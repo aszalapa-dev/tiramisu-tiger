@@ -1,0 +1,23 @@
+[
+  "index.html",
+  "redesign.css",
+  "site-interactions.css",
+  "interface.js",
+  "site-interactions.js",
+  "scene.js",
+  "assets/classique.glb",
+  "assets/speculoos.glb",
+  "assets/classique.png",
+  "assets/speculoos.png",
+  "assets/detail-biscuit.png",
+  "assets/detail-cacao.png",
+  "assets/coffee-boudoirs.svg",
+  "assets/coffee-boudoirs-dark.svg",
+  "assets/grain.svg",
+  "assets/da/hand-jar.png",
+  "assets/da/newsletter-can.png",
+  "assets/da/trio-jars.png",
+  "assets/da/atelier-creme.png",
+  "assets/da/atelier-cafe.png",
+  "assets/da/atelier-montage.png"
+]

@@ -1,0 +1,92 @@
+.shop-drawer,.game-dialog,.mobile-menu{box-sizing:border-box;padding:0;border:0;border-radius:0;color:var(--brown,#2b1611);background:var(--gold,#f0efee);font-family:var(--body,Arial,sans-serif);max-height:100svh;overscroll-behavior:contain}
+.shop-drawer::backdrop,.game-dialog::backdrop,.mobile-menu::backdrop{background:#2b1611a8;backdrop-filter:blur(5px)}
+.shop-drawer button,.game-dialog button,.mobile-menu button{font:inherit;cursor:pointer}
+.shop-drawer button:disabled{cursor:not-allowed}
+.shop-drawer button:focus-visible,.game-dialog button:focus-visible,.mobile-menu button:focus-visible,.mobile-menu a:focus-visible{outline:3px solid var(--brick,#86221c);outline-offset:5px}
+.shop-drawer [hidden],.game-dialog [hidden],.mobile-menu [hidden]{display:none!important}
+.shop-drawer .shop-close,.game-dialog .game-close,.mobile-menu .menu-heading button{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:0;border:1px solid currentColor;border-radius:50%;background:transparent;color:inherit;font-family:Arial,sans-serif;font-size:31px;line-height:1;transition:background .18s,color .18s,transform .18s}
+.shop-drawer .shop-close:hover,.game-dialog .game-close:hover,.mobile-menu .menu-heading button:hover{background:var(--pink,#7ea0e3);color:var(--brown,#2b1611);transform:rotate(90deg)}
+.game-dialog .game-close:hover{background:var(--gold,#f0efee);color:var(--brown,#2b1611)}
+.shop-drawer .shop-announcement,.shop-drawer .shop-sr-only,.game-dialog .game-announcement{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+.shop-drawer{inset:0 0 0 auto;width:min(540px,100%);height:100svh;margin:0;max-width:100%;overflow-y:auto;padding:32px}
+.shop-drawer[open]{display:flex;flex-direction:column;gap:0}
+.shop-drawer .shop-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.shop-drawer h2{font:900 clamp(37px,4vw,56px)/.94 var(--display,Arial,sans-serif);letter-spacing:-.045em;margin:0}
+.shop-drawer .shop-intro{font-size:14px;margin:19px 0 30px}
+.shop-drawer .shop-content{flex:1}
+.shop-drawer .shop-empty{font:900 clamp(32px,3vw,44px)/.99 var(--display,Arial,sans-serif);letter-spacing:-.025em;margin:0 0 30px}
+.shop-drawer .shop-suggestions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.shop-drawer .shop-suggestion{display:flex;flex-direction:column;align-items:center;padding:12px 8px 18px;background:transparent;border:1px solid #2b161155;border-radius:2px;color:inherit;transition:background .2s}
+.shop-drawer .shop-suggestion:hover{background:#2b16110f}
+.shop-drawer .shop-suggestion img{height:180px;width:100%;object-fit:contain;transition:transform .2s}
+.shop-drawer .shop-suggestion:hover img{transform:rotate(-8deg)}
+.shop-drawer .shop-suggestion>span{font-weight:800;font-size:17px}
+.shop-drawer .shop-suggestion .shop-add-label{margin-top:15px;font-size:11px;letter-spacing:.045em;border-bottom:1px solid currentColor;padding-bottom:3px}
+.shop-drawer .shop-footer{padding-top:28px;margin-top:28px;border-top:1px solid #2b161155}
+.shop-drawer .shop-total{font:800 17px/1.3 var(--display,Arial,sans-serif);text-transform:uppercase;margin:0 0 16px}
+.shop-drawer .shop-checkout{width:100%;padding:17px 10px;border-radius:30px;border:0;background:var(--pink,#7ea0e3);color:var(--brown,#2b1611);font-weight:700;font-size:12px;line-height:1.4;opacity:.72}
+.shop-drawer .shop-note{font-size:12px;line-height:1.5;margin:12px 0 0}
+.shop-drawer .shop-lines{list-style:none;margin:0;padding:0}
+.shop-drawer .shop-line{display:grid;grid-template-columns:122px 1fr;gap:24px;padding:21px 0;border-top:1px solid #2b161155}
+.shop-drawer .shop-picture{background:#2b16110a;display:grid;place-items:center;min-height:164px}
+.shop-drawer .shop-picture img{width:100%;height:165px;object-fit:contain}
+.shop-drawer .shop-line h3{font:800 26px/1 var(--display,Arial,sans-serif);letter-spacing:-.025em;margin:5px 0 9px}
+.shop-drawer .shop-line p{font-size:12px;line-height:1.4;margin:0 0 18px}
+.shop-drawer .shop-quantity{display:inline-flex;align-items:center;border:1px solid #2b161180;border-radius:30px;overflow:hidden}
+.shop-drawer .shop-quantity button{background:transparent;color:inherit;font-size:22px;border:0;width:40px;height:40px;padding:0;transition:background .2s}
+.shop-drawer .shop-quantity button:hover:not(:disabled){background:#2b16111a}
+.shop-drawer .shop-quantity button:disabled{opacity:.3}
+.shop-drawer .shop-quantity button:focus-visible{outline-offset:-5px;border-radius:50%}
+.shop-drawer .shop-quantity span{min-width:30px;text-align:center;font-size:14px}
+.shop-drawer .shop-remove{display:block;padding:0;margin-top:12px;background:transparent;color:var(--brick,#86221c);border-bottom:1px solid currentColor;border-radius:0;font-size:11px;line-height:1.5}
+.shop-drawer .shop-continue{background:transparent;border:1px solid currentColor;border-radius:30px;color:inherit;padding:13px 19px;font-size:11px;font-weight:700;margin-top:15px;transition:background .2s,color .2s}
+.shop-drawer .shop-continue:hover{background:var(--pink,#7ea0e3);color:var(--brown,#2b1611)}
+
+.mobile-menu{position:fixed;inset:0;margin:0;width:100%;max-width:100%;height:100svh;padding:25px 6% 35px;overflow-y:auto}
+.mobile-menu[open]{display:flex;flex-direction:column;grid-template-columns:none}
+.mobile-menu .menu-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:48px}
+.mobile-menu .menu-heading>span{font:900 30px/1 var(--display,Arial,sans-serif);letter-spacing:-.05em}
+.mobile-menu nav{display:flex;flex-direction:column;margin-bottom:38px}
+.mobile-menu nav a{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;border-top:1px solid #2b161155;font:900 clamp(32px,8vw,60px)/1 var(--display,Arial,sans-serif);letter-spacing:-.045em;color:inherit;text-decoration:none;transition:padding .2s}
+.mobile-menu nav a:last-child{border-bottom:1px solid #2b161155}
+.mobile-menu nav a:hover{padding-left:10px}
+.mobile-menu nav a span{font-family:Arial,sans-serif;font-size:.8em;font-weight:400}
+.mobile-menu .menu-game{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:auto;padding:20px 24px;border:0;border-radius:40px;background:var(--pink,#7ea0e3);color:var(--brown,#2b1611);font-size:13px;font-weight:800}
+.mobile-menu .menu-game span{font-size:24px}
+
+.game-dialog{width:min(720px,calc(100% - 28px));max-width:100%;max-height:calc(100svh - 28px);padding:30px;overflow-y:auto;margin:auto;background:var(--pink,#7ea0e3);color:var(--brown,#2b1611)}
+.game-dialog[open]{display:block;grid-template-columns:none}
+.game-dialog .game-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
+.game-dialog h2{font:900 clamp(30px,4.5vw,54px)/.95 var(--display,Arial,sans-serif);letter-spacing:-.04em;margin:0}
+.game-dialog #game-instructions{font-size:13px;line-height:1.55;max-width:530px;margin:18px 0}
+.game-dialog .game-stats{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #2b161155;padding:15px 0;gap:20px}
+.game-dialog .game-stats p{display:flex;flex-direction:column;gap:5px;margin:0;min-width:70px}
+.game-dialog .game-stats p:last-child{text-align:right}
+.game-dialog .game-stats p:nth-child(2){text-align:center}
+.game-dialog .game-stats span{font-size:10px;letter-spacing:.1em;font-weight:700}
+.game-dialog .game-stats strong{font:900 38px/1 var(--display,Arial,sans-serif);font-variant-numeric:tabular-nums}
+.game-dialog .game-board{position:relative;isolation:isolate;height:clamp(220px,34svh,340px);min-height:220px;overflow:hidden;border:1px solid #2b161155;background:var(--gold,#f0efee);background-image:radial-gradient(#2b161115 1px,transparent 1px);background-size:15px 15px}
+.game-dialog .game-message{position:absolute;inset:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;text-align:center}
+.game-dialog .game-message strong{font:900 clamp(32px,5vw,62px)/.96 var(--display,Arial,sans-serif);letter-spacing:-.04em}
+.game-dialog .game-message span{font-size:13px;line-height:1.5}
+.game-dialog .game-target{position:absolute;width:76px;height:86px;transform:translate(-50%,-50%);background:transparent;color:var(--brown,#2b1611);border:0;border-radius:50%;padding:4px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.game-dialog .game-target svg{display:block;width:100%;height:100%;pointer-events:none}
+.game-dialog .game-target:hover{background:#2b16110a}
+.game-dialog .game-target:focus-visible{outline:2px dashed var(--brick,#86221c);outline-offset:2px}
+.game-dialog .game-controls{display:flex;justify-content:center;margin-top:18px;min-height:48px}
+.game-dialog .game-controls button{min-width:190px;padding:16px 28px;border:0;border-radius:30px;color:var(--brown,#2b1611);background:var(--gold,#f0efee);font-size:12px;font-weight:800;transition:background .2s,transform .2s}
+.game-dialog .game-controls button:hover{background:var(--gold,#f0efee);color:var(--brick,#86221c);transform:translateY(-2px)}
+@media(max-width:480px){
+  .shop-drawer{padding:25px 22px}
+  .shop-drawer .shop-line{grid-template-columns:104px 1fr;gap:18px}
+  .shop-drawer .shop-suggestion img{height:150px}
+  .shop-drawer .shop-suggestion>span{font-size:16px}
+  .game-dialog{padding:22px 18px}
+  .game-dialog .game-stats strong{font-size:32px}
+  .game-dialog .game-target{width:68px;height:76px}
+}
+@media(prefers-reduced-motion:reduce){
+  .shop-drawer *,.game-dialog *,.mobile-menu *{transition:none!important;animation:none!important;scroll-behavior:auto}
+  .shop-drawer .shop-suggestion:hover img,.shop-drawer .shop-close:hover,.game-dialog .game-close:hover,.game-dialog .game-controls button:hover,.mobile-menu .menu-heading button:hover{transform:none}
+}

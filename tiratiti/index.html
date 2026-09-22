@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tiratiti — Le bonheur à la cuillère</title>
+<meta name="description" content="Les tiramisus Tiratiti : du café, de la crème, du cacao et beaucoup de gourmandise. Entrez dans l'atelier et découvrez votre prochain petit bonheur.">
+<meta name="theme-color" content="#2b1611">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232b1611'/%3E%3Ctext x='18' y='48' fill='%23f0efee' font-family='Arial' font-weight='bold' font-size='54'%3Et%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="redesign.css"><link rel="stylesheet" href="site-interactions.css">
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+<symbol id="icon-pot" viewBox="0 0 32 32"><path d="M10 5h12M10 8h12M9 11c-2 3-2 8-2 12 0 4 2 5 9 5s9-1 9-5c0-4 0-9-2-12Z"/><path d="M11 17h10v6H11z"/></symbol>
+<symbol id="icon-basket" viewBox="0 0 32 32"><path d="m5 13 3 14h16l3-14ZM3 13h26M10 13l5-9M22 13l-5-9M12 17v6M16 17v6M20 17v6"/></symbol>
+<symbol id="icon-coffee" viewBox="0 0 32 32"><path d="M6 13h18v6a9 9 0 0 1-18 0Zm18 1h2a4 4 0 0 1 0 8h-3M4 29h23M11 9c-5-5 4-5 0-9M19 9c-5-5 4-5 0-9"/></symbol>
+<symbol id="icon-spoon" viewBox="0 0 32 32"><ellipse cx="20" cy="9" rx="6" ry="8" transform="rotate(30 20 9)"/><path d="M16 16 7 30"/></symbol>
+<symbol id="icon-flower" viewBox="0 0 32 32"><path d="M16 2v28M2 16h28M6 6l20 20M6 26 26 6"/><circle cx="16" cy="16" r="4"/></symbol>
+</defs></svg>
+<a class="skip" href="#ingredients">Aller au contenu</a>
+<header class="header">
+<nav class="desktop-nav" aria-label="Navigation principale"><a href="#accueil">Le pot</a><a href="#histoire">L'histoire</a><a href="#parfums">Les parfums</a><button data-open-game>Le jeu</button></nav>
+<button class="menu-button" data-menu-toggle aria-label="Ouvrir le menu" aria-haspopup="dialog">Menu <span>☰</span></button>
+<a class="wordmark" href="#accueil" aria-label="Tiratiti, accueil">tiratiti<span>YOUR HOMEMADE TIRAMISU</span></a>
+<div class="header-actions"><a href="#actualites" class="news-link">Actualités</a><button class="nav-cta" data-open-cart>Choisir mon pot <svg class="icon" aria-hidden="true"><use href="#icon-basket"/></svg><span data-cart-count hidden>0</span></button></div>
+</header>
+<main>
+<section class="journey" id="accueil" aria-label="Le pot Tiratiti en mouvement">
+<div class="scene" id="scene">
+<div class="story-stream">
+<div class="opening scroll-panel"><p class="hero-kicker">TIRAMISU FAIT MAISON</p><h1>PUR BONHEUR</h1><p class="hero-flavor">LE CLASSIQUE</p><div class="hero-bottom"><a class="pill" href="#parfums">Découvrir les parfums <span>↗</span></a></div></div>
+<section class="scroll-panel chapter angle"><h2 data-reveal>LE GOÛT SOUS<br>UN NOUVEL ANGLE.</h2></section>
+<section class="scroll-panel chapter adventure"><h2 class="text-textured" data-reveal>LAISSE PARLER<br>TA GOURMANDISE.</h2></section>
+<div class="hero-side-cta"><a class="pill" href="#parfums">Choisir mon préféré ↗</a></div>
+<section class="scroll-panel chapter final-chapter"><h2 data-reveal>LE MEILLEUR<br>EST À<br>L'INTÉRIEUR.</h2></section>
+</div>
+<div class="product-stage" id="product-stage"><img id="poster" class="poster" src="assets/classique.png" alt="Pot Tiratiti Le Classique"><canvas id="pot" aria-label="Pot Tiratiti en trois dimensions, animé par le défilement" role="img"></canvas></div>
+<a class="scroll-cue" href="#ingredients" aria-label="Découvrir les ingrédients">↓</a><button class="motion-toggle" id="motion-toggle" aria-pressed="false" aria-label="Mettre l'animation en pause">Ⅱ</button>
+<button class="scene-retry" id="retry-3d" hidden>Relancer la 3D ↻</button><span class="sr-only" id="scene-status" role="status" aria-live="polite"></span>
+<div class="scene-index" aria-hidden="true"><span id="step-number">01</span><i><b id="scroll-progress"></b></i><span>04</span></div>
+</div></section>
+<section class="inside" id="ingredients"><div class="inside-copy"><h2 data-reveal>ET DEDANS,<br>ÇA DONNE QUOI ?</h2><p class="inside-intro">Les saveurs du Classique.<br>Chacune a son rôle à jouer.</p>
+<ol class="ingredient-list"><li><span class="ingredient-symbol"><svg class="icon" aria-hidden="true"><use href="#icon-coffee"/></svg></span><p>LE CAFÉ.<br>LA NOTE QUI DONNE LE TON.</p></li><li><span class="ingredient-symbol"><svg class="icon" aria-hidden="true"><use href="#icon-spoon"/></svg></span><p>LA CRÈME.<br>LA DOUCEUR À CHAQUE CUILLÈRE.</p></li><li><span class="ingredient-symbol"><svg class="icon" aria-hidden="true"><use href="#icon-flower"/></svg></span><p>LE CACAO.<br>LA TOUCHE FINALE.</p></li></ol></div>
+<div class="inside-art inside-photo"><img src="assets/da/hand-jar.png" alt="Les couches de tiramisu dans un bocal tenu dans une main sur fond bleu pervenche" width="1122" height="1402" loading="lazy" decoding="async"></div></section>
+<section class="statement-split"><div class="statement-copy"><p data-reveal>UN PETIT POT.<br>UNE GRANDE ENVIE.</p><h2 data-reveal>LE BONHEUR<br>À CHAQUE<br>CUILLÈRE.</h2></div><div class="statement-art"><span class="statement-stamp" aria-hidden="true">MIAM.</span><img src="assets/speculoos.png" alt="Tiratiti Le Spéculoos" loading="lazy" decoding="async" data-parallax></div></section>
+<section class="craft section grain" id="histoire"><div class="craft-heading"><h2 data-reveal>UNE HISTOIRE<br>DE GOURMANDISE.</h2><p>Dans l'atelier Tiratiti,<br>le plaisir commence bien<br>avant la première cuillère.</p></div><div class="craft-cards">
+<figure class="craft-card" data-tilt="5"><figcaption><span>01</span>LE PLAISIR<br>DES TEXTURES</figcaption><div class="craft-image"><img src="assets/da/atelier-creme.png" alt="Préparation de la crème au batteur à l'atelier" width="1536" height="1024" loading="lazy" decoding="async"></div></figure>
+<figure class="craft-card" data-tilt="-6"><figcaption><span>02</span>LE GOÛT<br>DES DÉTAILS</figcaption><div class="craft-image"><img src="assets/da/atelier-cafe.png" alt="Un boudoir trempé dans le café" width="1536" height="1024" loading="lazy" decoding="async"></div></figure>
+<figure class="craft-card" data-tilt="4"><figcaption><span>03</span>LE BONHEUR<br>À PARTAGER</figcaption><div class="craft-image"><img src="assets/da/atelier-montage.png" alt="Montage des tiramisus à la poche à douille" width="1536" height="1024" loading="lazy" decoding="async"></div></figure></div></section>
+<section class="packaging section grain" id="le-pot"><div class="packaging-heading"><h2 data-reveal>BIEN PLUS<br>QU'UN PETIT POT.</h2><div class="package-tags" aria-hidden="true"><span>TOUT EN DOUCEUR</span><span>À LA CUILLÈRE</span><span>JUSQU'AU BOUT</span></div><p>On le regarde. On l'ouvre.<br>On y plonge.</p></div><div class="packaging-benefits">
+<article><h3><span class="benefit-icon"><svg class="icon" aria-hidden="true"><use href="#icon-pot"/></svg></span>LE PLAISIR DES YEUX</h3><p>Des couches de crème et de biscuit.<br>À regarder avant de les savourer.</p><div class="benefit-image"><img src="assets/classique.png" alt="Le pot transparent Tiratiti" loading="lazy" decoding="async"></div></article>
+<article><h3><span class="benefit-icon"><svg class="icon" aria-hidden="true"><use href="#icon-spoon"/></svg></span>LE MOMENT À SOI</h3><p>Une pause, un pot,<br>et ta cuillère préférée.</p><div class="benefit-image"><img src="assets/detail-biscuit.png" alt="Détail des biscuits et de la crème" loading="lazy" decoding="async"></div></article>
+<article><h3><span class="benefit-icon"><svg class="icon" aria-hidden="true"><use href="#icon-flower"/></svg></span>LE GOÛT D'Y REVENIR</h3><p>Le cacao pour finir.<br>Et l'envie de recommencer.</p><div class="benefit-image"><img src="assets/detail-cacao.png" alt="Détail du cacao sur la crème" loading="lazy" decoding="async"></div></article></div></section>
+<section class="full-cta" id="moment"><img class="full-cta-image" src="assets/da/trio-jars.png" alt="Trois bocaux de tiramisu sur fond rouge profond" width="1672" height="941" loading="lazy" decoding="async" data-parallax><div class="full-cta-copy"><h2 data-reveal>OUVRE UN POT.<br>CHANGE TON<br>PETIT MOMENT.</h2><a href="#parfums" class="pill">Trouver mon préféré ↗</a></div></section>
+<section class="flavors section grain" id="parfums"><div class="section-heading"><svg class="section-icon icon" aria-hidden="true"><use href="#icon-spoon"/></svg><h2 data-reveal>À CHACUN<br>SON PETIT FAIBLE.</h2><button class="pill" data-open-cart>Choisir mes pots ↗</button></div><div class="flavor-grid">
+<article class="flavor-card classic"><button class="card-art" data-flavor="classique" aria-label="Voir Le Classique en 3D"><span class="halo" aria-hidden="true">CLASSIQUE</span><img src="assets/classique.png" loading="lazy" decoding="async" alt="Tiratiti Le Classique"></button><div class="card-copy"><div class="card-top"><span>L'ORIGINAL</span><span>CAFÉ · CACAO</span></div><h3>Le Classique</h3><p>La rencontre du café, de la crème et du cacao.</p><div class="card-actions"><button class="text-link" data-flavor="classique">Découvrir en 3D ↗</button><button class="circle-button" data-add-product="classique" aria-label="Ajouter Le Classique au panier">+</button></div></div></article>
+<article class="flavor-card speculoos"><button class="card-art" data-flavor="speculoos" aria-label="Voir Le Spéculoos en 3D"><span class="halo" aria-hidden="true">SPÉCULOOS</span><img src="assets/speculoos.png" loading="lazy" decoding="async" alt="Tiratiti Le Spéculoos"></button><div class="card-copy"><div class="card-top"><span>LE COMPLICE</span><span>DOUX · BISCUITÉ</span></div><h3>Le Spéculoos</h3><p>Toute la douceur de la crème, tout le goût du biscuit.</p><div class="card-actions"><button class="text-link" data-flavor="speculoos">Découvrir en 3D ↗</button><button class="circle-button" data-add-product="speculoos" aria-label="Ajouter Le Spéculoos au panier">+</button></div></div></article>
+</div></section>
+<section class="newsletter" id="actualites" aria-labelledby="newsletter-title"><div class="newsletter-copy"><h2 id="newsletter-title" data-reveal>UNE DOSE DE BONHEUR DANS TA BOÎTE MAIL.</h2><span class="newsletter-flower" aria-hidden="true">✳</span><form class="newsletter-form" aria-describedby="newsletter-note"><fieldset disabled aria-label="Inscription à la newsletter, bientôt disponible"><label><span class="sr-only">Ton prénom</span><input type="text" name="firstname" autocomplete="given-name" placeholder="TON PRÉNOM"></label><label><span class="sr-only">Ton adresse e-mail</span><input type="email" name="email" autocomplete="email" placeholder="TON ADRESSE E-MAIL"></label><button type="submit">JE M'INSCRIS</button></fieldset><p id="newsletter-note">Les inscriptions ouvrent bientôt.</p></form></div><div class="newsletter-art"><img src="assets/da/newsletter-can.png" alt="Une canette de tiramisu inclinée sur fond bleu pervenche" width="1254" height="1254" loading="lazy" decoding="async"></div></section>
+</main>
+<footer><div class="footer-main"><a class="footer-logo" href="#accueil">tiratiti<span>YOUR HOMEMADE TIRAMISU</span></a><nav aria-label="Navigation de pied de page"><a href="#accueil">Le pot</a><a href="#histoire">L'histoire</a><a href="#le-pot">Le contenant</a><a href="#parfums">Les parfums</a><button data-open-game>Le jeu</button><a href="#actualites">Les actualités</a></nav><div class="footer-signoff"><p>TON PROCHAIN<br>PETIT BONHEUR.</p><a href="#accueil" aria-label="Revenir en haut de page">↑</a></div></div><div class="footer-bottom"><span>2026 © TIRATITI</span><span>À SAVOURER. TOUT SIMPLEMENT.</span><a href="#accueil">ENCORE UNE CUILLÈRE ? ↑</a></div></footer>
+<aside class="floating-actions" aria-label="Accès rapides"><a href="#parfums" aria-label="Découvrir les pots"><svg class="icon" aria-hidden="true"><use href="#icon-pot"/></svg></a><button data-open-cart aria-label="Ouvrir le panier"><svg class="icon" aria-hidden="true"><use href="#icon-basket"/></svg><span data-cart-count hidden>0</span></button></aside>
+<dialog id="flavor-dialog" aria-labelledby="dialog-title"><button class="dialog-close" aria-label="Fermer la fiche">✕</button><div class="dialog-visual" id="dialog-visual"></div><div class="dialog-copy"><p class="eyebrow">Tiratiti · les parfums</p><h2 id="dialog-title">Le Classique</h2><p id="dialog-description"></p><p class="drag-hint">Glisse sur le pot pour le faire tourner.</p><button class="pill" id="dialog-add" data-add-product="classique">Ajouter à mon panier +</button><button class="text-link dialog-close-text">Continuer la découverte ↗</button></div></dialog>
+<script src="interface.js" defer></script><script src="site-interactions.js" defer></script><script type="module" src="scene.js"></script>
+</body></html>
+
+

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.vercel/
+.env
+.env.*
+*.log
+version-*/
+assets/da/*-prompts.md
+assets/atelier-*.jpg
+assets/tiramisu-*.png
+assets/cacao-botanical.svg
+style.css
+experience.css
+refinements.css
+palette.css
+.DS_Store
+Thumbs.db
