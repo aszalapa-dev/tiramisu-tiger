@@ -2,6 +2,23 @@
 
 Le projet contient le code modifiable, les photos et les deux modèles 3D. La configuration Vercel est déjà fournie. Aucune clé ni variable d'environnement n'est nécessaire.
 
+## Depuis le dépôt GitHub
+
+Le dépôt `tiramisu-tiger` contient le site dans le sous-dossier `tiratiti/`. Le fichier `vercel.json` à la racine du dépôt permet de déployer avec **Root Directory** laissé vide (racine du dépôt) : il lance `node tiratiti/build.cjs` et publie uniquement `tiratiti/dist`.
+
+Après avoir envoyé cette configuration sur GitHub, Vercel l'utilisera au prochain déploiement. La page d'accueil sera disponible directement sur `/`.
+
+Si tu préfères régler le projet dans Vercel sans attendre une modification du dépôt :
+
+1. Ouvre **Settings → Build and Deployment** dans le projet Vercel.
+2. Définis **Root Directory** sur `tiratiti` et enregistre.
+3. Vérifie **Framework Preset : Other**, **Build Command : `npm run build`**, **Output Directory : `dist`**. Ces valeurs figurent dans `tiratiti/vercel.json`.
+4. Dans **Deployments**, redéploie le dernier déploiement avec **Redeploy**.
+
+Les chemins de build et de sortie sont relatifs au dossier racine choisi : ne mélange pas les valeurs des deux configurations.
+
+Si `/` affiche `404 NOT_FOUND` alors que `/tiratiti/` affiche le site, Vercel sert le dépôt sans utiliser le dossier de sortie du site. L'une des deux configurations ci-dessus corrige ce décalage. Voir la [documentation des réglages de build](https://vercel.com/docs/builds/configure-a-build).
+
 ## Depuis VS Code
 
 1. Ouvre ce dossier dans VS Code : celui qui contient `package.json` et `vercel.json`.
