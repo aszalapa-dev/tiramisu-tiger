@@ -2,19 +2,20 @@
   'use strict';
 
   const products = {
-    classique: { name: 'Le Classique', image: 'assets/classique.png', note: 'Café, crème, cacao.' },
-    speculoos: { name: 'Le Spéculoos', image: 'assets/speculoos.png', note: 'La douceur du biscuit.' }
+    classique: { name: 'Le Classique', image: 'assets/classique.png?v=photo-25', note: 'Boudoirs, café, mascarpone et cacao.' },
+    speculoos: { name: 'Le Spéculos', image: 'assets/speculoos.png', note: 'Spéculos et crème au mascarpone.' },
+    special: { name: 'Le Spécial', image: 'assets/special.webp', note: 'Pane di Stelle au cacao et mascarpone.' }
   };
   const cartKey = 'tiratiti-cart-v1';
-  const recordKey = 'tiratiti-game-record-v1';
+
   let cart = {};
-  let record = 0;
+
   try {
     const saved = JSON.parse(localStorage.getItem(cartKey) || '{}');
     for (const id of Object.keys(products)) {
       if (Number.isInteger(saved?.[id]) && saved[id] > 0) cart[id] = Math.min(saved[id], 99);
     }
-    record = Math.max(0, Math.min(9999, Number(localStorage.getItem(recordKey)) || 0));
+
   } catch { /* The experience also works when local storage is unavailable. */ }
 
   const drawer = document.createElement('dialog');
@@ -22,10 +23,10 @@
   drawer.id = 'shop-drawer';
   drawer.setAttribute('aria-labelledby', 'shop-title');
   drawer.innerHTML = `
-    <div class="shop-heading"><h2 id="shop-title">TON PETIT<br>BONHEUR.</h2><button class="shop-close" type="button" data-close-dialog aria-label="Fermer le panier" autofocus>×</button></div>
-    <p class="shop-intro">Les pots qui te font envie.</p>
+    <div class="shop-heading"><h2 id="shop-title">TA<br>SÉLECTION.</h2><button class="shop-close" type="button" data-close-dialog aria-label="Fermer ma sélection" autofocus>×</button></div>
+    <p class="shop-intro">Garde tes goûts préférés sous la main.</p>
     <div class="shop-content"></div>
-    <div class="shop-footer"><p class="shop-total"></p><button class="shop-checkout" type="button" disabled>COMMANDE BIENTÔT DISPONIBLE</button><p class="shop-note">La commande en ligne arrive bientôt.</p></div>
+    <div class="shop-footer"><p class="shop-total"></p><a class="shop-checkout" href="#ou-nous-trouver">OÙ NOUS TROUVER ↗</a><p class="shop-note">Cette sélection reste sur ton appareil. Pour les disponibilités et les commandes, écris à <a href="mailto:contact@tiratiti.be">contact@tiratiti.be</a>.</p></div>
     <p class="shop-announcement" role="status" aria-live="polite"></p>`;
 
   const menu = document.createElement('dialog');
@@ -33,25 +34,12 @@
   menu.id = 'mobile-menu';
   menu.setAttribute('aria-label', 'Navigation');
   menu.innerHTML = `
-    <div class="menu-heading"><span>TIRATITI</span><button type="button" data-close-dialog aria-label="Fermer le menu" autofocus>×</button></div>
-    <nav aria-label="Navigation mobile"><a href="#accueil">LE POT <span>↗</span></a><a href="#histoire">L’HISTOIRE <span>↗</span></a><a href="#le-pot">LES DÉTAILS <span>↗</span></a><a href="#parfums">LES PARFUMS <span>↗</span></a><a href="#actualites">LES NOUVELLES <span>↗</span></a></nav>
-    <button class="menu-game" type="button" data-open-game>UNE PAUSE GOURMANDE ? <span>↗</span></button>`;
+    <div class="menu-heading"><a href="#accueil" aria-label="Tiratiti, accueil"><img src="assets/logo-tiratiti-ink.svg" alt="Tiratiti" width="157" height="48"></a><button type="button" data-close-dialog aria-label="Fermer le menu" autofocus>×</button></div>
+    <nav aria-label="Navigation mobile"><a href="#histoire">L’HISTOIRE <span>↗</span></a><a href="#parfums">LES GOÛTS <span>↗</span></a><a href="#ou-nous-trouver">OÙ NOUS TROUVER <span>↗</span></a></nav>
+    <div class="menu-secondary"><a href="#revendeurs">Devenir revendeur ↗</a><a href="#evenements">Pour vos événements ↗</a></div>`;
 
-  const game = document.createElement('dialog');
-  game.className = 'game-dialog';
-  game.id = 'gourmandise-game';
-  game.setAttribute('aria-labelledby', 'game-title');
-  game.setAttribute('aria-describedby', 'game-instructions');
-  game.innerHTML = `
-    <div class="game-heading"><h2 id="game-title">ATTRAPE<br>LA GOURMANDISE.</h2><button class="game-close" type="button" data-close-dialog aria-label="Fermer le jeu" autofocus>×</button></div>
-    <p id="game-instructions">20 secondes pour attraper un maximum de cafés et de boudoirs. Touche, clique ou utilise Entrée sur l’ingrédient.</p>
-    <div class="game-stats"><p><span>SCORE</span><strong class="game-score">00</strong></p><p><span>SECONDES</span><strong class="game-time">20</strong></p><p><span>RECORD</span><strong class="game-record">00</strong></p></div>
-    <div class="game-board"><div class="game-message"><strong>À TOI<br>DE CROQUER.</strong><span>Prêt pour une petite pause ?</span></div><button class="game-target" type="button" aria-label="Attraper le grain de café" hidden></button></div>
-    <div class="game-controls"><button class="game-start" type="button">C’EST PARTI ↗</button><button class="game-pause" type="button" hidden>PAUSE Ⅱ</button><button class="game-replay" type="button" hidden>ON REJOUE ↗</button></div>
-    <p class="game-announcement" role="status" aria-live="polite"></p>`;
-
-  document.body.append(drawer, menu, game);
-  const dialogs = [drawer, menu, game];
+  document.body.append(drawer, menu);
+  const dialogs = [drawer, menu];
   const returnFocus = new WeakMap();
   let scrollLock = null;
 
@@ -86,7 +74,7 @@
     });
     dialog.addEventListener('close', () => {
       if (dialog === menu) document.querySelectorAll('[data-menu-toggle]').forEach(button => button.setAttribute('aria-expanded', 'false'));
-      if (dialog === game) pauseGame();
+
       if (dialogs.some(item => item.open)) return;
       if (scrollLock !== null) {
         document.documentElement.style.overflow = scrollLock;
@@ -97,7 +85,7 @@
     });
   }
 
-  menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+  for (const dialog of dialogs) dialog.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener('click', () => {
     const destination = document.getElementById(link.hash.slice(1));
     const focusTarget = destination?.querySelector('h1, h2') || destination;
     if (focusTarget) {
@@ -106,9 +94,9 @@
         focusTarget.setAttribute('tabindex', '-1');
         focusTarget.addEventListener('blur', () => focusTarget.removeAttribute('tabindex'), { once: true });
       }
-      returnFocus.set(menu, focusTarget);
+      returnFocus.set(dialog, focusTarget);
     }
-    menu.close();
+    dialog.close();
   }));
   document.querySelectorAll('[data-menu-toggle]').forEach(button => {
     button.setAttribute('aria-expanded', 'false');
@@ -120,6 +108,12 @@
     try { localStorage.setItem(cartKey, JSON.stringify(cart)); } catch { /* No storage is required to select a pot. */ }
   }
 
+  function productVisual(product) {
+    return product.image
+      ? `<img src="${product.image}" alt="" width="160" height="180">`
+      : '<span class="shop-special" aria-hidden="true"><span>✦ ✧ ✦</span><strong>LE<br>SPÉCIAL.</strong><small>PANE DI STELLE</small></span>';
+  }
+
   function renderCart(focusAction) {
     const count = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
     document.querySelectorAll('[data-cart-count]').forEach(element => {
@@ -127,14 +121,14 @@
       element.hidden = count === 0;
     });
     document.querySelectorAll('[data-open-cart]').forEach(button => {
-      button.setAttribute('aria-label', `Ouvrir le panier, ${count} ${count === 1 ? 'pot' : 'pots'}`);
+      button.setAttribute('aria-label', `Ouvrir ma sélection, ${count} ${count === 1 ? 'canette' : 'canettes'}`);
       button.setAttribute('aria-haspopup', 'dialog');
       button.setAttribute('aria-controls', 'shop-drawer');
     });
-    drawer.querySelector('.shop-total').textContent = count ? `${count} ${count === 1 ? 'pot sélectionné' : 'pots sélectionnés'}` : 'LEQUEL TE FAIT CRAQUER ?';
+    drawer.querySelector('.shop-total').textContent = count ? `${count} ${count === 1 ? 'canette sélectionnée' : 'canettes sélectionnées'}` : 'LEQUEL TE FAIT CRAQUER ?';
     drawer.querySelector('.shop-content').innerHTML = count ? `<ul class="shop-lines">${Object.entries(cart).map(([id, quantity]) => `
-      <li class="shop-line"><div class="shop-picture"><img src="${products[id].image}" alt="" width="130" height="160"></div><div class="shop-line-copy"><h3>${products[id].name}</h3><p>${products[id].note}</p><div class="shop-quantity"><button type="button" data-cart-action="decrease" data-product="${id}" aria-label="Retirer un pot ${products[id].name}">−</button><span aria-label="Quantité : ${quantity}">${quantity}</span><button type="button" data-cart-action="increase" data-product="${id}" aria-label="Ajouter un pot ${products[id].name}" ${quantity >= 99 ? 'disabled' : ''}>+</button></div><button class="shop-remove" type="button" data-cart-action="remove" data-product="${id}">Retirer <span class="shop-sr-only">${products[id].name}</span></button></div></li>`).join('')}</ul><button class="shop-continue" type="button" data-close-dialog>CONTINUER LA DÉCOUVERTE ↗</button>` : `
-      <p class="shop-empty">TON PANIER<br>ATTEND SA<br>DOSE DE BONHEUR.</p><div class="shop-suggestions">${Object.entries(products).map(([id, product]) => `<button type="button" class="shop-suggestion" data-add-product="${id}"><img src="${product.image}" alt="" width="160" height="180"><span>${product.name}</span><span class="shop-add-label">AJOUTER +</span></button>`).join('')}</div>`;
+      <li class="shop-line"><div class="shop-picture">${productVisual(products[id])}</div><div class="shop-line-copy"><h3>${products[id].name}</h3><p>${products[id].note}</p><div class="shop-quantity"><button type="button" data-cart-action="decrease" data-product="${id}" aria-label="Retirer une canette ${products[id].name}">−</button><span aria-label="Quantité : ${quantity}">${quantity}</span><button type="button" data-cart-action="increase" data-product="${id}" aria-label="Ajouter une canette ${products[id].name}" ${quantity >= 99 ? 'disabled' : ''}>+</button></div><button class="shop-remove" type="button" data-cart-action="remove" data-product="${id}">Retirer <span class="shop-sr-only">${products[id].name}</span></button></div></li>`).join('')}</ul><button class="shop-continue" type="button" data-close-dialog>CONTINUER LA DÉCOUVERTE ↗</button>` : `
+      <p class="shop-empty">TROUVE TON<br>PETIT FAIBLE.</p><div class="shop-suggestions">${Object.entries(products).map(([id, product]) => `<button type="button" class="shop-suggestion" data-add-product="${id}">${productVisual(product)}<span>${product.name}</span><span class="shop-add-label">CHOISIR +</span></button>`).join('')}</div>`;
     if (focusAction) {
       const next = drawer.querySelector(`[data-cart-action="${focusAction.action}"][data-product="${focusAction.id}"]:not(:disabled)`)
         || drawer.querySelector('[data-cart-action]:not(:disabled), [data-add-product]')
@@ -150,7 +144,7 @@
     renderCart();
     openDialog(drawer, trigger);
     if (!drawer.contains(document.activeElement)) drawer.querySelector('.shop-close').focus({ preventScroll: true });
-    drawer.querySelector('.shop-announcement').textContent = `${products[id].name} ajouté au panier.`;
+    drawer.querySelector('.shop-announcement').textContent = `${products[id].name} ajouté à ta sélection.`;
   }
 
   drawer.addEventListener('click', event => {
@@ -164,127 +158,17 @@
     else delete cart[id];
     saveCart();
     renderCart({ id, action });
-    drawer.querySelector('.shop-announcement').textContent = cart[id] ? `${products[id].name} : ${cart[id]} ${cart[id] === 1 ? 'pot' : 'pots'}.` : `${products[id].name} retiré du panier.`;
+    drawer.querySelector('.shop-announcement').textContent = cart[id] ? `${products[id].name} : ${cart[id]} ${cart[id] === 1 ? 'canette' : 'canettes'}.` : `${products[id].name} retiré de ta sélection.`;
   });
-
-  const bean = '<svg aria-hidden="true" viewBox="0 0 80 80"><ellipse cx="40" cy="40" rx="24" ry="34" fill="currentColor" transform="rotate(28 40 40)"/><path d="M53 12C25 34 54 43 28 67" fill="none" stroke="var(--gold, #f0efee)" stroke-width="4" stroke-linecap="round"/></svg>';
-  const biscuit = '<svg aria-hidden="true" viewBox="0 0 80 80"><rect x="23" y="6" width="34" height="68" rx="17" fill="var(--gold, #f0efee)" stroke="currentColor" stroke-width="3" transform="rotate(-22 40 40)"/><path d="m28 28 3 1m6-10 3 1m-5 22 3 1m7-10 3 1m-6 23 3 1m7-9 3 1" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
-  const target = game.querySelector('.game-target');
-  const message = game.querySelector('.game-message');
-  const startButton = game.querySelector('.game-start');
-  const pauseButton = game.querySelector('.game-pause');
-  const replayButton = game.querySelector('.game-replay');
-  const scoreOutput = game.querySelector('.game-score');
-  const timeOutput = game.querySelector('.game-time');
-  const recordOutput = game.querySelector('.game-record');
-  let score = 0;
-  let remaining = 20000;
-  let started = false;
-  let running = false;
-  let previousTime = 0;
-  let frame = 0;
-  const number = value => String(value).padStart(2, '0');
-  recordOutput.textContent = number(record);
-
-  function placeTarget() {
-    const isBean = score % 2 === 0;
-    target.innerHTML = isBean ? bean : biscuit;
-    target.setAttribute('aria-label', isBean ? 'Attraper le grain de café' : 'Attraper le boudoir');
-    target.style.left = `${14 + Math.random() * 72}%`;
-    target.style.top = `${18 + Math.random() * 64}%`;
-  }
-
-  function finishGame() {
-    running = false;
-    cancelAnimationFrame(frame);
-    target.hidden = true;
-    pauseButton.hidden = true;
-    replayButton.hidden = false;
-    message.hidden = false;
-    message.innerHTML = `<strong>${score ? 'BIEN JOUÉ !' : 'UNE AUTRE<br>CUILLÈRE ?'}</strong><span>${score} ${score === 1 ? 'gourmandise attrapée' : 'gourmandises attrapées'}.</span>`;
-    if (score > record) {
-      record = score;
-      recordOutput.textContent = number(record);
-      try { localStorage.setItem(recordKey, String(record)); } catch { /* A record is optional. */ }
-    }
-    timeOutput.textContent = '00';
-    game.querySelector('.game-announcement').textContent = `Terminé ! ${score} ${score === 1 ? 'point' : 'points'}. Tu peux rejouer.`;
-    if (game.open) replayButton.focus({ preventScroll: true });
-  }
-
-  function gameTick(time) {
-    if (!running || !game.open) return;
-    remaining = Math.max(0, remaining - (time - previousTime));
-    previousTime = time;
-    const seconds = number(Math.ceil(remaining / 1000));
-    if (timeOutput.textContent !== seconds) timeOutput.textContent = seconds;
-    if (remaining <= 0) finishGame();
-    else frame = requestAnimationFrame(gameTick);
-  }
-
-  function startGame(reset = false) {
-    if (!game.open) return;
-    if (!started || reset || remaining <= 0) {
-      score = 0;
-      remaining = 20000;
-      scoreOutput.textContent = '00';
-      timeOutput.textContent = '20';
-      placeTarget();
-    }
-    started = true;
-    running = true;
-    previousTime = performance.now();
-    message.hidden = true;
-    target.hidden = false;
-    startButton.hidden = true;
-    replayButton.hidden = true;
-    pauseButton.hidden = false;
-    game.querySelector('.game-announcement').textContent = 'C’est parti ! Attrape les ingrédients.';
-    target.focus({ preventScroll: true });
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(gameTick);
-  }
-
-  function pauseGame() {
-    if (!running) return;
-    remaining = Math.max(0, remaining - (performance.now() - previousTime));
-    running = false;
-    cancelAnimationFrame(frame);
-    if (remaining <= 0) { finishGame(); return; }
-    timeOutput.textContent = number(Math.ceil(remaining / 1000));
-    target.hidden = true;
-    pauseButton.hidden = true;
-    startButton.hidden = false;
-    startButton.textContent = 'ON REPREND ↗';
-    message.hidden = false;
-    message.innerHTML = '<strong>UNE PETITE<br>PAUSE.</strong><span>On garde ta place.</span>';
-    if (game.open) startButton.focus({ preventScroll: true });
-  }
-
-  target.addEventListener('keydown', event => {
-    if (event.repeat && (event.key === 'Enter' || event.key === ' ')) event.preventDefault();
-  });
-  target.addEventListener('click', () => {
-    if (!running) return;
-    if (remaining - (performance.now() - previousTime) <= 0) { remaining = 0; finishGame(); return; }
-    score += 1;
-    scoreOutput.textContent = number(score);
-    placeTarget();
-    target.focus({ preventScroll: true });
-  });
-  startButton.addEventListener('click', () => startGame());
-  replayButton.addEventListener('click', () => startGame(true));
-  pauseButton.addEventListener('click', pauseGame);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
 
   document.addEventListener('click', event => {
-    const button = event.target.closest('[data-open-cart], [data-add-product], [data-menu-toggle], [data-open-game]');
+    const button = event.target.closest('[data-open-cart], [data-add-product], [data-menu-toggle]');
     if (!button) return;
     event.preventDefault();
     if (button.hasAttribute('data-add-product')) addProduct(button.dataset.addProduct, button);
     else if (button.hasAttribute('data-open-cart')) { renderCart(); openDialog(drawer, button); }
     else if (button.hasAttribute('data-menu-toggle')) openDialog(menu, button);
-    else openDialog(game, button);
+
   });
 
   window.addEventListener('storage', event => {

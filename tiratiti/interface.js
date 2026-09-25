@@ -67,7 +67,7 @@ function paintHero(){
   const initialY=innerWidth<761?71:85;
   scene.style.setProperty('--stage-y',(initialY-(initialY-50)*ease(clamp(progress/.18)))+'%');
   stage.dataset.progress=String(progress);
-  stepNumber.textContent=String(Math.min(4,1+Math.floor(progress*4))).padStart(2,'0');
+  stepNumber.textContent=String(progress<.22?1:progress<.72?2:3).padStart(2,'0');
   progressBar.style.transform='scaleX('+progress+')';
   for(const block of heroBlocks){
     const reveal=(height*.91-(block.offset-y))/(height*.56);
@@ -125,15 +125,19 @@ updateButton();schedule();
 
 const dialog=document.querySelector('#flavor-dialog');
 const recipes={
-  classique:{title:'Le Classique',description:'La rencontre du café, de la crème et du cacao. Un équilibre tout en douceur, pour retrouver le plaisir d’un tiramisu à chaque cuillère.'},
-  speculoos:{title:'Le Spéculoos',description:'Le parfum du spéculoos, la douceur de la crème et ce petit goût de biscuit qui donne envie de recommencer.'}
+  classique:{title:'Le Classique',description:'Boudoirs imbibés de café, crème au mascarpone et voile de cacao. Celui avec lequel tout a commencé.'},
+  speculoos:{title:'Le Spéculos',description:'Le goût du spéculos rencontre l’onctuosité du mascarpone. Notre clin d’œil à la Belgique.'},
+  special:{title:'Le Spécial',description:'Des biscuits Pane di Stelle au cacao et notre crème au mascarpone. Pour les faibles face au chocolat.'}
 };
 document.querySelectorAll('[data-flavor]').forEach(button=>button.addEventListener('click',()=>{
   const flavor=button.dataset.flavor;
+  if(!recipes[flavor])return;
   document.querySelector('#dialog-title').textContent=recipes[flavor].title;
   document.querySelector('#dialog-description').textContent=recipes[flavor].description;
   document.querySelector('#dialog-add').dataset.addProduct=flavor;
   document.querySelector('#dialog-visual').style.backgroundColor=flavor==='speculoos'?'var(--brick)':'var(--blue)';
+  dialog.dataset.flavor=flavor;
+  dialog.querySelector('.drag-hint').hidden=flavor==='special';
   dialog.showModal();document.body.classList.add('modal-open');
   dispatchEvent(new CustomEvent('tiratiti-flavor',{detail:{flavor}}));
 }));

@@ -1,23 +1,6 @@
 # Mettre Tiratiti en ligne avec Vercel
 
-Le projet contient le code modifiable, les photos et les deux modèles 3D. La configuration Vercel est déjà fournie. Aucune clé ni variable d'environnement n'est nécessaire.
-
-## Depuis le dépôt GitHub
-
-Le dépôt `tiramisu-tiger` contient le site dans le sous-dossier `tiratiti/`. Le fichier `vercel.json` à la racine du dépôt permet de déployer avec **Root Directory** laissé vide (racine du dépôt) : il lance `node tiratiti/build.cjs` et publie uniquement `tiratiti/dist`.
-
-Après avoir envoyé cette configuration sur GitHub, Vercel l'utilisera au prochain déploiement. La page d'accueil sera disponible directement sur `/`.
-
-Si tu préfères régler le projet dans Vercel sans attendre une modification du dépôt :
-
-1. Ouvre **Settings → Build and Deployment** dans le projet Vercel.
-2. Définis **Root Directory** sur `tiratiti` et enregistre.
-3. Vérifie **Framework Preset : Other**, **Build Command : `npm run build`**, **Output Directory : `dist`**. Ces valeurs figurent dans `tiratiti/vercel.json`.
-4. Dans **Deployments**, redéploie le dernier déploiement avec **Redeploy**.
-
-Les chemins de build et de sortie sont relatifs au dossier racine choisi : ne mélange pas les valeurs des deux configurations.
-
-Si `/` affiche `404 NOT_FOUND` alors que `/tiratiti/` affiche le site, Vercel sert le dépôt sans utiliser le dossier de sortie du site. L'une des deux configurations ci-dessus corrige ce décalage. Voir la [documentation des réglages de build](https://vercel.com/docs/builds/configure-a-build).
+Le projet contient le code modifiable, les photos, les logos vectoriels, les modèles 3D du Classique et du Spéculos ainsi que l'ouverture animée du Classique. Le Spécial est présenté sans modèle 3D. La configuration Vercel est déjà fournie. Aucune clé ni variable d'environnement n'est nécessaire. La préparation locale de ces fichiers ne publie pas le site.
 
 ## Depuis VS Code
 
@@ -59,8 +42,8 @@ Le projet n'a pas de dépendances à installer pour ces commandes locales. Three
 
 ## Contenu de cette version
 
-Le site public comprend 21 fichiers, soit environ 87,3 Mo avant compression. Les modèles 3D représentent la majeure partie de ce poids et peuvent demander du temps au premier chargement sur mobile. Le fichier `.vercelignore` exclut les anciennes versions et les doublons de l'envoi à Vercel ; `build.cjs` ne place que les fichiers nécessaires dans `dist`.
+La version du 25 septembre 2026 comprend 26 fichiers publics, soit environ 61,36 Mo de fichiers à transférer avant compression HTTP. Les modèles 3D représentent la majeure partie de ce poids et peuvent demander du temps au premier chargement sur mobile. Le Classique et son ouverture sont déjà compressés avec Draco. Le fichier `.vercelignore` exclut les anciennes versions et les doublons de l'envoi à Vercel ; `build.cjs` ne place que les fichiers de `public-files.json` dans `dist`. Le compte et le poids affichés par `npm.cmd run build` font foi après toute nouvelle modification.
 
-Le panier et le jeu fonctionnent dans le navigateur. Le paiement et l'inscription à la newsletter restent désactivés, comme dans la version locale.
+Le site présente le logo original, l'histoire de Timoty et trois goûts, avec une navigation vers L'histoire, Les goûts et Où nous trouver. La sélection des produits fonctionne dans le navigateur, mais le paiement reste désactivé. Le jeu et la newsletter ont été retirés. Les demandes de disponibilité, de référencement et d'événement utilisent des liens vers `contact@tiratiti.be`, l'adresse figurant sur les étiquettes fournies. Aucun formulaire de collecte ni service de commande n'est à configurer pour cette version.
 
-L'archive fournie contient uniquement la version active et ses outils de déploiement. Les sauvegardes des anciennes versions restent dans le dossier de travail d'origine.
+L'archive destinée au déploiement contient la version active et ses outils de publication. Les sauvegardes des anciennes versions restent dans le dossier de travail d'origine. Les références du logo et des coordonnées sont décrites dans `PROVENANCE-ASSETS.md` ; ce document local n'est pas inclus dans les fichiers publics.
