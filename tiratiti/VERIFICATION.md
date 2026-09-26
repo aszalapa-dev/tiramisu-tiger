@@ -1,5 +1,11 @@
 # Vérifications Tiratiti
 
+## Défilement doux — 26 septembre 2026
+
+Inertie légère de la molette sur l’accueil et la page revendeurs, amortissement indépendant de la fréquence d’écran, inversion immédiate et arrêt de la boucle au repos. La canette et ses textes suivent directement la position lissée pour éviter deux amortissements successifs. Défilement tactile natif, clavier, ancres, champs, carte et panneaux internes conservés ; désactivation avec les mouvements réduits et les dialogues ouverts.
+
+Vérification du contrôleur : progression sans dépassement, arrêt, inversion, annulation tactile/clavier, verrouillage modal, mouvements réduits, zoom, déplacement externe et limites de page. Navigateur : inertie observée puis arrêt à la distance demandée, ancre des goûts atteinte, fond immobile pendant le défilement dans une fiche produit. Syntaxe et construction validées (32 fichiers publics).
+
 ## Retrait de l’opercule vers le haut — 26 septembre 2026
 
 Après le pli synchronisé, la trajectoire de retrait de l’opercule et de sa languette est redirigée verticalement hors du cadre. Seul l’os qui entraîne les pièces amovibles est corrigé après l’échantillonnage du clip ; le rebord fixe reste indépendant. Le pli, la durée, les matériaux et le cadrage sont conservés.

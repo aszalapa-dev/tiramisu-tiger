@@ -100,6 +100,10 @@ function tick(time){
   if(measureDirty)measure();
   target=reduce.matches?0:clamp((scrollY-start)/span);
   if(reduce.matches){progress=0;heroDirty=true;}
+  else if(!userPaused&&document.documentElement.classList.contains('smooth-scrolling')){
+    // The page already has inertia: keep the can and its text on that timeline.
+    progress=target;heroDirty=true;
+  }
   else if(!userPaused&&Math.abs(target-progress)>.000015){
     const delta=target-progress;
     // Smooth wheel steps and cap catch-up after a fast swipe or a paused scroll.
