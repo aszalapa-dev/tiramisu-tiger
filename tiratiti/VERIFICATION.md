@@ -1,5 +1,11 @@
 # Vérifications Tiratiti
 
+## Page adresses et revendeurs — 26 septembre 2026
+
+Nouvelle page `revendeurs.html` dans la palette du site, reliée aux menus ordinateur/mobile, au panier et aux appels à devenir revendeur. Carte Leaflet/OpenStreetMap centrée sur Liège, zoom et recentrage, attribution visible et lien externe de secours. Les six anciennes adresses restent masquées à la demande du propriétaire ; aucune adresse ni disponibilité inventée n’est publiée.
+
+L’ancien formulaire de `BEANRO MODELE/referencement.html` simulait un succès sans transmission. Le nouveau valide les champs et prépare un e-mail complet à `contact@tiratiti.be`, avec ouverture explicite de la messagerie, aperçu et copie de secours. Il n’annonce aucun envoi et ne transmet rien automatiquement. Vérifiés : préparation du destinataire et du message, blocage des champs vides, carte visible, écran 390 × 844 sans débordement. Données de test effacées. Construction : 29 fichiers, environ 61,17 Mo. L’envoi direct côté serveur nécessiterait un service de messagerie configuré.
+
 ## Pli simultané — 26 septembre 2026
 
 Le soulèvement flexible de la languette commence désormais au même instant que le pli de l’opercule. Suppression de l’amorce séparée de 0,8 seconde ; le clip dure 3,2 secondes et conserve les mêmes bornes de défilement. La languette reste relevée pendant le passage du pli puis épouse la feuille. Rebord fixe et retour fermé inchangés ; contrôle des intersections sur 241 positions du GLB final et vérification visuelle dans le navigateur. Construction : 26 fichiers, 61,15 Mo.
