@@ -1,5 +1,7 @@
 # Tiratiti — site avec pot 3D
 
+L’accueil attend la préparation de la 3D derrière un écran de chargement. Le visiteur peut passer l’attente ; une erreur ou un délai de 35 secondes libère automatiquement la page. Les modèles continuent à charger après une entrée anticipée. Le mobile dispose de zones tactiles élargies et d’un cadrage dédié au paysage.
+
 La page `revendeurs.html` réunit la carte OpenStreetMap et le formulaire professionnel dans la direction artistique du site. Les adresses restent masquées jusqu’à confirmation. Le formulaire prépare un e-mail à relire et envoyer dans la messagerie du visiteur ; aucun service d’envoi serveur n’est configuré. Carte : [Leaflet](https://leafletjs.com/examples/quick-start/), tuiles et attribution selon la [politique OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/).
 
 Site de présentation Tiratiti, avec une canette animée au défilement. La version du 25 septembre 2026 conserve les grandes compositions inspirées de Hungry Tiger et les adapte aux produits, à l'histoire de Timoty et aux couleurs des étiquettes Tiratiti.

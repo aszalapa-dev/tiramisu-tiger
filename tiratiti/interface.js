@@ -64,7 +64,7 @@ function measure(){
 function paintHero(){
   const y=progress*span;
   stream.style.transform=reduce.matches?'none':'translate3d(0,'+(-y).toFixed(2)+'px,0)';
-  const initialY=innerWidth<761?71:85;
+  const initialY=innerWidth<761||(innerWidth<951&&innerHeight<501)?71:85;
   scene.style.setProperty('--stage-y',(initialY-(initialY-50)*ease(clamp(progress/.18)))+'%');
   stage.dataset.progress=String(progress);
   stepNumber.textContent=String(progress<.22?1:progress<.72?2:3).padStart(2,'0');

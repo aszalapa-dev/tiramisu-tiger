@@ -1,5 +1,11 @@
 # Vérifications Tiratiti
 
+## Mobile et préparation 3D — 26 septembre 2026
+
+Écran de chargement accessible dans la DA Tiratiti, relié au chargement réel de la canette, de ses textures, de l’opercule animé et à la préparation des shaders. Sortie après le premier rendu et la disponibilité des polices (attente des polices limitée), minimum anti-clignotement de 650 ms. Bouton « Entrer sans attendre », touche Échap, repli sur la photo si erreur, et déblocage automatique après 35 s même si le module 3D est absent. Sans JavaScript, le dialogue reste fermé.
+
+Vérifié dans le navigateur : état prêt avec les deux modèles chargés, bouton de sortie et rétablissement du défilement, secours automatique en absence du module 3D sur une page QA exclue du build. Affichage et menu contrôlés à 320 × 700 et 390 × 844 ; canette entière à 844 × 390 en paysage. Zones tactiles agrandies et marges adaptées aux zones de sécurité. Aucun débordement horizontal sur ces vues. Construction validée : 31 fichiers publics, environ 61,17 Mo. Les performances sur téléphone physique restent à mesurer.
+
 ## Page adresses et revendeurs — 26 septembre 2026
 
 Nouvelle page `revendeurs.html` dans la palette du site, reliée aux menus ordinateur/mobile, au panier et aux appels à devenir revendeur. Carte Leaflet/OpenStreetMap centrée sur Liège, zoom et recentrage, attribution visible et lien externe de secours. Les six anciennes adresses restent masquées à la demande du propriétaire ; aucune adresse ni disponibilité inventée n’est publiée.

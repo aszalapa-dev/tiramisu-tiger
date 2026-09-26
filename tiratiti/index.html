@@ -9,9 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="redesign.css?v=photo-25"><link rel="stylesheet" href="site-interactions.css?v=photo-25">
+<link rel="stylesheet" href="loading.css?v=mobile-26">
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
+<dialog id="site-loading" aria-labelledby="loading-title" aria-describedby="loading-message"><img src="assets/logo-tiratiti.svg" alt="Tiratiti" width="529" height="162"><h2 id="loading-title">LA GOURMANDISE<br>SE PRÉPARE.</h2><div class="loading-track" aria-hidden="true"></div><p id="loading-message" role="status" aria-live="polite">On prépare ta canette…</p><button id="loading-skip" type="button" autofocus>Entrer sans attendre</button></dialog>
+<script src="loading.js?v=mobile-26"></script>
 <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
 <symbol id="icon-pot" viewBox="0 0 32 32"><path d="M10 5h12M10 8h12M9 11c-2 3-2 8-2 12 0 4 2 5 9 5s9-1 9-5c0-4 0-9-2-12Z"/><path d="M11 17h10v6H11z"/></symbol>
 <symbol id="icon-basket" viewBox="0 0 32 32"><path d="m5 13 3 14h16l3-14ZM3 13h26M10 13l5-9M22 13l-5-9M12 17v6M16 17v6M20 17v6"/></symbol>
@@ -68,5 +71,5 @@
 <footer><div class="footer-main"><a class="footer-logo" href="#accueil" aria-label="Tiratiti, accueil"><img src="assets/logo-tiratiti.svg" alt="Tiratiti" width="529" height="162"></a><nav aria-label="Navigation de pied de page"><a href="#histoire">L'histoire</a><a href="#parfums">Les goûts</a><a href="revendeurs.html#adresses">Où nous trouver</a><a href="#le-pot">La canette</a><a href="revendeurs.html#contact">Devenir revendeur</a><a href="#evenements">Pour vos événements</a></nav><div class="footer-signoff"><p>PRÉPARÉ À LA MAIN.<br>SERVI EN CANETTE.</p><a href="#accueil" aria-label="Revenir en haut de page">↑</a></div></div><div class="footer-bottom"><span>2026 © TIRATITI</span><span>TIRAMISU ARTISANAL · PROVINCE DE LIÈGE</span><a href="#accueil">ENCORE UNE CUILLÈRE ? ↑</a></div></footer>
 <aside class="floating-actions" aria-label="Accès rapides"><a href="#parfums" aria-label="Découvrir les goûts"><svg class="icon" aria-hidden="true"><use href="#icon-pot"/></svg></a><button data-open-cart aria-label="Ouvrir ma sélection"><svg class="icon" aria-hidden="true"><use href="#icon-basket"/></svg><span data-cart-count hidden>0</span></button></aside>
 <dialog id="flavor-dialog" aria-labelledby="dialog-title"><button class="dialog-close" aria-label="Fermer la fiche" autofocus>✕</button><div class="dialog-visual" id="dialog-visual"></div><div class="dialog-copy"><p class="eyebrow">Tiratiti · les goûts</p><h2 id="dialog-title">Le Classique</h2><p id="dialog-description"></p><p class="drag-hint">Glisse sur la canette pour la faire tourner.</p><button class="pill" id="dialog-add" data-add-product="classique">Ajouter à ma sélection +</button><button class="text-link dialog-close-text">Continuer la découverte ↗</button></div></dialog>
-<script src="interface.js?v=photo-25" defer></script><script src="site-interactions.js?v=revendeurs-26" defer></script><script type="module" src="scene.js?v=tab-sync-26"></script>
+<script src="interface.js?v=mobile-26" defer></script><script src="site-interactions.js?v=revendeurs-26" defer></script><script type="module" src="scene.js?v=mobile-26"></script>
 </body></html>

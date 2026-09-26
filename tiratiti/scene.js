@@ -137,6 +137,7 @@ async function loadHero(){
   if(heroLoading||canvas.dataset.modelLoaded==='true')return;
   heroLoading=true;retryButton.hidden=true;canvas.hidden=false;
   stage.setAttribute('aria-busy','true');sceneStatus.textContent='Chargement du pot en 3D.';
+  window.TiratitiLoading?.stage('On prépare la canette et ses textures…');
   try{
     hero=makeView(canvas,stage,()=>visible,.18);
     // Clone only the objects: cached geometry and the closed product stay reusable.
@@ -144,15 +145,23 @@ async function loadHero(){
     paintHero(true);
     stage.classList.add('loaded');canvas.dataset.modelLoaded='true';
     document.querySelector('#motion-toggle').hidden=false;
-    sceneStatus.textContent='Canette 3D prête. Faites défiler pour la découvrir et l’ouvrir.';
+    sceneStatus.textContent='Préparation de l’ouverture de la canette.';
+    window.TiratitiLoading?.stage('On prépare le mouvement et l’ouverture…');
     try{
       // Normalise the original closed body first; the authored top inherits
       // precisely that transform. Product-dialog clones remain untouched.
       heroLid=await loadBlenderOpening(model,loader);
+      window.TiratitiLoading?.stage('Une dernière touche de lumière…');
+      // Compile the replacement metal and skinning shaders before revealing it.
+      if(hero.renderer.compileAsync)await hero.renderer.compileAsync(hero.scene,hero.camera);
       canvas.dataset.openingLoaded='true';paintHero(true);
+      sceneStatus.textContent='Canette 3D prête. Faites défiler pour la découvrir et l’ouvrir.';
+      window.TiratitiLoading?.finish();
     }catch(error){
       canvas.dataset.openingLoaded='false';
       console.warn('L’ouverture animée est indisponible, le pot reste fermé.',error);
+      sceneStatus.textContent='La canette est prête. Son ouverture animée est momentanément indisponible.';
+      window.TiratitiLoading?.finish('fallback');
     }
   }catch(error){
     heroLid?.dispose();
@@ -160,6 +169,7 @@ async function loadHero(){
     console.warn('Le rendu 3D est indisponible, la photo du pot reste visible.',error);
     canvas.hidden=true;document.querySelector('#motion-toggle').hidden=true;
     retryButton.hidden=false;sceneStatus.textContent='Le pot 3D n’a pas chargé. Vous pouvez relancer son chargement.';
+    window.TiratitiLoading?.finish('fallback');
   }finally{heroLoading=false;stage.setAttribute('aria-busy','false');}
 }
 retryButton.addEventListener('click',loadHero);

@@ -27,5 +27,7 @@
   "assets/da/atelier-montage.png",
   "revendeurs.html",
   "revendeurs.css",
-  "revendeurs.js"
+  "revendeurs.js",
+  "loading.css",
+  "loading.js"
 ]
