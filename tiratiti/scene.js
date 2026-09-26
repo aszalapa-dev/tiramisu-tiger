@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { loadBlenderOpening, orientClosure } from './blender-opening.js?v=photo-25';
+import { loadBlenderOpening, orientClosure } from './blender-opening.js?v=tab-flex-26';
 
 const stage=document.querySelector('#product-stage');
 const canvas=document.querySelector('#pot');

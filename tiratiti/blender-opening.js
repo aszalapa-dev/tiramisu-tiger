@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 
 export const OPENING_CLIP_NAME = 'Tiratiti_Ouverture';
-export const OPENING_ASSET_URL = new URL('./assets/ouverture-classique.glb?v=stickers-pdf-2', import.meta.url).href;
+export const OPENING_ASSET_URL = new URL('./assets/ouverture-classique.glb?v=tab-flex-26', import.meta.url).href;
 
 const assetCache = new Map();
 const originalTopName = /^(Couvercle\s*\||Languette\s*\||Bord interieur languette$|Contour roule languette$|Estampage autour du rivet$|Nervure circulaire emboutie$|Rainure circulaire ouverture$|Rivet de languette$)/;

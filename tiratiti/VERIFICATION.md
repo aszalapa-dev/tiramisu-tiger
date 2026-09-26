@@ -1,5 +1,11 @@
 # Vérifications Tiratiti
 
+## Languette flexible — 26 septembre 2026
+
+La languette et ses deux contours ont leur propre déformation : la partie rivetée reste attachée, la boucle se soulève en fléchissant puis accompagne la courbure de l’opercule. Le mouvement du reste de l’opercule et du rebord est conservé. Le fichier Blender modifiable est dans `../exports/tab-flex/`.
+
+Contrôle géométrique du GLB final sur 241 poses, y compris entre les images clés : aucune intersection des trois pièces de la languette avec l’opercule, sa tranche et sa nervure ; déplacement du rebord fixe nul ; retour ouvert → fermé exact. Contrôle visuel des étapes dans le navigateur, matériaux reconnus et corps inchangé. Construction validée : 26 fichiers publics, 61,23 Mo.
+
 ## Animation toupie — 26 septembre 2026
 
 Deux tours sur l’axe vertical, oscillation progressive de 0 à 8° puis retour droit et face caméra avant l’ouverture. Accélération et ralentissement continus, arrêt à 82 % du parcours. 2 001 poses vérifiées : rotation monotone, dessous jamais face caméra, fin verticale et retour reproductible. Les matériaux, l’éclairage, le cadrage et le décapsulage restent inchangés. Construction du site validée. Cette chorégraphie remplace celle du 25 septembre qui gardait la face visible pendant tout le parcours.
