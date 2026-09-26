@@ -2,6 +2,8 @@
   'use strict';
   const root = document.documentElement;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const dampingSeconds = .30;
+  const wheelSensitivity = .75;
   let frame = 0, lastTime = 0, target = scrollY, position = scrollY, written = scrollY, direction = 0;
   const maximum = () => Math.max(0, document.scrollingElement.scrollHeight - innerHeight);
   const locked = () => document.hidden || reduced.matches || document.querySelector('dialog[open]')
@@ -17,7 +19,7 @@
     const dt = Math.min((time - (lastTime || time - 16.67)) / 1000, .05);
     lastTime = time;
     target = Math.max(0, Math.min(maximum(), target));
-    position += (target - position) * (1 - Math.exp(-dt / .12));
+    position += (target - position) * (1 - Math.exp(-dt / dampingSeconds));
     const done = Math.abs(target - position) < .5;
     if (done) position = target;
     // Instant writes avoid stacking native CSS smooth-scroll animations.
@@ -37,7 +39,7 @@
         stop(); return;
       }
     }
-    const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1);
+    const delta = event.deltaY * wheelSensitivity * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1);
     if (!frame || Math.sign(delta) !== direction) target = position = scrollY;
     direction = Math.sign(delta);
     target = Math.max(0, Math.min(maximum(), target + delta));
