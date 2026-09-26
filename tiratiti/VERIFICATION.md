@@ -1,5 +1,9 @@
 # Vérifications Tiratiti
 
+## Pli simultané — 26 septembre 2026
+
+Le soulèvement flexible de la languette commence désormais au même instant que le pli de l’opercule. Suppression de l’amorce séparée de 0,8 seconde ; le clip dure 3,2 secondes et conserve les mêmes bornes de défilement. La languette reste relevée pendant le passage du pli puis épouse la feuille. Rebord fixe et retour fermé inchangés ; contrôle des intersections sur 241 positions du GLB final et vérification visuelle dans le navigateur. Construction : 26 fichiers, 61,15 Mo.
+
 ## Languette flexible — 26 septembre 2026
 
 La languette et ses deux contours ont leur propre déformation : la partie rivetée reste attachée, la boucle se soulève en fléchissant puis accompagne la courbure de l’opercule. Le mouvement du reste de l’opercule et du rebord est conservé. Le fichier Blender modifiable est dans `../exports/tab-flex/`.

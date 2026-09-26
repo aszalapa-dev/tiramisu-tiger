@@ -14,7 +14,7 @@ Pour Vercel, suivre **[DEPLOIEMENT.md](DEPLOIEMENT.md)**. La configuration est i
 - Logo vectoriel original extrait du document de marque, sans étirement ni police de remplacement. Voir [PROVENANCE-ASSETS.md](PROVENANCE-ASSETS.md) pour les sources et les proportions.
 - Navigation principale en trois entrées : L'histoire, Les goûts et Où nous trouver. Titres larges, texture de grain et décor de cafés et de boudoirs.
 - Parcours de 650svh sur ordinateur et 550svh sur mobile. La canette reste centrée et fait deux tours sur son axe vertical comme une toupie, avec une oscillation maximale de 8°. Elle ralentit et revient droite, étiquette de face, à 82 % du parcours, avant l’ouverture. Le dessous reste masqué.
-- L'ouverture occupe 16 % du parcours, de 82 % à 98 %. La fermeture est orientée dans le sens opposé pour inverser le côté de traction. La languette se soulève, l'opercule se plie puis se détache ; le rebord serti du contenant reste fixé. Le défilement en sens inverse referme le pot.
+- L'ouverture occupe 16 % du parcours, de 82 % à 98 %. La fermeture est orientée dans le sens opposé pour inverser le côté de traction. La languette et l'opercule se plient simultanément, puis se détachent ensemble ; le rebord serti du contenant reste fixé. Le défilement en sens inverse referme le pot.
 - Une seule progression lissée synchronise la rotation, le défilement des titres et leur apparition lettre par lettre. Les positions de la page sont mises en cache ; la 3D cesse de se redessiner lorsqu'elle est immobile ou hors écran.
 - Éclairage de studio et rendu ACES, reflets sur le métal, environnement lumineux précalculé et matériau PET physique transparent avec transmission et réfraction.
 - Histoire de Timoty illustrée par les photos d'atelier, ingrédients du Classique, mode d'emploi de la canette, photo produit pleine largeur et trois goûts : Le Classique, Le Spéculos et Le Spécial aux biscuits Pane di Stelle.
@@ -39,7 +39,7 @@ Le paiement reste désactivé et aucun service externe de commande n'est configu
 - `scene.js` : rendu, lumière et poses des modèles 3D.
 - `blender-opening.js` : lecture réversible du clip Blender, synchronisée au scroll ; conservation des matériaux et du reste du modèle.
 - `assets/classique.glb` : nouveau modèle fourni dans `Tiratiti_Classique_stickers_PDF.blend`, avec les six stickers du PDF, les nouveaux boudoirs et la crème. Les matières procédurales sont converties en textures embarquées pour le navigateur.
-- `assets/ouverture-classique.glb` : dessus articulé du même fichier Blender, avec rebord fixe et opercule déformable. Le clip `Tiratiti_Ouverture` dure environ 4 secondes. La copie Blender préparée pour l’export et ses rapports sont conservés dans `../exports/stickers-pdf/`.
+- `assets/ouverture-classique.glb` : dessus articulé du même fichier Blender, avec rebord fixe et opercule déformable. Le clip `Tiratiti_Ouverture` dure 3,2 secondes. La copie Blender préparée pour l’export et ses rapports sont conservés dans `../exports/stickers-pdf/`.
 - `site-interactions.js` et `.css` : sélection locale et menu mobile.
 - `assets/logo-tiratiti.svg` et `assets/logo-tiratiti-ink.svg` : tracé original du logo, en crème et en chocolat.
 - `assets/special.webp` : photo détourée du Spécial, conservée telle qu'elle était dans le projet précédent.
