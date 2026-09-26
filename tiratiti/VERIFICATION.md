@@ -1,5 +1,11 @@
 # Vérifications Tiratiti
 
+## Retrait de l’opercule vers le haut — 26 septembre 2026
+
+Après le pli synchronisé, la trajectoire de retrait de l’opercule et de sa languette est redirigée verticalement hors du cadre. Seul l’os qui entraîne les pièces amovibles est corrigé après l’échantillonnage du clip ; le rebord fixe reste indépendant. Le pli, la durée, les matériaux et le cadrage sont conservés.
+
+Page QA : rebord immobile sur 101 positions, retrait vertical sans translation latérale, retour 0 → 1 → 0 exact, corps et matériaux inchangés. Contrôle visuel du pot ouvert debout, opercule hors du cadre. Syntaxe et construction validées (31 fichiers publics).
+
 ## Mobile et préparation 3D — 26 septembre 2026
 
 Écran de chargement accessible dans la DA Tiratiti, relié au chargement réel de la canette, de ses textures, de l’opercule animé et à la préparation des shaders. Sortie après le premier rendu et la disponibilité des polices (attente des polices limitée), minimum anti-clignotement de 650 ms. Bouton « Entrer sans attendre », touche Échap, repli sur la photo si erreur, et déblocage automatique après 35 s même si le module 3D est absent. Sans JavaScript, le dialogue reste fermé.

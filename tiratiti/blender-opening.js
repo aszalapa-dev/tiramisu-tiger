@@ -94,6 +94,7 @@ export function prepareBlenderOpening(model, gltf) {
     throw new Error('L’opercule Blender doit contenir un maillage lié à son armature.');
   }
 
+  const departureBone = root.getObjectByName('Opening_Root');
   const mixer = new THREE.AnimationMixer(root);
   const action = mixer.clipAction(clip);
   action.setLoop(THREE.LoopOnce, 1);
@@ -110,6 +111,16 @@ export function prepareBlenderOpening(model, gltf) {
     // from the last frame must reproduce the exact closed pose.
     action.reset().play();
     mixer.setTime(amount * clip.duration);
+    if (departureBone) {
+      // The authored release moves 120 mm sideways, 17 mm up and 12 mm
+      // backward. Redirect only that departure above the viewport. Sampling
+      // the clip first keeps the foil/tab bend and backward seeking exact.
+      // Fixed rim meshes are outside this bone's hierarchy.
+      const release = THREE.MathUtils.clamp(departureBone.position.x / .12, 0, 1);
+      departureBone.position.x = 0;
+      departureBone.position.y += (.22 - .017) * release;
+      departureBone.position.z += .012 * release;
+    }
     root.updateMatrixWorld(true);
     lastProgress = amount;
   };
