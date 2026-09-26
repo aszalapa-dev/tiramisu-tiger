@@ -1,6 +1,10 @@
 # Vérifications Tiratiti
 
-## Version actuelle — 25 septembre 2026
+## Animation toupie — 26 septembre 2026
+
+Deux tours sur l’axe vertical, oscillation progressive de 0 à 8° puis retour droit et face caméra avant l’ouverture. Accélération et ralentissement continus, arrêt à 82 % du parcours. 2 001 poses vérifiées : rotation monotone, dessous jamais face caméra, fin verticale et retour reproductible. Les matériaux, l’éclairage, le cadrage et le décapsulage restent inchangés. Construction du site validée. Cette chorégraphie remplace celle du 25 septembre qui gardait la face visible pendant tout le parcours.
+
+## Version du 25 septembre 2026
 
 - Remarques du document utilisateur appliquées : logo vectoriel original et proportions natives, menu L’histoire / Les goûts / Où nous trouver, récit de Timoty, quatre ingrédients, mode d’emploi Ouvre / Plonge / Savoure et trois goûts. Le jeu et la newsletter sont retirés. La photo réelle du Spécial et les coordonnées des étiquettes officielles remplacent les éléments manquants ; aucun revendeur fictif n’est affiché.
 - Syntaxe des quatre modules validée, ancres et fichiers locaux vérifiés. Navigation ordinateur et menu mobile testés ; le focus suit la section choisie. Fiche du Spécial, ajout du bon goût et retrait de la sélection vérifiés ; la sélection de test est remise vide. Vue 3D du Spéculos chargée sans avertissement.

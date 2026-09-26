@@ -98,39 +98,14 @@ function makeView(canvas,host,canRender=()=>true,verticalPadding=0){
 let hero,heroLid;
 let progress=Number(stage.dataset.progress||0),visible=true,motionReduced=reduced.matches,lastHeroProgress=NaN;
 let dialogView=null,modalAngle=0,dragging=false,lastX=0,modalToken=0,modalFrame=0;
-// Gentle product-photo angles: keep the label toward the viewer and the
-// bottom facing away throughout. Settle with the opening visible from above.
-const turns=[
-  {p:0,x:0,y:0,z:0},
-  {p:.16,x:.30,y:-.30,z:-.16},
-  {p:.36,x:.66,y:.34,z:.14},
-  {p:.56,x:.38,y:-.42,z:-.09},
-  {p:.72,x:.55,y:-.20,z:.10},
-  {p:.82,x:.48,y:0,z:0},
-  {p:1,x:.48,y:0,z:0},
-];
-const axes=['x','y','z'];
-// Shape-preserving Hermite tangents prevent overshoot at changes of direction,
-// while keeping angular velocity continuous at every reference pose.
-const tangents=turns.map((pose,i)=>Object.fromEntries(axes.map(axis=>{
-  if(i===0||i===turns.length-1)return [axis,0];
-  const left=pose.p-turns[i-1].p,right=turns[i+1].p-pose.p;
-  const a=(pose[axis]-turns[i-1][axis])/left,b=(turns[i+1][axis]-pose[axis])/right;
-  if(a*b<=0)return [axis,0];
-  const w1=2*right+left,w2=right+2*left;
-  return [axis,(w1+w2)/(w1/a+w2/b)];
-})));
+// Spin twice around the can's vertical axis. A small precessing tilt evokes
+// a spinning top; both tilt and angular speed settle to zero before opening.
 function turnAt(p){
-  p=Math.max(0,Math.min(1,p));
-  const i=Math.min(turns.length-2,Math.max(0,turns.findIndex((v,j)=>j<turns.length-1&&p<=turns[j+1].p)));
-  const a=turns[i],b=turns[i+1],span=b.p-a.p,t=(p-a.p)/span;
-  const t2=t*t,t3=t2*t;
-  const pose={};
-  for(const axis of axes){
-    pose[axis]=(2*t3-3*t2+1)*a[axis]+(t3-2*t2+t)*span*tangents[i][axis]
-      +(-2*t3+3*t2)*b[axis]+(t3-t2)*span*tangents[i+1][axis];
-  }
-  return pose;
+  const t=Math.max(0,Math.min(1,p/.82));
+  const eased=t*t*t*(10+t*(-15+6*t));
+  const y=4*Math.PI*eased;
+  const wobble=.14*Math.sin(Math.PI*t)**2;
+  return {x:wobble*Math.sin(y),y,z:wobble*Math.cos(y)};
 }
 function paintHero(force=false){
   if(!hero||!visible||document.hidden)return;
