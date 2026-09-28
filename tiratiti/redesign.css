@@ -160,3 +160,6 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 .special-dialog-recipe{font-size:12px;letter-spacing:.12em;font-weight:700}
 
 @media(max-width:760px){.header .contact-cta{font-size:10px;min-height:44px;padding:10px;gap:4px}.header .contact-cta span{font-size:16px}}
+
+/* Hero: plain chocolate background. */
+.scene:before,.scene:after{content:none}
