@@ -1,5 +1,9 @@
 # Vérifications Tiratiti
 
+## Mascotte dans le hero — 28 septembre 2026
+
+Le décor café/boudoirs est remplacé par la mascotte crème originale fournie, agrandie en arrière-plan sur un fond chocolat uni. Grain atténué et motif des lettres supprimé uniquement dans le hero. Aucun changement du modèle, de son mouvement ou du scroll. Image transparente copiée sans modification (59 ko). Contrôle visuel ordinateur et 390 × 844, sans débordement horizontal mobile. Construction validée : 33 fichiers publics.
+
 ## Défilement doux — 26 septembre 2026
 
 Inertie légère de la molette sur l’accueil et la page revendeurs, amortissement indépendant de la fréquence d’écran, inversion immédiate et arrêt de la boucle au repos. La canette et ses textes suivent directement la position lissée pour éviter deux amortissements successifs. Défilement tactile natif, clavier, ancres, champs, carte et panneaux internes conservés ; désactivation avec les mouvements réduits et les dialogues ouverts.
