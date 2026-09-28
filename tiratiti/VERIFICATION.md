@@ -1,5 +1,9 @@
 # Vérifications Tiratiti
 
+## Carte panoramique — 28 septembre 2026
+
+Carte OpenStreetMap pleine largeur, teintes atténuées, badge de lancement, zoom à droite, recentrage et agrandissement. Les adresses restent masquées : aucun marqueur ni compteur fictif. Mentions OpenStreetMap conservées, message de secours et lien externe disponibles. Zoom, recentrage, agrandissement puis sortie Échap contrôlés ; hauteur plein écran et déverrouillage du scroll vérifiés. Affichage à 390 × 844 sans débordement horizontal. Construction validée.
+
 ## Site vitrine sans achat — 28 septembre 2026
 
 Suppression du tiroir de sélection, des quantités, des boutons d’ajout et du stockage de panier. Les fiches de goûts restent consultables et renvoient aux revendeurs. Le bouton du header mène au contact e-mail et le raccourci panier est remplacé par une épingle vers les adresses. Aucun point de vente n’est publié. Syntaxe, construction et ouverture de la fiche Classique vérifiées ; aucune commande d’ajout présente dans la page.
