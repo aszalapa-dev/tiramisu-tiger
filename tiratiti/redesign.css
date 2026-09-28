@@ -158,3 +158,5 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 .special-dialog-stars{font-size:40px;letter-spacing:15px}
 .special-dialog-name{font:900 clamp(55px,6vw,86px)/.9 var(--display);letter-spacing:-.055em;max-width:400px;transform:rotate(-8deg);text-transform:uppercase}
 .special-dialog-recipe{font-size:12px;letter-spacing:.12em;font-weight:700}
+
+@media(max-width:760px){.header .contact-cta{font-size:10px;min-height:44px;padding:10px;gap:4px}.header .contact-cta span{font-size:16px}}

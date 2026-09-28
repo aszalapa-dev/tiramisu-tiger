@@ -1,5 +1,9 @@
 # Vérifications Tiratiti
 
+## Site vitrine sans achat — 28 septembre 2026
+
+Suppression du tiroir de sélection, des quantités, des boutons d’ajout et du stockage de panier. Les fiches de goûts restent consultables et renvoient aux revendeurs. Le bouton du header mène au contact e-mail et le raccourci panier est remplacé par une épingle vers les adresses. Aucun point de vente n’est publié. Syntaxe, construction et ouverture de la fiche Classique vérifiées ; aucune commande d’ajout présente dans la page.
+
 ## Mascotte dans le hero — 28 septembre 2026
 
 Le décor café/boudoirs est remplacé par la mascotte crème originale fournie, agrandie en arrière-plan sur un fond chocolat uni. Grain atténué et motif des lettres supprimé uniquement dans le hero. Aucun changement du modèle, de son mouvement ou du scroll. Image transparente copiée sans modification (59 ko). Contrôle visuel ordinateur et 390 × 844, sans débordement horizontal mobile. Construction validée : 33 fichiers publics.

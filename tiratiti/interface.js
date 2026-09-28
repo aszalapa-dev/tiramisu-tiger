@@ -138,7 +138,6 @@ document.querySelectorAll('[data-flavor]').forEach(button=>button.addEventListen
   if(!recipes[flavor])return;
   document.querySelector('#dialog-title').textContent=recipes[flavor].title;
   document.querySelector('#dialog-description').textContent=recipes[flavor].description;
-  document.querySelector('#dialog-add').dataset.addProduct=flavor;
   document.querySelector('#dialog-visual').style.backgroundColor=flavor==='speculoos'?'var(--brick)':'var(--blue)';
   dialog.dataset.flavor=flavor;
   dialog.querySelector('.drag-hint').hidden=flavor==='special';
@@ -146,7 +145,6 @@ document.querySelectorAll('[data-flavor]').forEach(button=>button.addEventListen
   dispatchEvent(new CustomEvent('tiratiti-flavor',{detail:{flavor}}));
 }));
 document.querySelectorAll('.dialog-close,.dialog-close-text').forEach(button=>button.addEventListener('click',()=>dialog.close()));
-document.querySelector('#dialog-add').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 dialog.addEventListener('close',()=>{document.body.classList.remove('modal-open');dispatchEvent(new Event('tiratiti-dialog-close'));});
 
