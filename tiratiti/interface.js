@@ -130,8 +130,8 @@ updateButton();schedule();
 const dialog=document.querySelector('#flavor-dialog');
 const recipes={
   classique:{title:'Le Classique',description:'Boudoirs imbibés de café, crème au mascarpone et voile de cacao. Celui avec lequel tout a commencé.'},
-  speculoos:{title:'Le Spéculos',description:'Le goût du spéculos rencontre l’onctuosité du mascarpone. Notre clin d’œil à la Belgique.'},
-  special:{title:'Le Spécial',description:'Des biscuits Pane di Stelle au cacao et notre crème au mascarpone. Pour les faibles face au chocolat.'}
+  speculoos:{title:'Le Spéculos',description:'Du spéculos et notre crème au mascarpone. L’accent belge lui va bien.'},
+  special:{title:'Le Spécial',description:'Des biscuits Pane di Stelle au cacao et notre crème au mascarpone. Pour ceux qui ont un faible pour le chocolat.'}
 };
 document.querySelectorAll('[data-flavor]').forEach(button=>button.addEventListener('click',()=>{
   const flavor=button.dataset.flavor;

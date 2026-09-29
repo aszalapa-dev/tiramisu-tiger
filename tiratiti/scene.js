@@ -98,8 +98,7 @@ function makeView(canvas,host,canRender=()=>true,verticalPadding=0){
 let hero,heroLid;
 let progress=Number(stage.dataset.progress||0),visible=true,motionReduced=reduced.matches,lastHeroProgress=NaN;
 let dialogView=null,modalAngle=0,dragging=false,lastX=0,modalToken=0,modalFrame=0;
-// Spin twice around the can's vertical axis. A small precessing tilt evokes
-// a spinning top; both tilt and angular speed settle to zero before opening.
+// Spin around the vertical axis and settle upright before opening.
 function turnAt(p){
   const t=Math.max(0,Math.min(1,p/.82));
   const eased=t*t*t*(10+t*(-15+6*t));
@@ -179,15 +178,17 @@ loadHero();
 addEventListener('tiratiti-flavor',async e=>{
   const token=++modalToken;const flavor=e.detail.flavor;const host=document.querySelector('#dialog-visual');
   if(dialogView){dialogView.dispose();dialogView=null;}
-  if(flavor==='special'){
-    // The original site's product photograph is available for this recipe;
-    // there is no matching 3D model, so keep the photograph on screen.
-    host.replaceChildren();
-    const photo=document.createElement('img');photo.src='assets/special.webp';
-    photo.alt='Tiratiti Le Spécial, biscuits Pane di Stelle au cacao et crème au mascarpone';
-    host.append(photo);
+  if(flavor!=='classique'){
+  host.replaceChildren();
+  const slot=document.createElement('div');slot.className='photo-slot packshot';
+  const label=document.createElement('span');label.className='slot-label';label.textContent='VISUEL À FINALISER';
+  const note=document.createElement('p');note.textContent='Canette avec l’étiquette finale.';
+  slot.append(label,note);host.append(slot);
+  document.querySelector('.drag-hint').hidden=true;
+
     return;
   }
+  document.querySelector('.drag-hint').hidden=false;
   host.replaceChildren();const poster=document.createElement('img');poster.src=`assets/${flavor}.png`;poster.alt=`Pot Tiratiti ${flavor==='classique'?'Le Classique':'Le Spéculoos'}`;host.append(poster);
   document.querySelector('.drag-hint').textContent='Chargement de la vue à 360°…';
   try{
