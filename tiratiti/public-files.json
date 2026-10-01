@@ -25,5 +25,7 @@
   "revendeurs.css",
   "revendeurs.js",
   "loading.css",
-  "loading.js"
+  "loading.js",
+  "store-map.js",
+  "home-map.css"
 ]
