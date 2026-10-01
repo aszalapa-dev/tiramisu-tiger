@@ -3,7 +3,6 @@ const scene=document.querySelector('.scene');
 const stream=document.querySelector('.story-stream');
 const stage=document.querySelector('#product-stage');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)');
-const motionButton=document.querySelector('#motion-toggle');
 const progressBar=document.querySelector('#scroll-progress');
 const stepNumber=document.querySelector('#step-number');
 const clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
@@ -45,14 +44,7 @@ const motionObserver=new IntersectionObserver(entries=>{
 },{rootMargin:'120px'});
 movingElements.forEach(el=>motionObserver.observe(el));
 
-function updateButton(){
-  const stopped=userPaused||reduce.matches;
-  motionButton.setAttribute('aria-pressed',String(stopped));
-  motionButton.setAttribute('aria-label',stopped?'Reprendre l’animation':'Mettre l’animation en pause');
-  motionButton.textContent=stopped?'▷':'Ⅱ';
-  motionButton.disabled=reduce.matches;
-  document.body.classList.toggle('motion-stopped',stopped);
-}
+
 function measure(){
   height=innerHeight;
   start=journey.getBoundingClientRect().top+scrollY;
@@ -118,14 +110,13 @@ function tick(time){
   else lastTime=0;
 }
 function schedule(){if(!frame&&!document.hidden)frame=requestAnimationFrame(tick);}
-motionButton.addEventListener('click',()=>{userPaused=!userPaused;updateButton();heroDirty=true;pageDirty=true;schedule();});
-reduce.addEventListener('change',()=>{progress=0;updateButton();measureDirty=true;pageDirty=true;heroDirty=true;schedule();});
+reduce.addEventListener('change',()=>{progress=0;measureDirty=true;pageDirty=true;heroDirty=true;schedule();});
 addEventListener('scroll',()=>{pageDirty=true;schedule();},{passive:true});
 addEventListener('resize',()=>{measureDirty=true;pageDirty=true;schedule();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastTime=0;heroDirty=true;schedule();}});
 new ResizeObserver(()=>{measureDirty=true;pageDirty=true;schedule();}).observe(document.body);
 document.fonts.ready.then(()=>{measureDirty=true;pageDirty=true;schedule();});
-updateButton();schedule();
+schedule();
 
 const dialog=document.querySelector('#flavor-dialog');
 const recipes={
