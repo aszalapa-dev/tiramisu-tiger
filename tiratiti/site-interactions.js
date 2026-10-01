@@ -7,8 +7,8 @@
   menu.setAttribute('aria-label', 'Navigation');
   menu.innerHTML = `
     <div class="menu-heading"><a href="#accueil" aria-label="Tiratiti, accueil"><img src="assets/logo-tiratiti-ink.svg" alt="Tiratiti" width="157" height="48"></a><button type="button" data-close-dialog aria-label="Fermer le menu" autofocus>×</button></div>
-    <nav aria-label="Navigation mobile"><a href="#histoire">L’HISTOIRE <span>↗</span></a><a href="#parfums">LES GOÛTS <span>↗</span></a><a href="revendeurs.html#adresses">OÙ NOUS TROUVER <span>↗</span></a></nav>
-    <div class="menu-secondary"><a href="revendeurs.html#contact">Devenir revendeur ↗</a><a href="#evenements">Pour vos événements ↗</a></div>`;
+    <nav aria-label="Navigation mobile"><a href="#histoire">L’HISTOIRE </a><a href="#parfums">LES GOÛTS </a><a href="#ou-nous-trouver">OÙ NOUS TROUVER </a></nav>
+    <div class="menu-secondary"><a href="revendeurs.html#contact">Devenir revendeur</a><a href="#evenements">Pour vos événements</a></div>`;
 
   document.body.append(menu);
   const dialogs = [menu];

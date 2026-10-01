@@ -199,3 +199,6 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 @media(prefers-reduced-motion:reduce){
  .craft-image img{transform:none}
 }
+
+/* Quiet typography instead of decorative symbols. */
+.footer-signoff a{font:600 12px/1.4 var(--body);text-decoration:underline;text-underline-offset:4px}
