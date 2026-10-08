@@ -22,3 +22,32 @@
 
 .home-map h2{font:900 clamp(34px,5vw,76px)/.95 var(--display);letter-spacing:-.045em;text-transform:uppercase;margin:0 0 32px}
 @media(max-width:760px){.home-map h2{margin-bottom:24px}}
+
+.dealer-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+.dealer-sidebar{height:520px;display:flex;flex-direction:column;background:#fff;border-top:4px solid var(--chocolate);border-radius:8px;overflow:hidden}
+.dealer-list-heading{padding:23px 20px 20px;border-bottom:1px solid #2b16111c}
+.dealer-list-heading h3{font:800 25px/1.1 var(--display);margin:0 0 8px}
+.dealer-list-heading p{font-size:12px;line-height:1.4}
+.dealer-list{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9e7c6a #f0efee;position:relative;min-height:0;flex:1}
+.dealer-card{display:flex;gap:13px;width:100%;padding:22px 18px;text-align:left;background:transparent;color:var(--chocolate);border:0;border-bottom:1px solid #2b16111c;cursor:pointer;transition:background .2s}
+.dealer-card:hover,.dealer-card[aria-pressed="true"]{background:#f2e9df}
+.dealer-card:disabled{cursor:default}
+.dealer-card strong{display:block;font:800 19px/1.2 var(--display);margin-bottom:8px}
+.dealer-card span span{display:block;font:400 13px/1.6 var(--body)}
+.dealer-number{font:700 12px/1.5 var(--body);padding-top:2px;opacity:.6}
+.home-map .dealer-layout #dealer-map{height:516px}
+.dealer-marker{width:30px;height:30px;border:2px solid white;border-radius:50%;background:#9e775f;color:white;box-shadow:0 2px 8px #2b161140;font:700 13px/1 Arial;cursor:pointer}
+.dealer-marker.is-selected{background:var(--brick);box-shadow:0 0 0 5px #84231b30}
+.home-map .mapboxgl-popup-content{padding:20px;color:var(--chocolate);font:14px/1.5 var(--body);border-radius:7px}
+.home-map .mapboxgl-popup-content strong{font:800 19px/1.2 var(--display)}
+.home-map .mapboxgl-popup-content p{margin:10px 0}
+.home-map .mapboxgl-popup-content small{font-size:11px}
+.home-map .mapboxgl-popup-close-button{font-size:23px;width:28px;height:28px}
+.home-map .dealer-layout .map-frame.is-expanded #dealer-map{height:100dvh}
+@media(max-width:760px){
+ .dealer-layout{grid-template-columns:minmax(0,1fr);gap:15px}
+ .dealer-sidebar{height:280px}
+ .dealer-list-heading{padding:17px 18px 14px}
+ .dealer-card{padding:18px}
+ .home-map .dealer-layout #dealer-map{height:390px}
+}

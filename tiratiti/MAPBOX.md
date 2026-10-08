@@ -9,6 +9,6 @@ En local, créer `tiratiti/.env.local` avec `MAPBOX_PUBLIC_TOKEN=…`, puis lanc
 local et dans `dist`. Ces fichiers et `.env.local` restent hors de Git.
 
 Ce jeton public sera visible par les visiteurs, comme requis par Mapbox GL JS.
-Les adresses des revendeurs restent masquées. La molette défile dans la page ;
+Six commerces et adresses explicitement fictifs servent de démonstration dans la liste et sur la carte. Remplacer ces exemples par les revendeurs confirmés avant le lancement. La molette défile dans la page ;
 les boutons de la carte permettent de zoomer. Sur mobile, déplacer la carte
 avec deux doigts pour conserver le défilement de la page avec un seul doigt.
