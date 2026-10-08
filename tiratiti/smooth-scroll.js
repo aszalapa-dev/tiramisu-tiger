@@ -31,10 +31,11 @@
   addEventListener('wheel', event => {
     if (event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey || event.shiftKey
       || Math.abs(event.deltaX) > Math.abs(event.deltaY) || !event.deltaY || locked()) { stop(); return; }
-    // Leave maps, fields, dialogs and independently scrolling panels native.
+    // Keep the same page inertia over the map; its wheel zoom is disabled.
+    // Fields, dialogs and independently scrolling panels retain native control.
     for (const node of event.composedPath()) {
       if (!(node instanceof Element) || node === document.body || node === root) continue;
-      if (node.matches('input,textarea,select,[contenteditable],dialog,.leaflet-container,[data-native-scroll]')
+      if (node.matches('input,textarea,select,[contenteditable],dialog,[data-native-scroll]')
         || (node.scrollHeight > node.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(node).overflowY))) {
         stop(); return;
       }
