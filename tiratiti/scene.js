@@ -143,7 +143,6 @@ async function loadHero(){
     const model=(await loadModel('classique')).clone(true);hero.rig.add(model);
     paintHero(true);
     stage.classList.add('loaded');canvas.dataset.modelLoaded='true';
-    document.querySelector('#motion-toggle').hidden=false;
     sceneStatus.textContent='Préparation de l’ouverture de la canette.';
     window.TiratitiLoading?.stage('On prépare le mouvement et l’ouverture…');
     try{
@@ -166,7 +165,8 @@ async function loadHero(){
     heroLid?.dispose();
     hero?.dispose();hero=null;heroLid=null;lastHeroProgress=NaN;
     console.warn('Le rendu 3D est indisponible, la photo du pot reste visible.',error);
-    canvas.hidden=true;document.querySelector('#motion-toggle').hidden=true;
+    canvas.hidden=true;stage.classList.remove('loaded');
+    delete canvas.dataset.modelLoaded;delete canvas.dataset.openingLoaded;
     retryButton.hidden=false;sceneStatus.textContent='Le pot 3D n’a pas chargé. Vous pouvez relancer son chargement.';
     window.TiratitiLoading?.finish('fallback');
   }finally{heroLoading=false;stage.setAttribute('aria-busy','false');}
