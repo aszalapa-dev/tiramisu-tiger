@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232b1611'/%3E%3Ctext x='18' y='48' fill='%23f0efee' font-family='Arial' font-weight='bold' font-size='54'%3Et%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="redesign.css?v=full-logo-08"><link rel="stylesheet" href="site-interactions.css?v=photo-25">
+<link rel="stylesheet" href="redesign.css?v=ingredients-footer-08"><link rel="stylesheet" href="site-interactions.css?v=photo-25">
 <link rel="stylesheet" href="loading.css?v=mobile-26">
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.css">
@@ -28,6 +28,39 @@
 <symbol id="icon-spoon" viewBox="0 0 32 32"><ellipse cx="20" cy="9" rx="6" ry="8" transform="rotate(30 20 9)"/><path d="M16 16 7 30"/></symbol>
 <symbol id="icon-flower" viewBox="0 0 32 32"><path d="M16 2v28M2 16h28M6 6l20 20M6 26 26 6"/><circle cx="16" cy="16" r="4"/></symbol>
 <symbol id="icon-biscuit" viewBox="0 0 32 32"><rect x="10" y="2" width="12" height="28" rx="6" transform="rotate(24 16 16)"/><path d="m16 8 1 1m-4 5 1 1m3 3 1 1m-5 4 1 1"/></symbol>
+<symbol id="ingredient-cream" viewBox="0 0 48 48">
+<g stroke="#6b422b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+<path d="M12 25c-4-6 2-9 6-10-1-4 5-6 7-9 1 5 8 5 7 10 6 1 8 5 5 10" fill="#f4e6c9"/>
+<path d="M18 16c3 2 8 2 11 0M14 23c5 2 13 3 18 0" fill="none" stroke="#d0ad77"/>
+<path d="M6 26h36c-1 10-8 15-18 15S7 36 6 26Z" fill="#a9bed9"/>
+<path d="M8 27c8 3 24 3 32 0" fill="none" stroke="#e9eef1"/>
+<path d="M18 42h12" fill="none"/>
+</g></symbol>
+<symbol id="ingredient-boudoir" viewBox="0 0 48 48">
+<g stroke="#926030" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+<rect x="10" y="5" width="13" height="37" rx="6.5" transform="rotate(-20 16.5 23.5)" fill="#c8904e"/>
+<rect x="23" y="5" width="14" height="38" rx="7" transform="rotate(18 30 24)" fill="#e9bc78"/>
+<path d="m31 10-8 26" stroke="#f7db9e" stroke-width="2.5"/>
+<path d="m13 11 7 24" stroke="#e4b678" stroke-width="2"/>
+</g><g fill="#fff0c9"><circle cx="31" cy="15" r="1"/><circle cx="26" cy="21" r="1"/><circle cx="30" cy="27" r=".9"/><circle cx="25" cy="34" r="1"/><circle cx="12" cy="17" r=".9"/><circle cx="18" cy="28" r="1"/></g>
+</symbol>
+<symbol id="ingredient-cafe" viewBox="0 0 48 48">
+<g stroke="#56321f" stroke-width="1.6" stroke-linecap="round">
+<ellipse cx="17" cy="20" rx="10" ry="14" transform="rotate(32 17 20)" fill="#c48a55"/>
+<path d="M23 8c-14 6-1 13-13 23" fill="none"/>
+<ellipse cx="31" cy="31" rx="10" ry="14" transform="rotate(48 31 31)" fill="#a9693f"/>
+<path d="M40 22c-13 0-4 13-19 18" fill="none"/>
+<path d="M15 10c-3 2-5 6-5 9M31 20l-4 2" fill="none" stroke="#e0b985"/>
+</g></symbol>
+<symbol id="ingredient-cacao" viewBox="0 0 48 48">
+<g stroke="#704024" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M12 11c4-7 13-8 18-5-3 6-10 8-18 5Z" fill="#a4ae6b"/>
+<path d="m18 7-4 9" fill="none"/>
+<path d="M14 13c-17 14-7 28 10 29 13-10 10-26-10-29Z" fill="#cd9355"/>
+<path d="M14 13c-5 12-1 22 10 29M14 13c7 5 10 14 10 29M14 13c-11 9-5 24 10 29" fill="none" stroke="#f0c486"/>
+<ellipse cx="37" cy="35" rx="6" ry="4" transform="rotate(-25 37 35)" fill="#7e4b31"/>
+<path d="m33 37 7-4" fill="none" stroke="#c49268"/>
+</g></symbol>
 </defs></svg>
 <a class="skip" href="#ingredients">Aller au contenu</a>
 <header class="header">
@@ -50,10 +83,10 @@
 <div class="scene-index" aria-hidden="true"><span id="step-number">01</span><i><b id="scroll-progress"></b></i><span>03</span></div>
 </div></section>
 <section class="inside" id="ingredients" aria-labelledby="inside-title"><div class="inside-copy"><h2 id="inside-title" data-reveal>ET DEDANS,<br>ÇA DONNE QUOI ?</h2><p class="inside-intro">DU MASCARPONE. PAS DE CHANTILLY.</p><p class="recipe-context">Dans Le Classique :</p><ol class="ingredient-list" data-ingredient-scroll>
-<li><div><h3>La crème au mascarpone</h3><p>Légère, aérée, onctueuse.</p></div></li>
-<li><div><h3>Les boudoirs</h3><p>Imbibés de café, fondants à la cuillère.</p></div></li>
-<li><div><h3>Le café</h3><p>Présent, tout en douceur.</p></div></li>
-<li><div><h3>Le cacao</h3><p>Le voile final.</p></div></li>
+<li><span class="ingredient-illustration" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><use href="#ingredient-cream"/></svg></span><div><h3>La crème au mascarpone</h3><p>Légère, aérée, onctueuse.</p></div></li>
+<li><span class="ingredient-illustration" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><use href="#ingredient-boudoir"/></svg></span><div><h3>Les boudoirs</h3><p>Imbibés de café, fondants à la cuillère.</p></div></li>
+<li><span class="ingredient-illustration" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><use href="#ingredient-cafe"/></svg></span><div><h3>Le café</h3><p>Présent, tout en douceur.</p></div></li>
+<li><span class="ingredient-illustration" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><use href="#ingredient-cacao"/></svg></span><div><h3>Le cacao</h3><p>Le voile final.</p></div></li>
 </ol></div><div class="inside-art inside-photo"><div class="photo-slot portrait" data-photo-slot="canette-main" role="img" aria-label="Photo à fournir : La vraie canette en main, avec son étiquette."><span class="slot-label">PHOTO À FOURNIR</span><p>La vraie canette en main, avec son étiquette.</p></div></div></section>
 <section class="craft section grain" id="histoire" aria-labelledby="story-title"><div class="craft-heading"><h2 id="story-title" data-reveal>MON TIRAMISU<br>PRÉFÉRÉ N’AVAIT<br>PAS D’ÉTIQUETTE.</h2><div class="craft-story"><p>C’était celui que je préparais avec ma Nona, depuis tout petit. Un goût que je cherchais souvent ailleurs, sans vraiment le retrouver.</p><p>Alors j’ai décidé de partager le nôtre.</p><p>Aujourd’hui, je prépare mes tiramisus à la main, en province de Liège. Et cette fois, ils ont une étiquette.</p><p class="story-signature">Timoty</p></div></div><div class="craft-cards">
 <figure class="craft-card" data-tilt="3"><figcaption><span>01</span>La crème prend forme.</figcaption><div class="craft-image"><img src="assets/da/atelier-creme.webp" alt="Préparation de la crème au batteur à l'atelier" width="1536" height="1024" loading="lazy" decoding="async"></div></figure>
@@ -74,8 +107,8 @@
 <section class="home-map" id="ou-nous-trouver" aria-labelledby="map-title"><h2 id="map-title">Où nous trouver</h2><div class="map-panel"><div class="dealer-layout"><aside class="dealer-sidebar" aria-labelledby="dealer-list-title"><div class="dealer-list-heading"><h3 id="dealer-list-title">Les commerces</h3><p>6 adresses fictives · démonstration</p></div><div class="dealer-list" id="dealer-list" data-native-scroll tabindex="0" aria-label="Liste défilante des commerces fictifs"></div></aside><div class="map-frame" id="map-frame"><div class="map-badge">6 commerces fictifs</div><div class="map-tools"><button id="reset-map" type="button" aria-label="Recentrer sur Liège" title="Recentrer sur Liège" hidden>⌖</button><button id="expand-map" type="button" aria-label="Agrandir la carte" aria-pressed="false" title="Agrandir la carte" hidden>⛶</button></div><div id="dealer-map" aria-label="Carte Mapbox et OpenStreetMap de Liège et ses alentours"><p class="map-loading">La carte arrive…</p></div></div></div><p class="map-notice" id="map-notice" role="status">Adresses et commerces fictifs : ces exemples ne sont pas des points de vente Tiratiti.</p><a class="external-map" href="https://www.openstreetmap.org/#map=12/50.6392/5.5762" target="_blank" rel="noopener">Ouvrir dans OpenStreetMap</a></div></section>
 <section class="professional section" aria-label="Tiratiti pour les professionnels et vos événements"><article id="revendeurs"><p class="eyebrow">DEVENIR REVENDEUR</p><h2>TIRATITI DANS<br>VOTRE FRIGO.</h2><p>Un tiramisu artisanal, préparé en province de Liège, dans une canette qui se remarque. Vous souhaitez le proposer à vos clients ? Parlons-en.</p><a class="pill" href="revendeurs.html#contact">Devenir revendeur</a></article><article id="evenements"><p class="eyebrow">POUR VOS ÉVÉNEMENTS</p><h2>ON S’OCCUPE<br>DU DESSERT ?</h2><p>Un anniversaire, un événement d’entreprise ou une grande tablée ? Parlez-nous de la date, du lieu et du nombre de personnes. On prépare la suite ensemble.</p><a class="pill" href="mailto:contact@tiratiti.be?subject=Tiratiti%20pour%20un%20%C3%A9v%C3%A9nement">Parlons de votre événement</a></article></section>
 </main>
-<footer><div class="footer-main"><a class="footer-logo" href="#accueil" aria-label="Tiratiti, accueil"><img src="assets/logo-tiratiti.svg" alt="Tiratiti" width="529" height="162"></a><nav aria-label="Navigation de pied de page"><a href="#histoire">L'histoire</a><a href="#parfums">Les goûts</a><a href="#ou-nous-trouver">Où nous trouver</a><a href="#le-pot">La canette</a><a href="revendeurs.html#contact">Devenir revendeur</a><a href="#evenements">Pour vos événements</a></nav><div class="footer-signoff"><p>PRÉPARÉ À LA MAIN.<br>SERVI EN CANETTE.</p><a href="#accueil" aria-label="Revenir en haut de page">Haut de page</a></div></div><div class="footer-bottom"><span>2026 © TIRATITI</span><span>TIRAMISU ARTISANAL · PROVINCE DE LIÈGE</span><a href="#accueil">ENCORE UNE CUILLÈRE ?</a></div></footer>
+<footer><div class="footer-main"><a class="footer-logo" href="#accueil" aria-label="Tiratiti, accueil"><img src="assets/logo-full-white.png" alt="Tiratiti — homemade tiramisu" width="686" height="571"></a><nav aria-label="Navigation de pied de page"><a href="#histoire">L'histoire</a><a href="#parfums">Les goûts</a><a href="#ou-nous-trouver">Où nous trouver</a><a href="#le-pot">La canette</a><a href="revendeurs.html#contact">Devenir revendeur</a><a href="#evenements">Pour vos événements</a></nav><div class="footer-signoff"><p>PRÉPARÉ À LA MAIN.<br>SERVI EN CANETTE.</p><a href="#accueil" aria-label="Revenir en haut de page">Haut de page</a></div></div><div class="footer-bottom"><span>2026 © TIRATITI</span><span>TIRAMISU ARTISANAL · PROVINCE DE LIÈGE</span><a href="#accueil">ENCORE UNE CUILLÈRE ?</a></div></footer>
 <aside class="floating-actions" aria-label="Accès rapides"><a href="#parfums" aria-label="Découvrir les goûts"><svg class="icon" aria-hidden="true"><use href="#icon-pot"/></svg></a><a href="#ou-nous-trouver" aria-label="Trouver nos revendeurs"><svg class="icon" aria-hidden="true"><use href="#icon-location"/></svg></a></aside>
 <dialog id="flavor-dialog" aria-labelledby="dialog-title"><button class="dialog-close" aria-label="Fermer la fiche" autofocus>✕</button><div class="dialog-visual" id="dialog-visual"></div><div class="dialog-copy"><p class="eyebrow">Tiratiti · les goûts</p><h2 id="dialog-title">Le Classique</h2><p id="dialog-description"></p><p class="drag-hint">Glisse sur la canette pour la faire tourner.</p><a class="pill" href="#ou-nous-trouver">Où nous trouver</a><button class="text-link dialog-close-text">Continuer la découverte</button></div></dialog>
-<script src="smooth-scroll.js?v=uniform-scroll-08" defer></script><script src="interface.js?v=ingredients-motion-08" defer></script><script src="site-interactions.js?v=clean-01" defer></script><script type="module" src="scene.js?v=restore-model-08"></script>
+<script src="smooth-scroll.js?v=uniform-scroll-08" defer></script><script src="interface.js?v=section-cover-08" defer></script><script src="site-interactions.js?v=clean-01" defer></script><script type="module" src="scene.js?v=restore-model-08"></script>
 </body></html>

@@ -240,3 +240,27 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
  .header .wordmark img,.dealer-header .dealer-logo img{max-height:74px}
  .opening{padding-top:124px}
 }
+
+/* Hold the completed 3D scene behind the incoming ingredients panel. */
+@media(prefers-reduced-motion:no-preference){
+ .journey{height:530svh;z-index:0}
+ .journey + .inside{position:relative;z-index:1;margin-top:-100svh}
+}
+@media(max-width:760px) and (prefers-reduced-motion:no-preference){
+ .journey{height:470svh}
+}
+
+/* Small ingredient drawings follow the same moving list as their captions. */
+.ingredient-illustration{display:grid;place-items:center;width:62px;height:62px;flex:0 0 62px;border:1px solid #f0efee80;border-radius:50%;background:#f0efee08}
+.ingredient-illustration svg{display:block;width:44px;height:44px}
+.ingredient-list li>div{min-width:0}
+@media(max-width:760px){
+ .ingredient-list li:nth-child(n){gap:12px}
+ .ingredient-illustration{width:52px;height:52px;flex-basis:52px}
+.ingredient-illustration svg{width:38px;height:38px}
+}
+
+/* Complete white signature in both footers. */
+.footer-logo,.dealer-footer .footer-brand{display:block;align-self:start;width:180px;max-width:100%}
+.footer-logo img,.dealer-footer .footer-brand img{display:block;width:100%;height:auto;object-fit:contain}
+@media(max-width:760px){.footer-logo,.dealer-footer .footer-brand{width:150px}}

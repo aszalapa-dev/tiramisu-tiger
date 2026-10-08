@@ -2,6 +2,7 @@ const journey=document.querySelector('.journey');
 const scene=document.querySelector('.scene');
 const stream=document.querySelector('.story-stream');
 const stage=document.querySelector('#product-stage');
+const ingredients=document.querySelector('#ingredients');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)');
 const progressBar=document.querySelector('#scroll-progress');
 const stepNumber=document.querySelector('#step-number');
@@ -48,7 +49,10 @@ movingElements.forEach(el=>motionObserver.observe(el));
 function measure(){
   height=innerHeight;
   start=journey.getBoundingClientRect().top+scrollY;
-  span=Math.max(1,journey.offsetHeight-height);
+  // The final viewport only holds the scene while the next section covers it.
+  // Exclude that overlap so the existing spin, text and lid timing stay intact.
+  const cover=ingredients?Math.max(0,-parseFloat(getComputedStyle(ingredients).marginTop)||0):0;
+  span=Math.max(1,journey.offsetHeight-height-cover);
   const streamTop=stream.getBoundingClientRect().top;
   for(const block of heroBlocks)block.offset=block.el.getBoundingClientRect().top-streamTop;
   measureDirty=false;heroDirty=true;
