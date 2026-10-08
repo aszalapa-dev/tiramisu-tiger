@@ -202,3 +202,24 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 
 /* Quiet typography instead of decorative symbols. */
 .footer-signoff a{font:600 12px/1.4 var(--body);text-decoration:underline;text-underline-offset:4px}
+
+/* Larger ingredients, arranged in a gentle staircase that travels with scroll. */
+.inside-intro{font-size:clamp(16px,1.45vw,21px);line-height:1.4}
+.recipe-context{font-size:clamp(16px,1.3vw,19px)}
+.ingredient-list{width:calc(100% - min(7.5vw,110px));margin:auto 0 0;padding-top:55px}
+.ingredient-list li:nth-child(n){margin-top:26px;margin-left:0}
+.ingredient-list li:nth-child(2){margin-left:18px}
+.ingredient-list li:nth-child(3){margin-left:36px}
+.ingredient-list li:nth-child(4){margin-left:54px}
+.ingredient-list h3{font-size:clamp(23px,2.1vw,32px);line-height:1.15;margin-bottom:8px}
+.ingredient-list p{font-size:clamp(17px,1.45vw,21px);line-height:1.45}
+@media(max-width:760px){
+ .ingredient-list{width:calc(100% - 20px);padding-top:35px}
+ .ingredient-list li:nth-child(n){margin-top:24px}
+ .ingredient-list li:nth-child(2){margin-left:8px}
+ .ingredient-list li:nth-child(3){margin-left:16px}
+ .ingredient-list li:nth-child(4){margin-left:24px}
+ .ingredient-list h3{font-size:23px}
+ .ingredient-list p{font-size:17px}
+}
+@media(prefers-reduced-motion:reduce){.ingredient-list{transform:none!important}}
