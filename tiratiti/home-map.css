@@ -2,20 +2,20 @@
 .home-map [hidden]{display:none!important}
 .home-map .map-frame{position:relative;isolation:isolate;border-top:4px solid var(--chocolate);border-radius:8px;overflow:hidden;background:#f6f5f2;box-shadow:0 12px 35px #2b16110c}
 .home-map #dealer-map{height:460px;width:100%;z-index:0;background:#f6f5f2}
-.home-map .leaflet-tile-pane{filter:saturate(.55) brightness(1.06)}
 .home-map .map-badge{position:absolute;top:16px;left:16px;z-index:500;display:flex;align-items:center;gap:9px;padding:12px 17px;border-radius:30px;background:white;box-shadow:0 3px 15px #2b16111a;font-size:13px;font-weight:600;pointer-events:none;max-width:calc(100% - 88px)}
 .home-map .map-badge span{font-size:22px;line-height:1}
-.home-map .map-tools{position:absolute;right:12px;top:112px;z-index:500;display:grid;gap:8px}
+.home-map .map-tools{position:absolute;right:12px;top:148px;z-index:500;display:grid;gap:8px}
 .home-map .map-tools button{width:44px;height:44px;display:grid;place-items:center;background:white;color:var(--chocolate);border:1px solid #2b161122;border-radius:5px;box-shadow:0 2px 8px #2b161114;font:26px/1 Arial;cursor:pointer}
-.home-map .leaflet-top.leaflet-right .leaflet-control{margin:12px}
-.home-map .leaflet-bar{border:1px solid #2b161122;border-radius:5px;overflow:hidden}
-.home-map .leaflet-bar a{background:white;color:var(--chocolate);width:42px;height:42px;line-height:42px}
-.home-map .leaflet-control-attribution{font-size:10px;background:#fffe;color:#222;white-space:normal}
-.home-map .leaflet-control-attribution a{color:#234966}
 .home-map .map-notice{font-size:13px;line-height:1.6;padding-top:14px}
 .home-map .external-map{display:inline-block;font-size:12px;text-decoration:underline;margin-top:6px}
 .home-map .map-loading{padding:35px;line-height:1.6}
 .home-map .map-frame.is-expanded{position:fixed;inset:0;z-index:10000;border:0;border-radius:0}
 .home-map .map-frame.is-expanded #dealer-map{height:100dvh}
 .home-map :focus-visible{outline:3px solid var(--brick);outline-offset:3px}
-@media(max-width:760px){.home-map{padding:24px 5%}.home-map #dealer-map{height:390px}.home-map .map-badge{top:12px;left:10px;padding:10px 12px;font-size:11px;line-height:1.35}.home-map .leaflet-control-attribution{max-width:calc(90vw - 10px)}}
+@media(max-width:760px){.home-map{padding:24px 5%}.home-map #dealer-map{height:390px}.home-map .map-badge{top:12px;left:10px;padding:10px 12px;font-size:11px;line-height:1.35}.home-map .mapboxgl-ctrl-attrib{max-width:calc(90vw - 45px)}}
+.home-map .mapboxgl-ctrl-top-right .mapboxgl-ctrl{margin:12px}
+.home-map .mapboxgl-ctrl-group{border:1px solid #2b161122;border-radius:5px;box-shadow:0 2px 8px #2b161114}
+.home-map .mapboxgl-ctrl-group button{width:42px;height:42px}
+.home-map .mapboxgl-ctrl-attrib{font:11px/20px Arial,sans-serif;color:#222}
+.home-map .mapboxgl-ctrl-attrib a{color:#234966}
+.home-map .mapboxgl-canvas:focus-visible{outline-offset:-3px}

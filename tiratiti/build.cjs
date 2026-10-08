@@ -30,3 +30,17 @@ for (const file of files) {
   fs.copyFileSync(path.join(root, file), destination);
 }
 console.log(`Tiratiti : ${files.length} fichiers préparés dans dist (${(totalBytes / 1000000).toFixed(2)} Mo).`);
+
+// Mapbox public browser token is configured in Vercel, never committed.
+const localEnv = path.join(root, '.env.local');
+const localToken = fs.existsSync(localEnv)
+  ? fs.readFileSync(localEnv, 'utf8').match(/^MAPBOX_PUBLIC_TOKEN=(.+)$/m)?.[1].trim()
+  : '';
+const mapboxToken = (process.env.MAPBOX_PUBLIC_TOKEN || localToken || '').trim();
+if (mapboxToken && !mapboxToken.startsWith('pk.')) {
+  throw new Error('MAPBOX_PUBLIC_TOKEN doit être un jeton public pk.');
+}
+const mapboxConfig = `window.TIRATITI_MAPBOX_TOKEN = ${JSON.stringify(mapboxToken)};\n`;
+fs.writeFileSync(path.join(output, 'mapbox-config.js'), mapboxConfig);
+fs.writeFileSync(path.join(root, 'mapbox-config.js'), mapboxConfig);
+if (!mapboxToken) console.warn('MAPBOX_PUBLIC_TOKEN absent : lien OpenStreetMap utilisé à la place de la carte.');
