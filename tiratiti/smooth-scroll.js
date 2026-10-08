@@ -29,7 +29,8 @@
     else frame = requestAnimationFrame(tick);
   }
   addEventListener('wheel', event => {
-    if (event.defaultPrevented || !event.cancelable || event.ctrlKey || event.metaKey || event.shiftKey
+    if (!event.cancelable) return;
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey
       || Math.abs(event.deltaX) > Math.abs(event.deltaY) || !event.deltaY || locked()) { stop(); return; }
     // Keep the same page inertia over the map; its wheel zoom is disabled.
     // Fields, dialogs and independently scrolling panels retain native control.
@@ -47,7 +48,9 @@
     event.preventDefault();
     root.classList.add('smooth-scrolling');
     if (!frame) frame = requestAnimationFrame(tick);
-  }, { passive: false });
+  // Capture before map controls stop wheel propagation. The same controller
+  // handles the map, the professional section and the footer.
+  }, { passive: false, capture: true });
   // Touch momentum, keyboard, anchors and scrollbar dragging keep native control.
   addEventListener('touchstart', stop, { passive: true });
   addEventListener('pointerdown', stop, { passive: true });
