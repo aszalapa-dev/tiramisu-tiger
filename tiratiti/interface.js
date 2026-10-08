@@ -81,7 +81,7 @@ function paintSections(){
   // directly so scrolling back restores its size on the same short interval.
   const coverProgress=coverSpan&&!reduce.matches?clamp((scrollY-start-span)/coverSpan):0;
   const exit=ease(clamp((coverProgress-.2)/.32));
-  stage.style.setProperty('--stage-exit-scale',(1-.28*exit).toFixed(4));
+  stage.style.setProperty('--stage-exit-scale',(1-.20*exit).toFixed(4));
   for(const el of pendingReveals)el.classList.add('is-visible');
   pendingReveals.clear();
   // Batch DOM reads before transforms. No perpetual decorative animation.
