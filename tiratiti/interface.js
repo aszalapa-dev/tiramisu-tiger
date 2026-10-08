@@ -8,7 +8,7 @@ const progressBar=document.querySelector('#scroll-progress');
 const stepNumber=document.querySelector('#step-number');
 const clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
 const ease=n=>n*n*(3-2*n);
-let progress=0,target=0,span=1,start=0,height=innerHeight,frame=0,lastTime=0;
+let progress=0,target=0,span=1,coverSpan=0,start=0,height=innerHeight,frame=0,lastTime=0;
 let userPaused=false,measureDirty=true,pageDirty=true,heroDirty=true;
 document.documentElement.classList.add('js');
 
@@ -51,8 +51,8 @@ function measure(){
   start=journey.getBoundingClientRect().top+scrollY;
   // The final viewport only holds the scene while the next section covers it.
   // Exclude that overlap so the existing spin, text and lid timing stay intact.
-  const cover=ingredients?Math.max(0,-parseFloat(getComputedStyle(ingredients).marginTop)||0):0;
-  span=Math.max(1,journey.offsetHeight-height-cover);
+  coverSpan=ingredients?Math.max(0,-parseFloat(getComputedStyle(ingredients).marginTop)||0):0;
+  span=Math.max(1,journey.offsetHeight-height-coverSpan);
   const streamTop=stream.getBoundingClientRect().top;
   for(const block of heroBlocks)block.offset=block.el.getBoundingClientRect().top-streamTop;
   measureDirty=false;heroDirty=true;
@@ -77,6 +77,11 @@ function paintHero(){
 }
 function paintSections(){
   if(userPaused&&!reduce.matches)return;
+  // Shrink only as the next panel covers the finished can. Follow the page
+  // directly so scrolling back restores its size on the same short interval.
+  const coverProgress=coverSpan&&!reduce.matches?clamp((scrollY-start-span)/coverSpan):0;
+  const exit=ease(clamp((coverProgress-.2)/.32));
+  stage.style.setProperty('--stage-exit-scale',(1-.72*exit).toFixed(4));
   for(const el of pendingReveals)el.classList.add('is-visible');
   pendingReveals.clear();
   // Batch DOM reads before transforms. No perpetual decorative animation.

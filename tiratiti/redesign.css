@@ -242,6 +242,7 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 }
 
 /* Hold the completed 3D scene behind the incoming ingredients panel. */
+.product-stage{transform:translate(-50%,-50%) scale(var(--stage-exit-scale,1));transform-origin:50% 58%}
 @media(prefers-reduced-motion:no-preference){
  .journey{height:530svh;z-index:0}
  .journey + .inside{position:relative;z-index:1;margin-top:-100svh}
