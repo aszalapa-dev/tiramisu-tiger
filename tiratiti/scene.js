@@ -27,11 +27,11 @@ function loadModel(flavor){
         for(const texture of [mat.map,mat.normalMap,mat.roughnessMap])if(texture)texture.anisotropy=8;
         if(!mat.map&&/Speculoos imbibe/.test(mat.name))mat.color.setHex(0xc17d3d);
         if(!mat.map&&/Mascarpone/.test(mat.name))mat.color.setHex(0xf0e8d6);
-        if(/PET transparent/.test(mat.name)){
-          // Thin PET refracts the food behind it and reflects the studio cards.
+        if(/^PET\b/i.test(mat.name)){
+          // Both PET material names use a thin, clear shell with restrained reflections.
           mat.transmission=1;mat.transparent=false;mat.opacity=1;mat.depthWrite=true;mat.side=THREE.FrontSide;
-          mat.ior=1.47;mat.thickness=.00045;mat.attenuationDistance=Infinity;
-          mat.envMapIntensity=1;mat.roughness=.045;mat.clearcoat=.15;mat.clearcoatRoughness=.06;
+          mat.ior=1.47;mat.thickness=0;mat.attenuationDistance=Infinity;
+          mat.envMapIntensity=.12;mat.roughness=.008;mat.clearcoat=0;mat.clearcoatRoughness=0;
         }
         if(/Etiquette|Papier interieur|Stickers PDF|Papier stickers PDF/.test(mat.name)){mat.alphaTest=.2;mat.depthWrite=true;}
       }
@@ -61,7 +61,7 @@ function studioEnvironment(renderer){
 }
 function makeView(canvas,host,canRender=()=>true,verticalPadding=0){
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<761?1:1.35));
+  renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<761?1.5:2));
   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;
   const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(26,1,.1,100);
   const viewDirection=new THREE.Vector3(0,2.35,7.6).normalize();
@@ -75,7 +75,7 @@ function makeView(canvas,host,canRender=()=>true,verticalPadding=0){
   let disposed=false,width=0,height=0,pixelRatio=0;
   const render=()=>{if(!disposed&&!document.hidden&&canRender())renderer.render(scene,camera);};
   const resize=()=>{
-    const w=host.clientWidth,h=host.clientHeight,dpr=Math.min(devicePixelRatio,innerWidth<761?1:1.35);
+    const w=host.clientWidth,h=host.clientHeight,dpr=Math.min(devicePixelRatio,innerWidth<761?1.5:2);
     if(!w||!h||(w===width&&h===height&&dpr===pixelRatio))return;
     width=w;height=h;pixelRatio=dpr;
     // Give the raised tab room above the original canvas. Expanding the
