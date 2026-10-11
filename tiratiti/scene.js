@@ -11,7 +11,7 @@ const loader=new GLTFLoader();
 const draco=new DRACOLoader().setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
 loader.setDRACOLoader(draco);
 function loadModel(flavor){
-  const modelURL=`assets/${flavor}.glb${flavor==='classique'?'?v=stickers-pdf-2':''}`;
+  const modelURL=`assets/${flavor}.glb${flavor==='classique'?'?v=cacao-plus-11':''}`;
   if(!cache.has(flavor))cache.set(flavor,loader.loadAsync(modelURL).then(gltf=>{
     let model=gltf.scene;
     for(const s of gltf.scenes){const pot=s.children.find(n=>n.name.includes('TIRATITI')&&n.name.includes('250ML'));if(pot){model=pot;break;}}
@@ -189,7 +189,7 @@ addEventListener('tiratiti-flavor',async e=>{
     return;
   }
   document.querySelector('.drag-hint').hidden=false;
-  host.replaceChildren();const poster=document.createElement('img');poster.src=`assets/${flavor}.png`;poster.alt=`Pot Tiratiti ${flavor==='classique'?'Le Classique':'Le Spéculoos'}`;host.append(poster);
+  host.replaceChildren();const poster=document.createElement('img');poster.src=`assets/${flavor}.png${flavor==='classique'?'?v=cacao-plus-11':''}`;poster.alt=`Pot Tiratiti ${flavor==='classique'?'Le Classique':'Le Spéculoos'}`;host.append(poster);
   document.querySelector('.drag-hint').textContent='Chargement de la vue à 360°…';
   try{
     const model=(await loadModel(flavor)).clone(true);if(token!==modalToken)return;

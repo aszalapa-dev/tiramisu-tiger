@@ -42,8 +42,9 @@ Le paiement reste désactivé et aucun service externe de commande n'est configu
 - `interface.js` : défilement, apparitions et fiches des parfums.
 - `scene.js` : rendu, lumière et poses des modèles 3D.
 - `blender-opening.js` : lecture réversible du clip Blender, synchronisée au scroll ; conservation des matériaux et du reste du modèle.
-- `assets/classique.glb` : nouveau modèle fourni dans `Tiratiti_Classique_stickers_PDF.blend`, avec les six stickers du PDF, les nouveaux boudoirs et la crème. Les matières procédurales sont converties en textures embarquées pour le navigateur.
-- `assets/ouverture-classique.glb` : dessus articulé du même fichier Blender, avec rebord fixe et opercule déformable. Le clip `Tiratiti_Ouverture` dure 3,2 secondes. La copie Blender préparée pour l’export et ses rapports sont conservés dans `../exports/stickers-pdf/`.
+- `assets/classique.glb` : modèle fourni dans `Tiratiti_Classique_cacao_etendu_plus.blend` (11 octobre 2026), avec son cacao étendu et son plastique neutre. Le nouveau shader de crème/cacao est converti en textures embarquées ; les nouveaux grains sont conservés. Les textures déjà validées des boudoirs et du métal sont réutilisées sur leurs géométries inchangées. Source SHA-256 : `88dfe2b2315a323a13caa5f6371f396f87fb6f48e6fc8413f5a97bfb4a3e3f61`.
+- `assets/ouverture-classique.glb` : dessus articulé conservé, avec rebord fixe et opercule déformable. Le clip `Tiratiti_Ouverture` dure 3,2 secondes. Les douze pièces de fermeture du nouveau corps ont été comparées à l’ancien export : transformations, sommets et dimensions compatibles. Les animations du site restent inchangées.
+- `assets/classique.png` : nouveau rendu transparent du fichier fourni pour le chargement et le secours sans WebGL. Export GLB réimporté et rendu dans Blender ; dimensions vérifiées : environ 65,22 × 65,22 × 92 mm. Scripts et rapports locaux dans `../tmp/cacao-plus/`. Vérification navigateur non effectuée le 11 octobre : l’outil d’aperçu ne démarrait pas.
 - `site-interactions.js` et `.css` : sélection locale et menu mobile.
 - `assets/logo-tiratiti.svg` et `assets/logo-tiratiti-ink.svg` : tracé original du logo, en crème et en chocolat.
 - `assets/special.webp` : photo détourée du Spécial, conservée telle qu'elle était dans le projet précédent.
