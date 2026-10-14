@@ -13,7 +13,7 @@ let userPaused=false,measureDirty=true,pageDirty=true,heroDirty=true;
 document.documentElement.classList.add('js');
 
 // One timeline drives the product, its backdrop and the text behind it.
-const blocks=[...document.querySelectorAll('[data-reveal]')].map(el=>{
+const blocks=[...stream.querySelectorAll('[data-reveal]')].map(el=>{
   el.setAttribute('aria-label',el.innerText.replace(/\n/g,' '));
   const nodes=[],walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
   while(walker.nextNode())nodes.push(walker.currentNode);
