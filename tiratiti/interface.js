@@ -85,7 +85,7 @@ function paintSections(){
   for(const el of pendingReveals)el.classList.add('is-visible');
   pendingReveals.clear();
   // Batch DOM reads before transforms. No perpetual decorative animation.
-  const positions=[...activeElements].map(el=>({el,r:el.getBoundingClientRect()}));
+  const positions=[...activeElements].map(el=>({el,r:(el.classList.contains('craft-card')?el.parentElement:el).getBoundingClientRect()}));
   for(const {el,r} of positions){
     if(el.hasAttribute('data-ingredient-scroll')){
       // Stagger each row along the same reversible scroll timeline.
@@ -101,8 +101,11 @@ function paintSections(){
       continue;
     }
     if(el.classList.contains('craft-card')){
-      const reveal=reduce.matches?1:ease(clamp((height*.94-r.top)/(height*.48)));
-      el.style.setProperty('--photo-reveal',(reveal*140-35).toFixed(2)+'%');
+      const index=[...el.parentElement.children].indexOf(el);
+      const progress=(height*.92-r.top)/(height*.65);
+      const reveal=reduce.matches?1:ease(clamp((progress-index*.25)/.32));
+      el.style.setProperty('--photo-opacity',reveal.toFixed(4));
+      el.style.setProperty('--photo-offset',((1-reveal)*24).toFixed(2)+'px');
     }
     if(reduce.matches){el.style.removeProperty('transform');continue;}
     const p=clamp((height/2-r.top-r.height/2)/height,-1,1);

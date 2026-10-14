@@ -266,6 +266,6 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 .footer-logo img,.dealer-footer .footer-brand img{display:block;width:100%;height:auto;object-fit:contain}
 @media(max-width:760px){.footer-logo,.dealer-footer .footer-brand{width:150px}}
 
-/* Soft top-to-bottom photo reveal, driven by the existing scroll timeline. */
-.craft-image img{-webkit-mask-image:linear-gradient(to bottom,#000 var(--photo-reveal,105%),transparent calc(var(--photo-reveal,105%) + 30%));mask-image:linear-gradient(to bottom,#000 var(--photo-reveal,105%),transparent calc(var(--photo-reveal,105%) + 30%))}
-@media(prefers-reduced-motion:reduce){.craft-image img{-webkit-mask-image:none;mask-image:none}}
+/* The three workshop photos enter in order along one scroll timeline. */
+.craft-image{opacity:var(--photo-opacity,1);translate:0 var(--photo-offset,0px)}
+@media(prefers-reduced-motion:reduce){.craft-image{opacity:1;translate:none}}
