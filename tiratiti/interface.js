@@ -66,10 +66,10 @@ function paintHero(){
   stepNumber.textContent=String(progress<.22?1:progress<.72?2:3).padStart(2,'0');
   progressBar.style.transform='scaleX('+progress+')';
   for(const block of heroBlocks){
-    const reveal=(height*.91-(block.offset-y))/(height*.56);
-    block.words.forEach((char,i)=>{
-      const f=reduce.matches?1:clamp((reveal-i/Math.max(1,block.words.length-1)*.3)/.5);
-      char.style.opacity=String(.13+.87*f);
+    const reveal=clamp((height*.96-(block.offset-y))/(height*.35));
+    block.words.forEach((word,i)=>{
+      const f=reduce.matches?1:clamp(reveal*block.words.length-i);
+      word.style.opacity=String(.2+.8*f);
     });
   }
   dispatchEvent(new CustomEvent('tiratiti-scroll',{detail:{progress,paused:userPaused||reduce.matches,reduced:reduce.matches}}));
