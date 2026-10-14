@@ -252,7 +252,7 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 }
 
 /* Small ingredient drawings follow the same moving list as their captions. */
-.ingredient-illustration{display:grid;place-items:center;width:62px;height:62px;flex:0 0 62px;border:1px solid #f0efee80;border-radius:50%;background:#f0efee08}
+.ingredient-illustration{display:grid;place-items:center;width:62px;height:62px;flex:0 0 62px;border:1px solid #f2e8d547;border-radius:50%;background:transparent;color:#f2e8d5}
 .ingredient-illustration svg{display:block;width:44px;height:44px}
 .ingredient-list li>div{min-width:0}
 @media(max-width:760px){
