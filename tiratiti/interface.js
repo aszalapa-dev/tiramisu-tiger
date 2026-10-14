@@ -85,16 +85,22 @@ function paintSections(){
   for(const el of pendingReveals)el.classList.add('is-visible');
   pendingReveals.clear();
   // Batch DOM reads before transforms. No perpetual decorative animation.
-  const positions=[...activeElements].map(el=>({el,r:(el.hasAttribute('data-ingredient-scroll')?el.closest('.inside-copy'):el).getBoundingClientRect()}));
+  const positions=[...activeElements].map(el=>({el,r:el.getBoundingClientRect()}));
   for(const {el,r} of positions){
-    if(reduce.matches){el.style.removeProperty('transform');continue;}
     if(el.hasAttribute('data-ingredient-scroll')){
-      // Follow the page scroll in both directions, measuring the stationary parent.
-      const arrival=ease(clamp((height*.85-r.top)/(height*.95)));
-      const distance=innerWidth<761?20:Math.min(innerWidth*.075,110);
-      el.style.transform='translate3d('+((1-arrival)*distance).toFixed(2)+'px,0,0)';
+      // Stagger each row along the same reversible scroll timeline.
+      // Measure the stationary list so row transforms cannot feed back into it.
+      const progress=(height*.92-r.top)/(height*.65);
+      const distance=innerWidth<761?32:80;
+      [...el.children].forEach((row,index)=>{
+        if(reduce.matches){row.style.removeProperty('transform');row.style.removeProperty('opacity');return;}
+        const arrival=ease(clamp((progress-index*.16)/.55));
+        row.style.transform='translate3d('+((1-arrival)*distance).toFixed(2)+'px,'+((1-arrival)*12).toFixed(2)+'px,0)';
+        row.style.opacity=String(.2+.8*arrival);
+      });
       continue;
     }
+    if(reduce.matches){el.style.removeProperty('transform');continue;}
     const p=clamp((height/2-r.top-r.height/2)/height,-1,1);
     if(el.hasAttribute('data-tilt'))el.style.transform='translate3d(0,'+(p*15).toFixed(2)+'px,0) rotate('+(Number(el.dataset.tilt)*(1-p*.7)).toFixed(2)+'deg)';
     else if(el.classList.contains('full-cta-image'))el.style.transform='translate3d(0,'+(p*25).toFixed(2)+'px,0)';
