@@ -25,38 +25,24 @@
         }
         node.replaceWith(fragment);
       }
-      return { el, words, lines: [] };
+      return { el, words };
     });
-  let frame = 0, layoutDirty = true;
-  function measureLines() {
-    for (const block of headings) {
-      const lines = [];
-      for (const word of block.words) {
-        const top = word.getBoundingClientRect().top;
-        let line = lines.find(line => Math.abs(line.top - top) < 3);
-        if (!line) { line = { top, words: [] }; lines.push(line); }
-        line.words.push(word);
-      }
-      block.lines = lines.map(line => line.words);
-    }
-    layoutDirty = false;
-  }
+  let frame = 0;
   function paint() {
     frame = 0;
-    if (layoutDirty) measureLines();
     const height = innerHeight;
     const positions = headings.map(block => ({ ...block, top: block.el.getBoundingClientRect().top }));
-    for (const { lines, top } of positions) {
+    for (const { words, top } of positions) {
       const progress = clamp((height * .96 - top) / (height * .35));
-      for (const words of lines) words.forEach((word, i) => {
-        const amount = reduce.matches ? 1 : clamp((progress - i / Math.max(1, words.length - 1) * .7) / .3);
+      words.forEach((word, i) => {
+        const amount = reduce.matches ? 1 : clamp(progress * words.length - i);
         word.style.opacity = String(.2 + .8 * amount);
       });
     }
   }
   function schedule() { if (!frame) frame = requestAnimationFrame(paint); }
   addEventListener('scroll', schedule, { passive: true });
-  const remeasure = () => { layoutDirty = true; schedule(); };
+  const remeasure = schedule;
   addEventListener('resize', remeasure);
   addEventListener('load', remeasure);
   reduce.addEventListener('change', schedule);
