@@ -100,7 +100,7 @@ let progress=Number(stage.dataset.progress||0),visible=true,motionReduced=reduce
 let dialogView=null,modalAngle=0,dragging=false,lastX=0,modalToken=0,modalFrame=0;
 // Spin around the vertical axis and settle upright before opening.
 function turnAt(p){
-  const t=Math.max(0,Math.min(1,p/.82));
+  const t=Math.max(0,Math.min(1,p/.68));
   const eased=t*t*t*(10+t*(-15+6*t));
   const y=4*Math.PI*eased;
   const wobble=.14*Math.sin(Math.PI*t)**2;
@@ -113,10 +113,10 @@ function paintHero(force=false){
   lastHeroProgress=p;
   const pose=turnAt(p);hero.rig.rotation.set(pose.x,pose.y,pose.z,'ZXY');
   // Leave room for the lifted tab without moving the centre of the can.
-  const openingRoom=THREE.MathUtils.smoothstep(p,.74,.82);
+  const openingRoom=THREE.MathUtils.smoothstep(p,.62,.70);
   hero.rig.scale.setScalar(1-.14*openingRoom);
   if(heroLid){
-    heroLid.update(Math.max(0,Math.min(1,(p-.82)/.16)));
+    heroLid.update(Math.max(0,Math.min(1,(p-.70)/.26)));
   }
   hero.render();
 }
