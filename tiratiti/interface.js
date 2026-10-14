@@ -23,12 +23,12 @@ const blocks=[...stream.querySelectorAll('[data-reveal]')].map(el=>{
     for(const word of node.textContent.split(/(\s+)/)){
       if(!word.trim()){fragment.append(document.createTextNode(word));continue;}
       const group=document.createElement('span');group.className='reveal-word';group.setAttribute('aria-hidden','true');
-      for(const letter of word){const char=document.createElement('span');char.className='reveal-char';char.textContent=letter;char.style.setProperty('--char-delay',Math.min(count++*.011,.3)+'s');group.append(char);}
+      for(const letter of word){const char=document.createElement('span');char.className='reveal-char';char.textContent=letter;char.style.opacity='1';char.style.setProperty('--char-delay',Math.min(count++*.011,.3)+'s');group.append(char);}
       fragment.append(group);
     }
     node.replaceWith(fragment);
   }
-  return {el,chars:[...el.querySelectorAll('.reveal-char')],hero:stream.contains(el),offset:0};
+  return {el,words:[...el.querySelectorAll('.reveal-word')],hero:stream.contains(el),offset:0};
 });
 const heroBlocks=blocks.filter(b=>b.hero);
 const pendingReveals=new Set();
@@ -67,8 +67,8 @@ function paintHero(){
   progressBar.style.transform='scaleX('+progress+')';
   for(const block of heroBlocks){
     const reveal=(height*.91-(block.offset-y))/(height*.56);
-    block.chars.forEach((char,i)=>{
-      const f=reduce.matches?1:clamp((reveal-i/Math.max(1,block.chars.length-1)*.3)/.5);
+    block.words.forEach((char,i)=>{
+      const f=reduce.matches?1:clamp((reveal-i/Math.max(1,block.words.length-1)*.3)/.5);
       char.style.opacity=String(.13+.87*f);
     });
   }

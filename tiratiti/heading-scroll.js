@@ -9,7 +9,7 @@
       const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
       const nodes = [];
       while (walker.nextNode()) nodes.push(walker.currentNode);
-      const letters = [];
+      const words = [];
       for (const node of nodes) {
         const fragment = document.createDocumentFragment();
         for (const word of node.textContent.split(/(\s+)/)) {
@@ -18,28 +18,25 @@
           group.style.whiteSpace = 'nowrap';
           group.style.display = 'inline-block';
           group.setAttribute('aria-hidden', 'true');
-          for (const letter of word) {
-            const char = document.createElement('span');
-            char.textContent = letter;
-            letters.push(char);
-            group.append(char);
-          }
+          group.textContent = word;
+          group.className = 'heading-word';
+          words.push(group);
           fragment.append(group);
         }
         node.replaceWith(fragment);
       }
-      return { el, letters };
+      return { el, words };
     });
   let frame = 0;
   function paint() {
     frame = 0;
     const height = innerHeight;
     const positions = headings.map(block => ({ ...block, top: block.el.getBoundingClientRect().top }));
-    for (const { letters, top } of positions) {
+    for (const { words, top } of positions) {
       const progress = clamp((height * .9 - top) / (height * .5));
-      letters.forEach((char, i) => {
-        const amount = reduce.matches ? 1 : clamp((progress - i / Math.max(1, letters.length - 1) * .7) / .3);
-        char.style.opacity = String(.2 + .8 * amount);
+      words.forEach((word, i) => {
+        const amount = reduce.matches ? 1 : clamp((progress - i / Math.max(1, words.length - 1) * .7) / .3);
+        word.style.opacity = String(.2 + .8 * amount);
       });
     }
   }
