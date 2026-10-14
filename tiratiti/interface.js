@@ -100,6 +100,10 @@ function paintSections(){
       });
       continue;
     }
+    if(el.classList.contains('craft-card')){
+      const reveal=reduce.matches?1:ease(clamp((height*.94-r.top)/(height*.48)));
+      el.style.setProperty('--photo-reveal',(reveal*140-35).toFixed(2)+'%');
+    }
     if(reduce.matches){el.style.removeProperty('transform');continue;}
     const p=clamp((height/2-r.top-r.height/2)/height,-1,1);
     if(el.hasAttribute('data-tilt'))el.style.transform='translate3d(0,'+(p*15).toFixed(2)+'px,0) rotate('+(Number(el.dataset.tilt)*(1-p*.7)).toFixed(2)+'deg)';
