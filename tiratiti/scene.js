@@ -23,7 +23,7 @@ function loadModel(flavor){
     wrap.scale.setScalar(2.4/size.y);
     model.traverse(obj=>{if(!obj.isMesh)return;
       for(const mat of Array.isArray(obj.material)?obj.material:[obj.material]){
-        mat.envMapIntensity=/Aluminium|Gravure|Sertissage/.test(mat.name)?1.05:.5;
+        mat.envMapIntensity=/Aluminium|Gravure|Sertissage/.test(mat.name)?1.05:.32;
         for(const texture of [mat.map,mat.normalMap,mat.roughnessMap])if(texture)texture.anisotropy=8;
         if(!mat.map&&/Speculoos imbibe/.test(mat.name))mat.color.setHex(0xc17d3d);
         if(!mat.map&&/Mascarpone/.test(mat.name))mat.color.setHex(0xf0e8d6);
@@ -49,11 +49,11 @@ function studioEnvironment(renderer){
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,height),material);
     mesh.position.set(...position);mesh.lookAt(0,0,0);studio.add(mesh);cards.push(mesh);
   };
-  card(3,5,[-3.8,2.8,4],4.5,0xfff3df);
+  card(2.2,5,[-4,2.8,3.5],5.2,0xfff3df);
   card(.55,4.8,[-1.8,1,4.5],10,0xffffff);
   card(3.5,2.5,[-.7,6,0],2.8,0xffffff);
   card(.85,4.5,[3.5,1,-2.3],3.2,0xffffff);
-  card(2,3,[4,0,4],.45,0xffecd6);
+  card(2,3,[4,0,4],.18,0xffecd6);
   const pmrem=new THREE.PMREMGenerator(renderer);
   const environment=pmrem.fromScene(studio,.025);
   for(const mesh of cards){mesh.geometry.dispose();mesh.material.dispose();}
@@ -62,15 +62,15 @@ function studioEnvironment(renderer){
 function makeView(canvas,host,canRender=()=>true,verticalPadding=0){
   const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<761?1.5:2));
-  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.96;
   const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(26,1,.1,100);
   const viewDirection=new THREE.Vector3(0,2.35,7.6).normalize();
   camera.position.copy(viewDirection).multiplyScalar(7.1);camera.lookAt(0,0,0);
   const env=studioEnvironment(renderer);scene.environment=env.texture;
-  scene.add(new THREE.AmbientLight(0xfff4e0,.08));
-  const key=new THREE.DirectionalLight(0xfff2df,2);key.position.set(-4.5,3.5,2.8);scene.add(key);
-  const fill=new THREE.DirectionalLight(0xfff5eb,.5);fill.position.set(4,1,3);scene.add(fill);
-  const rim=new THREE.DirectionalLight(0xffffff,.45);rim.position.set(3.5,2.5,-3);scene.add(rim);
+  scene.add(new THREE.AmbientLight(0xfff4e0,.04));
+  const key=new THREE.DirectionalLight(0xfff2df,3);key.position.set(-4.5,4,3);scene.add(key);
+  const fill=new THREE.DirectionalLight(0xfff5eb,.18);fill.position.set(4,1,3);scene.add(fill);
+  const rim=new THREE.DirectionalLight(0xffffff,.6);rim.position.set(3.5,2.5,-3);scene.add(rim);
   const rig=new THREE.Group();scene.add(rig);
   let disposed=false,width=0,height=0,pixelRatio=0;
   const render=()=>{if(!disposed&&!document.hidden&&canRender())renderer.render(scene,camera);};
