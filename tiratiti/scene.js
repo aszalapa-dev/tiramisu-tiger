@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { loadBlenderOpening, orientClosure } from './blender-opening.js?v=lid-up-26';
+import { loadBlenderOpening, orientClosure } from './blender-opening.js?v=opening-retry-16';
 
 const stage=document.querySelector('#product-stage');
 const canvas=document.querySelector('#pot');
@@ -133,14 +133,15 @@ const retryButton=document.querySelector('#retry-3d');
 const sceneStatus=document.querySelector('#scene-status');
 let heroLoading=false;
 async function loadHero(){
-  if(heroLoading||canvas.dataset.modelLoaded==='true')return;
+  if(heroLoading||(canvas.dataset.modelLoaded==='true'&&canvas.dataset.openingLoaded==='true'))return;
   heroLoading=true;retryButton.hidden=true;canvas.hidden=false;
   stage.setAttribute('aria-busy','true');sceneStatus.textContent='Chargement du pot en 3D.';
   window.TiratitiLoading?.stage('On prépare la canette et ses textures…');
   try{
-    hero=makeView(canvas,stage,()=>visible,.18);
-    // Clone only the objects: cached geometry and the closed product stay reusable.
-    const model=(await loadModel('classique')).clone(true);hero.rig.add(model);
+    if(!hero)hero=makeView(canvas,stage,()=>visible,.18);
+    // Reuse the displayed body when only the opening needs another attempt.
+    let model=hero.rig.children[0];
+    if(!model){model=(await loadModel('classique')).clone(true);hero.rig.add(model);}
     paintHero(true);
     stage.classList.add('loaded');canvas.dataset.modelLoaded='true';
     sceneStatus.textContent='Préparation de l’ouverture de la canette.';
@@ -148,15 +149,16 @@ async function loadHero(){
     try{
       // Normalise the original closed body first; the authored top inherits
       // precisely that transform. Product-dialog clones remain untouched.
-      heroLid=await loadBlenderOpening(model,loader);
+      if(!heroLid)heroLid=await loadBlenderOpening(model,loader);
       window.TiratitiLoading?.stage('Une dernière touche de lumière…');
       // Compile the replacement metal and skinning shaders before revealing it.
       if(hero.renderer.compileAsync)await hero.renderer.compileAsync(hero.scene,hero.camera);
-      canvas.dataset.openingLoaded='true';paintHero(true);
+      canvas.dataset.openingLoaded='true';retryButton.textContent='Relancer la 3D';paintHero(true);
       sceneStatus.textContent='Canette 3D prête. Faites défiler pour la découvrir et l’ouvrir.';
       window.TiratitiLoading?.finish();
     }catch(error){
       canvas.dataset.openingLoaded='false';
+      retryButton.textContent='Relancer l’ouverture';retryButton.hidden=false;
       console.warn('L’ouverture animée est indisponible, le pot reste fermé.',error);
       sceneStatus.textContent='La canette est prête. Son ouverture animée est momentanément indisponible.';
       window.TiratitiLoading?.finish('fallback');

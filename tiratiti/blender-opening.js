@@ -156,7 +156,11 @@ export function prepareBlenderOpening(model, gltf) {
 
 export async function loadBlenderOpening(model, loader, url = OPENING_ASSET_URL) {
   if (!assetCache.has(url)) {
-    assetCache.set(url, loader.loadAsync(url).catch(error => {
+    assetCache.set(url, loader.loadAsync(url).catch(async () => {
+      // Retry a transient download failure once, without reloading the body.
+      await new Promise(resolve => setTimeout(resolve, 700));
+      return loader.loadAsync(url);
+    }).catch(error => {
       assetCache.delete(url);
       throw error;
     }));
