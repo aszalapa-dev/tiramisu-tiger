@@ -1,6 +1,7 @@
 [
   "index.html",
   "redesign.css",
+  "button-type.css",
   "site-interactions.css",
   "interface.js",
   "heading-scroll.js",
