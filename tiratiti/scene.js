@@ -11,7 +11,7 @@ const loader=new GLTFLoader();
 const draco=new DRACOLoader().setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
 loader.setDRACOLoader(draco);
 function loadModel(flavor){
-  const modelURL=`assets/${flavor}.glb${flavor==='classique'?'?v=light-textures-11':''}`;
+  const modelURL=`assets/${flavor}.glb${flavor==='classique'?'?v=new-labels-19':''}`;
   if(!cache.has(flavor))cache.set(flavor,loader.loadAsync(modelURL).then(gltf=>{
     let model=gltf.scene;
     for(const s of gltf.scenes){const pot=s.children.find(n=>n.name.includes('TIRATITI')&&n.name.includes('250ML'));if(pot){model=pot;break;}}
@@ -33,7 +33,7 @@ function loadModel(flavor){
           mat.ior=1.47;mat.thickness=0;mat.attenuationDistance=Infinity;
           mat.envMapIntensity=.12;mat.roughness=.008;mat.clearcoat=0;mat.clearcoatRoughness=0;
         }
-        if(/Etiquette|Papier interieur|Stickers PDF|Papier stickers PDF/.test(mat.name)){mat.alphaTest=.2;mat.depthWrite=true;}
+        if(/Etiquette|Papier interieur|Stickers PDF|Papier stickers PDF|Design 1-1|Support 1-1/.test(mat.name)){mat.alphaTest=.2;mat.depthWrite=true;}
       }
     });
     return wrap;
