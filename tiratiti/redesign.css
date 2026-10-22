@@ -179,9 +179,9 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 .slot-mark{font-size:38px;font-weight:400}
 .inside-photo .photo-slot{min-height:100%;position:absolute;inset:0}
 .benefit-image{overflow:hidden}.benefit-image .photo-slot{background:#e2dfdc}
-.full-cta{display:grid;grid-template-columns:1.15fr 1fr;align-items:center;background:var(--brick);height:auto;min-height:620px;padding:65px 4%;gap:4%}
-.full-cta:after{content:none}
-.full-cta-copy{position:relative;inset:auto;grid-column:1;grid-row:1;z-index:1}
+.full-cta{display:flex;align-items:center;background:var(--brick);height:auto;min-height:clamp(620px,80svh,900px);padding:65px 4%}
+.full-cta:after{content:"";background:linear-gradient(90deg,rgba(43,22,17,.72),rgba(43,22,17,.3) 54%,rgba(43,22,17,.08));pointer-events:none}
+.full-cta-copy{position:relative;inset:auto;width:min(650px,60%);z-index:2}
 .full-cta h2{font-size:clamp(38px,6.3vw,100px)}
 .full-cta>.photo-slot{grid-column:2;grid-row:1;background:transparent;color:var(--ivory);height:auto;aspect-ratio:4/5}
 .card-art{overflow:hidden;position:relative}
@@ -191,7 +191,7 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 .dialog-visual .photo-slot{height:100%;background:transparent}
 .professional h2{font-size:clamp(32px,4.6vw,70px)}
 @media(max-width:760px){
- .full-cta{grid-template-columns:1fr;padding:58px 5%;gap:35px;min-height:0}
+ .full-cta{padding:58px 5%;min-height:660px}.full-cta-copy{width:100%}.full-cta:after{background:linear-gradient(90deg,rgba(43,22,17,.7),rgba(43,22,17,.28))}
  .full-cta h2{font-size:11.6vw}
  .full-cta>.photo-slot{grid-column:1;grid-row:2;aspect-ratio:4/3;min-height:220px}
  .professional h2{font-size:11vw}
@@ -277,8 +277,8 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 .packaging-benefits article:first-child .benefit-image img{object-fit:cover;transform:none;object-position:40% 50%}
 .packaging-benefits article:hover .benefit-image img{transform:scale(1.035)}
 .packaging-benefits article:last-child .benefit-image img{object-position:50% 50%}
-.moment-photo{grid-column:2;grid-row:1;aspect-ratio:4/5;overflow:hidden;border-radius:3px;min-width:0}
-.moment-photo img{width:100%;height:100%;object-fit:cover;object-position:58% 50%}
+.moment-photo{position:absolute;inset:0;z-index:0;width:100%;height:100%;margin:0;overflow:hidden}
+.moment-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:58% 50%}
 .flavor-card .card-art{background:#fff;padding:0}
 .card-art .halo{color:var(--chocolate);opacity:.12;z-index:2}
 .flavor-card .card-art .product-packshot{position:absolute;inset:0;margin:auto;width:100%;height:100%;object-fit:contain;transform:scale(1.27);mix-blend-mode:multiply}
@@ -287,5 +287,5 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 .flavor-card .card-art:hover .product-packshot-render{transform:scale(1.035)}
 .dialog-visual.has-product-photo{background:#fff;overflow:hidden}
 .dialog-visual .dialog-packshot{inset:0;width:100%;height:100%;object-fit:contain;transform:scale(1.2)}
-@media(max-width:760px){.moment-photo{grid-column:1;grid-row:2;aspect-ratio:4/3}}
+@media(max-width:760px){.moment-photo img{object-position:52% 50%}}
 @media(prefers-reduced-motion:reduce){.packaging-benefits article:hover .benefit-image img{transform:none}.flavor-card .card-art:hover .product-packshot{transform:scale(1.27)}.flavor-card .card-art:hover .product-packshot-render{transform:none}}
