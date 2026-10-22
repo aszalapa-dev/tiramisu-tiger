@@ -272,3 +272,20 @@ footer{padding:45px 2.2% 22px;background:var(--deep-brown);color:var(--gold)}.fo
 /* Contemporary cream folds behind the 3D scene. */
 .scene:before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:url('assets/hero-cream-waves.webp') center/cover no-repeat;opacity:.65}
 @media(max-width:760px){.scene:before{background-size:auto 100%;opacity:.55}}
+/* Photos de maquette : sources existantes, recadrage adapté aux emplacements. */
+.inside-photo>img{object-position:50% 50%}
+.packaging-benefits article:first-child .benefit-image img{object-fit:cover;transform:none;object-position:40% 50%}
+.packaging-benefits article:hover .benefit-image img{transform:scale(1.035)}
+.packaging-benefits article:last-child .benefit-image img{object-position:50% 50%}
+.moment-photo{grid-column:2;grid-row:1;aspect-ratio:4/5;overflow:hidden;border-radius:3px;min-width:0}
+.moment-photo img{width:100%;height:100%;object-fit:cover;object-position:58% 50%}
+.flavor-card .card-art{background:#fff;padding:0}
+.card-art .halo{color:var(--chocolate);opacity:.12;z-index:2}
+.flavor-card .card-art .product-packshot{position:absolute;inset:0;margin:auto;width:100%;height:100%;object-fit:contain;transform:scale(1.27);mix-blend-mode:multiply}
+.flavor-card .card-art .product-packshot-render{width:90%;height:90%;transform:none}
+.flavor-card .card-art:hover .product-packshot{transform:scale(1.31)}
+.flavor-card .card-art:hover .product-packshot-render{transform:scale(1.035)}
+.dialog-visual.has-product-photo{background:#fff;overflow:hidden}
+.dialog-visual .dialog-packshot{inset:0;width:100%;height:100%;object-fit:contain;transform:scale(1.2)}
+@media(max-width:760px){.moment-photo{grid-column:1;grid-row:2;aspect-ratio:4/3}}
+@media(prefers-reduced-motion:reduce){.packaging-benefits article:hover .benefit-image img{transform:none}.flavor-card .card-art:hover .product-packshot{transform:scale(1.27)}.flavor-card .card-art:hover .product-packshot-render{transform:none}}

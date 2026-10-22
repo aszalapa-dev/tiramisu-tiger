@@ -11,7 +11,7 @@ const loader=new GLTFLoader();
 const draco=new DRACOLoader().setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
 loader.setDRACOLoader(draco);
 function loadModel(flavor){
-  const modelURL=`assets/${flavor}.glb${flavor==='classique'?'?v=new-labels-19':''}`;
+  const modelURL=`assets/${flavor}.glb${flavor==='classique'?'?v=impression-22':''}`;
   if(!cache.has(flavor))cache.set(flavor,loader.loadAsync(modelURL).then(gltf=>{
     let model=gltf.scene;
     for(const s of gltf.scenes){const pot=s.children.find(n=>n.name.includes('TIRATITI')&&n.name.includes('250ML'));if(pot){model=pot;break;}}
@@ -181,17 +181,19 @@ addEventListener('tiratiti-flavor',async e=>{
   const token=++modalToken;const flavor=e.detail.flavor;const host=document.querySelector('#dialog-visual');
   if(dialogView){dialogView.dispose();dialogView=null;}
   if(flavor!=='classique'){
-  host.replaceChildren();
-  const slot=document.createElement('div');slot.className='photo-slot packshot';
-  const label=document.createElement('span');label.className='slot-label';label.textContent='VISUEL À FINALISER';
-  const note=document.createElement('p');note.textContent='Canette avec l’étiquette finale.';
-  slot.append(label,note);host.append(slot);
-  document.querySelector('.drag-hint').hidden=true;
+    host.replaceChildren();
+    host.classList.add('has-product-photo');
+    const photo=document.createElement('img');photo.className='dialog-packshot';
+    photo.src=flavor==='speculoos'?'assets/photos/packshot-speculoos.webp':'assets/photos/packshot-special.webp';
+    photo.alt=flavor==='speculoos'?'Le Spéculos, visuel de la canette':'Le Spécial, visuel de la canette';
+    photo.width=800;photo.height=1422;photo.decoding='async';host.append(photo);
+    document.querySelector('.drag-hint').hidden=true;
 
     return;
   }
+  host.classList.remove('has-product-photo');
   document.querySelector('.drag-hint').hidden=false;
-  host.replaceChildren();const poster=document.createElement('img');poster.src=`assets/${flavor}.png${flavor==='classique'?'?v=light-textures-11':''}`;poster.alt=`Pot Tiratiti ${flavor==='classique'?'Le Classique':'Le Spéculoos'}`;host.append(poster);
+  host.replaceChildren();const poster=document.createElement('img');poster.src='assets/classique.webp?v=impression-22';poster.alt=`Pot Tiratiti ${flavor==='classique'?'Le Classique':'Le Spéculoos'}`;host.append(poster);
   document.querySelector('.drag-hint').textContent='Chargement de la vue à 360°…';
   try{
     const model=(await loadModel(flavor)).clone(true);if(token!==modalToken)return;

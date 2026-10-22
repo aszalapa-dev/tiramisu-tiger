@@ -11,7 +11,6 @@
   "blender-opening.js",
   "assets/classique.glb",
   "assets/ouverture-classique.glb",
-  "assets/classique.png",
   "assets/hero-mascot-cream.png",
   "assets/hero-cream-waves.webp",
   "assets/coffee-boudoirs.svg",
@@ -22,8 +21,6 @@
   "assets/da/atelier-creme.webp",
   "assets/da/atelier-cafe.webp",
   "assets/da/atelier-montage.webp",
-  "assets/da/atelier-montage.png",
-  "assets/da/newsletter-can.png",
   "revendeurs.html",
   "revendeurs.css",
   "revendeurs.js",
@@ -32,5 +29,13 @@
   "store-map.js",
   "home-map.css",
   "assets/logo-full-ink-sans.png",
-  "assets/logo-full-white.png"
+  "assets/logo-full-white.png",
+  "assets/classique.webp",
+  "assets/photos/canette-bleue.webp",
+  "assets/photos/couches-classique.webp",
+  "assets/photos/duo-tiramisu.webp",
+  "assets/photos/geste-ouverture.webp",
+  "assets/photos/packshot-special.webp",
+  "assets/photos/packshot-speculoos.webp",
+  "assets/photos/trio-gourmand.webp"
 ]
