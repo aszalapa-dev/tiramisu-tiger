@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { loadBlenderOpening, orientClosure } from './blender-opening.js?v=opening-retry-16';
+import { preserveThinPETDetail } from './clear-pet.js?v=food-detail-26';
+import { browserDelivery } from './delivery-policy.js?v=automatic-arrival-26';
 
 const stage=document.querySelector('#product-stage');
 const canvas=document.querySelector('#pot');
@@ -11,7 +13,7 @@ const loader=new GLTFLoader();
 const draco=new DRACOLoader().setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
 loader.setDRACOLoader(draco);
 function loadModel(flavor){
-  const modelURL=`assets/${flavor}.glb${flavor==='classique'?'?v=impression-22':''}`;
+  const modelURL=`assets/${flavor==='classique'?browserDelivery().modelFile:flavor+'.glb'}?v=fast-start-26`;
   if(!cache.has(flavor))cache.set(flavor,loader.loadAsync(modelURL).then(gltf=>{
     let model=gltf.scene;
     for(const s of gltf.scenes){const pot=s.children.find(n=>n.name.includes('TIRATITI')&&n.name.includes('250ML'));if(pot){model=pot;break;}}
@@ -32,6 +34,7 @@ function loadModel(flavor){
           mat.transmission=1;mat.transparent=false;mat.opacity=1;mat.depthWrite=true;mat.side=THREE.FrontSide;
           mat.ior=1.47;mat.thickness=0;mat.attenuationDistance=Infinity;
           mat.envMapIntensity=.12;mat.roughness=.008;mat.clearcoat=0;mat.clearcoatRoughness=0;
+          preserveThinPETDetail(mat);
         }
         if(/Etiquette|Papier interieur|Stickers PDF|Papier stickers PDF|Design 1-1|Support 1-1/.test(mat.name)){mat.alphaTest=.2;mat.depthWrite=true;}
       }
@@ -118,6 +121,7 @@ function paintHero(force=false){
   if(heroLid){
     heroLid.update(Math.max(0,Math.min(1,(p-.70)/.26)));
   }
+  else if(p>.42)loadHeroOpening();
   hero.render();
 }
 addEventListener('tiratiti-scroll',e=>{
@@ -131,9 +135,32 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){paintHero
 function paintModal(){if(modalFrame)return;modalFrame=requestAnimationFrame(()=>{modalFrame=0;if(dialogView){dialogView.rig.rotation.y=modalAngle;dialogView.render();}});}
 const retryButton=document.querySelector('#retry-3d');
 const sceneStatus=document.querySelector('#scene-status');
-let heroLoading=false;
-async function loadHero(){
-  if(heroLoading||(canvas.dataset.modelLoaded==='true'&&canvas.dataset.openingLoaded==='true'))return;
+let heroLoading=false,openingLoading=false,heroRequested=false,openingFailed=false;
+async function loadHeroOpening(retry=false){
+  if(!hero?.rig.children[0]||heroLid||openingLoading||(openingFailed&&!retry))return;
+  if(!retry){const rect=stage.getBoundingClientRect();if(rect.bottom<=0||rect.top>=innerHeight)return;}
+  openingLoading=true;
+  openingFailed=false;
+  try{
+    heroLid=await loadBlenderOpening(hero.rig.children[0],loader);
+    if(hero.renderer.compileAsync)await hero.renderer.compileAsync(hero.scene,hero.camera);
+    canvas.dataset.openingLoaded='true';retryButton.hidden=true;paintHero(true);
+    sceneStatus.textContent='Canette 3D prête. Faites défiler pour la découvrir et l’ouvrir.';
+  }catch(error){
+    openingFailed=true;
+    heroLid?.dispose();heroLid=null;
+    canvas.dataset.openingLoaded='false';retryButton.textContent='Relancer l’ouverture';retryButton.hidden=false;
+    console.warn('L’ouverture animée est indisponible, le pot reste fermé.',error);
+    sceneStatus.textContent='La canette est prête. Son ouverture animée est momentanément indisponible.';
+  }finally{openingLoading=false;}
+}
+export async function loadHero({forceOpening=false}={}){
+  heroRequested=true;
+  if(heroLoading)return;
+  if(canvas.dataset.modelLoaded==='true'){
+    if(forceOpening||progress>.42)loadHeroOpening(forceOpening);
+    return;
+  }
   heroLoading=true;retryButton.hidden=true;canvas.hidden=false;
   stage.setAttribute('aria-busy','true');sceneStatus.textContent='Chargement du pot en 3D.';
   window.TiratitiLoading?.stage('On prépare la canette et ses textures…');
@@ -144,25 +171,10 @@ async function loadHero(){
     if(!model){model=(await loadModel('classique')).clone(true);hero.rig.add(model);}
     paintHero(true);
     stage.classList.add('loaded');canvas.dataset.modelLoaded='true';
-    sceneStatus.textContent='Préparation de l’ouverture de la canette.';
-    window.TiratitiLoading?.stage('On prépare le mouvement et l’ouverture…');
-    try{
-      // Normalise the original closed body first; the authored top inherits
-      // precisely that transform. Product-dialog clones remain untouched.
-      if(!heroLid)heroLid=await loadBlenderOpening(model,loader);
-      window.TiratitiLoading?.stage('Une dernière touche de lumière…');
-      // Compile the replacement metal and skinning shaders before revealing it.
-      if(hero.renderer.compileAsync)await hero.renderer.compileAsync(hero.scene,hero.camera);
-      canvas.dataset.openingLoaded='true';retryButton.textContent='Relancer la 3D';paintHero(true);
-      sceneStatus.textContent='Canette 3D prête. Faites défiler pour la découvrir et l’ouvrir.';
-      window.TiratitiLoading?.finish();
-    }catch(error){
-      canvas.dataset.openingLoaded='false';
-      retryButton.textContent='Relancer l’ouverture';retryButton.hidden=false;
-      console.warn('L’ouverture animée est indisponible, le pot reste fermé.',error);
-      sceneStatus.textContent='La canette est prête. Son ouverture animée est momentanément indisponible.';
-      window.TiratitiLoading?.finish('fallback');
-    }
+    sceneStatus.textContent='Canette 3D prête. Faites défiler pour la découvrir.';
+    window.TiratitiLoading?.finish();
+    // Fetch the opening only as the visitor approaches that part of the story.
+    if(progress>.42)loadHeroOpening();
   }catch(error){
     heroLid?.dispose();
     hero?.dispose();hero=null;heroLid=null;lastHeroProgress=NaN;
@@ -173,10 +185,8 @@ async function loadHero(){
     window.TiratitiLoading?.finish('fallback');
   }finally{heroLoading=false;stage.setAttribute('aria-busy','false');}
 }
-retryButton.addEventListener('click',loadHero);
-addEventListener('online',()=>{if(visible)loadHero();});
-// Start asynchronously so product viewers can open while the hero downloads.
-loadHero();
+retryButton.addEventListener('click',()=>loadHero({forceOpening:true}));
+addEventListener('online',()=>{if(heroRequested&&visible)loadHero({forceOpening:progress>.42});});
 addEventListener('tiratiti-flavor',async e=>{
   const token=++modalToken;const flavor=e.detail.flavor;const host=document.querySelector('#dialog-visual');
   if(dialogView){dialogView.dispose();dialogView=null;}

@@ -17,3 +17,5 @@ palette.css
 server.cjs
 .DS_Store
 Thumbs.db
+qa-*.html
+qa-*/

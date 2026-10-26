@@ -20,3 +20,4 @@
 .locator-pro{margin-top:8px;padding-top:14px}.map-frame.is-expanded{position:fixed;inset:0;z-index:10000;border:0;border-radius:0}
 .map-frame.is-expanded #dealer-map{height:100dvh}
 @media(max-width:800px){#dealer-map{height:390px}.map-badge{top:12px;left:10px;padding:10px 12px;font-size:11px;line-height:1.35}.locator-info{grid-template-columns:1fr;gap:16px}.locator-info h3,.locator-info>.eyebrow,.locator-info>p:not(.eyebrow),.locator-info>.text-link,.locator-pro{grid-column:1;grid-row:auto}.map-frame .leaflet-control-attribution{max-width:calc(100vw - 48px);white-space:normal}}
+.dealers-page>.header{position:relative;background-color:var(--chocolate);color:var(--ivory)}
