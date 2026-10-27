@@ -4,8 +4,6 @@ const stream=document.querySelector('.story-stream');
 const stage=document.querySelector('#product-stage');
 const ingredients=document.querySelector('#ingredients');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)');
-const progressBar=document.querySelector('#scroll-progress');
-const stepNumber=document.querySelector('#step-number');
 const clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
 const ease=n=>n*n*(3-2*n);
 let progress=0,target=0,span=1,coverSpan=0,start=0,height=innerHeight,frame=0,lastTime=0;
@@ -63,8 +61,6 @@ function paintHero(){
   const initialY=innerWidth<761||(innerWidth<951&&innerHeight<501)?71:85;
   scene.style.setProperty('--stage-y',(initialY-(initialY-50)*ease(clamp(progress/.18)))+'%');
   stage.dataset.progress=String(progress);
-  stepNumber.textContent=String(progress<.22?1:progress<.72?2:3).padStart(2,'0');
-  progressBar.style.transform='scaleX('+progress+')';
   for(const block of heroBlocks){
     const reveal=clamp((height*.96-(block.offset-y))/(height*.35));
     block.words.forEach((word,i)=>{

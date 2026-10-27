@@ -19,3 +19,4 @@ server.cjs
 Thumbs.db
 qa-*.html
 qa-*/
+tests/

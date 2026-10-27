@@ -2,11 +2,12 @@
   "name": "tiratiti",
   "version": "1.0.0",
   "private": true,
-  "description": "Le site Tiratiti et son pot animé en 3D",
+  "description": "Le site Tiratiti et son animation Blender au défilement",
   "scripts": {
     "dev": "node server.cjs",
     "start": "node server.cjs",
     "build": "node build.cjs",
-    "preview": "node server.cjs --dist"
+    "preview": "node server.cjs --dist",
+    "test": "node --test tests/automatic-arrival.test.cjs tests/rendered-sequence.test.mjs tests/sequence-regressions.test.mjs tests/sequence-timeline.test.mjs"
   }
 }
