@@ -4,10 +4,17 @@ const stream=document.querySelector('.story-stream');
 const stage=document.querySelector('#product-stage');
 const ingredients=document.querySelector('#ingredients');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+const coarse=matchMedia('(pointer: coarse)');
 const clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
 const ease=n=>n*n*(3-2*n);
-let progress=0,target=0,span=1,coverSpan=0,start=0,height=innerHeight,frame=0,lastTime=0;
+let progress=0,target=0,span=1,coverSpan=0,start=0,height=innerHeight,heroHeight=innerHeight,frame=0,lastTime=0;
 let userPaused=false,measureDirty=true,pageDirty=true,heroDirty=true;
+const styleValues=new WeakMap();
+function styleValue(el,name,value,custom=false){
+  let values=styleValues.get(el);if(!values){values=new Map();styleValues.set(el,values);}
+  if(values.get(name)===value)return;
+  values.set(name,value);if(custom)el.style.setProperty(name,value);else el.style[name]=value;
+}
 document.documentElement.classList.add('js');
 
 // One timeline drives the product, its backdrop and the text behind it.
@@ -46,42 +53,48 @@ movingElements.forEach(el=>motionObserver.observe(el));
 
 function measure(){
   height=innerHeight;
+  // Safari's toolbar changes innerHeight during a swipe, while the svh scene
+  // keeps its height. Use that same stable geometry for the product timeline.
+  heroHeight=scene.clientHeight||height;
   start=journey.getBoundingClientRect().top+scrollY;
   // The final viewport only holds the scene while the next section covers it.
   // Exclude that overlap so the existing spin, text and lid timing stay intact.
   coverSpan=ingredients?Math.max(0,-parseFloat(getComputedStyle(ingredients).marginTop)||0):0;
-  span=Math.max(1,journey.offsetHeight-height-coverSpan);
+  span=Math.max(1,journey.offsetHeight-heroHeight-coverSpan);
   const streamTop=stream.getBoundingClientRect().top;
   for(const block of heroBlocks)block.offset=block.el.getBoundingClientRect().top-streamTop;
   measureDirty=false;heroDirty=true;
 }
 function paintHero(){
   const y=progress*span;
-  stream.style.transform=reduce.matches?'none':'translate3d(0,'+(-y).toFixed(2)+'px,0)';
-  const initialY=innerWidth<761||(innerWidth<951&&innerHeight<501)?71:85;
-  scene.style.setProperty('--stage-y',(initialY-(initialY-50)*ease(clamp(progress/.18)))+'%');
+  styleValue(stream,'transform',reduce.matches?'none':'translate3d(0,'+(-y).toFixed(2)+'px,0)');
+  const initialY=innerWidth<761||(innerWidth<951&&heroHeight<501)?71:85;
+  styleValue(stage,'--stage-offset-y',((initialY-50)*(1-ease(clamp(progress/.18)))*heroHeight/100).toFixed(2)+'px',true);
   stage.dataset.progress=String(progress);
   for(const block of heroBlocks){
-    const reveal=clamp((height*.96-(block.offset-y))/(height*.35));
+    const reveal=clamp((heroHeight*.96-(block.offset-y))/(heroHeight*.35));
     block.words.forEach((word,i)=>{
       const f=reduce.matches?1:clamp(reveal*block.words.length-i);
-      word.style.opacity=String(.2+.8*f);
+      styleValue(word,'opacity',String(.2+.8*f));
     });
   }
   dispatchEvent(new CustomEvent('tiratiti-scroll',{detail:{progress,paused:userPaused||reduce.matches,reduced:reduce.matches}}));
   heroDirty=false;
 }
-function paintSections(){
+function readSections(){
+  if(userPaused&&!reduce.matches)return [];
+  return [...activeElements].map(el=>({el,r:(el.classList.contains('craft-card')?el.parentElement:el).getBoundingClientRect()}));
+}
+function paintSections(positions){
   if(userPaused&&!reduce.matches)return;
   // Shrink only as the next panel covers the finished can. Follow the page
   // directly so scrolling back restores its size on the same short interval.
   const coverProgress=coverSpan&&!reduce.matches?clamp((scrollY-start-span)/coverSpan):0;
   const exit=ease(clamp((coverProgress-.2)/.32));
-  stage.style.setProperty('--stage-exit-scale',(1-.20*exit).toFixed(4));
+  styleValue(stage,'--stage-exit-scale',(1-.20*exit).toFixed(4),true);
   for(const el of pendingReveals)el.classList.add('is-visible');
   pendingReveals.clear();
   // Batch DOM reads before transforms. No perpetual decorative animation.
-  const positions=[...activeElements].map(el=>({el,r:(el.classList.contains('craft-card')?el.parentElement:el).getBoundingClientRect()}));
   for(const {el,r} of positions){
     if(el.hasAttribute('data-ingredient-scroll')){
       // Stagger each row along the same reversible scroll timeline.
@@ -117,9 +130,10 @@ function tick(time){
   if(measureDirty)measure();
   target=reduce.matches?0:clamp((scrollY-start)/span);
   if(reduce.matches){progress=0;heroDirty=true;}
-  else if(!userPaused&&document.documentElement.classList.contains('smooth-scrolling')){
-    // The page already has inertia: keep the can and its text on that timeline.
-    progress=target;heroDirty=true;
+  else if(!userPaused&&(innerWidth<=760||(coarse.matches&&innerWidth<=1024)||document.documentElement.classList.contains('smooth-scrolling'))){
+    // Native touch scrolling already has inertia. Follow it without adding a
+    // second catch-up animation that continues after the finger has stopped.
+    if(progress!==target){progress=target;heroDirty=true;}
   }
   else if(!userPaused&&Math.abs(target-progress)>.000015){
     const delta=target-progress;
@@ -129,8 +143,10 @@ function tick(time){
     if(Math.abs(target-progress)<.000015)progress=target;
     heroDirty=true;
   }
+  // Read all active geometry before either animation mutates styles.
+  const positions=pageDirty?readSections():null;
   if(heroDirty)paintHero();
-  if(pageDirty)paintSections();
+  if(pageDirty)paintSections(positions);
   if(!reduce.matches&&!userPaused&&Math.abs(target-progress)>.000015)schedule();
   else lastTime=0;
 }

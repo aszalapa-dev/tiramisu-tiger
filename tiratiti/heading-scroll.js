@@ -17,6 +17,7 @@
           const group = document.createElement('span');
           group.style.whiteSpace = 'nowrap';
           group.style.display = 'inline-block';
+          group.style.opacity = reduce.matches ? '1' : '0.2';
           group.setAttribute('aria-hidden', 'true');
           group.textContent = word;
           group.className = 'heading-word';
@@ -25,27 +26,68 @@
         }
         node.replaceWith(fragment);
       }
-      return { el, words };
+      return { el, words, opacity: words.map(() => reduce.matches ? '1' : '0.2'), offscreenProgress: 0 };
     });
+  const active = new Set();
+  const byElement = new Map(headings.map(block => [block.el, block]));
   let frame = 0;
+
+  function paintWords(block, progress) {
+    block.words.forEach((word, i) => {
+      const opacity = String(.2 + .8 * clamp(progress * block.words.length - i));
+      if (block.opacity[i] === opacity) return;
+      word.style.opacity = opacity;
+      block.opacity[i] = opacity;
+    });
+  }
   function paint() {
     frame = 0;
+    if (document.hidden || reduce.matches) return;
     const height = innerHeight;
-    const positions = headings.map(block => ({ ...block, top: block.el.getBoundingClientRect().top }));
-    for (const { words, top } of positions) {
+    // Read only nearby headings, and finish every read before changing opacity.
+    const positions = [...active].map(block => ({ block, top: block.el.getBoundingClientRect().top }));
+    for (const { block, top } of positions) {
       const progress = clamp((height * .96 - top) / (height * .35));
-      words.forEach((word, i) => {
-        const amount = reduce.matches ? 1 : clamp(progress * words.length - i);
-        word.style.opacity = String(.2 + .8 * amount);
-      });
+      paintWords(block, progress);
     }
   }
-  function schedule() { if (!frame) frame = requestAnimationFrame(paint); }
+  function cancel() { if (frame) { cancelAnimationFrame(frame); frame = 0; } }
+  function schedule() {
+    if (!frame && active.size && !document.hidden && !reduce.matches) frame = requestAnimationFrame(paint);
+  }
+  function restore() {
+    cancel();
+    if (document.hidden) return;
+    for (const block of headings) {
+      if (reduce.matches) paintWords(block, 1);
+      else if (!active.has(block)) paintWords(block, block.offscreenProgress);
+    }
+    schedule();
+  }
+  if (typeof IntersectionObserver === 'function') {
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        const block = byElement.get(entry.target);
+        if (entry.isIntersecting) active.add(block);
+        else {
+          active.delete(block);
+          block.offscreenProgress = entry.boundingClientRect.bottom <= 0 ? 1 : 0;
+          if (!document.hidden && !reduce.matches) paintWords(block, block.offscreenProgress);
+        }
+      }
+      if (!active.size) cancel();
+      schedule();
+    }, { rootMargin: '160px 0px', threshold: 0 });
+    headings.forEach(block => observer.observe(block.el));
+  } else {
+    // Preserve the reveal on older browsers without visibility observation.
+    headings.forEach(block => active.add(block));
+    schedule();
+  }
   addEventListener('scroll', schedule, { passive: true });
-  const remeasure = schedule;
-  addEventListener('resize', remeasure);
-  addEventListener('load', remeasure);
-  reduce.addEventListener('change', schedule);
-  document.fonts.ready.then(remeasure);
-  paint();
+  addEventListener('resize', schedule);
+  addEventListener('load', schedule);
+  reduce.addEventListener('change', restore);
+  document.addEventListener('visibilitychange', restore);
+  document.fonts.ready.then(schedule);
 })();

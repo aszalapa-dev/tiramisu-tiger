@@ -1,11 +1,12 @@
-import { createRenderedSequence } from './rendered-sequence.js?v=one-turn-27';
+import { createRenderedSequence } from './rendered-sequence.js?v=mobile-safari-27';
 
 const stage=document.querySelector('#product-stage');
 const poster=document.querySelector('#poster');
 const canvas=document.querySelector('#pot');
 const button=document.querySelector('#retry-3d');
 const status=document.querySelector('#scene-status');
-const manifestUrl='assets/rendered-one-turn/manifest.json';
+const compact=innerWidth<=760||(innerWidth<=1024&&matchMedia('(pointer: coarse)').matches);
+const manifestUrl=compact?'assets/rendered-one-turn-mobile/manifest.json':'assets/rendered-one-turn/manifest.json';
 let hero,attempt=0,dialogPlayer,dialogToken=0;
 document.body.dataset.loadingState='ready';
 window.TiratitiLoading={stage(){},finish(){}};

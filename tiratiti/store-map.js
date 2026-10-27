@@ -53,6 +53,7 @@
   mapElement.append(placeholder);
   let loadButton = addLoadButton('Afficher la carte');
   let resources, pending, map, started = false, observer;
+  let automaticTimer = null, nearMap = false, removeAutomaticListeners = () => {};
   const assetLoads = new Map();
   function loadAsset(tag, id, url) {
     if (assetLoads.has(id)) return assetLoads.get(id);
@@ -82,6 +83,8 @@
   }
   function requestMap() {
     if (started || pending) return pending;
+    cancelAutomatic();
+    removeAutomaticListeners();
     if (observer) observer.disconnect();
     if (!window.TIRATITI_MAPBOX_TOKEN) { unavailable(); return; }
     loadButton.disabled = true;
@@ -102,9 +105,32 @@
   }
   const connection = navigator.connection;
   const economicalConnection = connection && (connection.saveData || /^(slow-)?2g$/.test(connection.effectiveType));
+  const waitForScroll = innerWidth <= 760 || matchMedia('(pointer: coarse)').matches;
+  function cancelAutomatic() {
+    if (automaticTimer !== null) { clearTimeout(automaticTimer); automaticTimer = null; }
+  }
+  function scheduleAutomatic() {
+    cancelAutomatic();
+    if (!nearMap || document.hidden || started || pending) return;
+    if (!waitForScroll) { requestMap(); return; }
+    // SDK parsing and the first WebGL draw wait until touch momentum settles.
+    automaticTimer = setTimeout(() => {
+      automaticTimer = null;
+      if (nearMap && !document.hidden && !started && !pending) requestMap();
+    }, 180);
+  }
   if ('IntersectionObserver' in window && !economicalConnection) {
+    const onScroll = () => { if (nearMap) scheduleAutomatic(); };
+    const onVisibility = () => { if (document.hidden) cancelAutomatic(); else scheduleAutomatic(); };
+    if (waitForScroll) addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('visibilitychange', onVisibility);
+    removeAutomaticListeners = () => {
+      if (waitForScroll) removeEventListener('scroll', onScroll);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
     observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) requestMap();
+      nearMap = entries.some(entry => entry.isIntersecting);
+      scheduleAutomatic();
     }, { rootMargin: '300px 0px', threshold: 0 });
     observer.observe(mapElement);
   }

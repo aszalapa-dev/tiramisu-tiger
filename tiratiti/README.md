@@ -9,11 +9,14 @@ La canette affiche des rendus transparents calculés dans Blender avec les maté
 - Une rotation complète échantillonnée tous les 2° parcourt un seul tour avant l’ouverture.
 - L’ouverture utilise 95 poses et reste réversible au défilement.
 - La languette et tout le couvercle sont orientés à 180° par rapport à la scène Blender d’origine ; le corps et les étiquettes conservent leur orientation.
-- Les 275 images WebP conservent leur transparence en 800 × 950 pixels.
+- Les 275 images WebP conservent leur transparence : 800 × 950 pixels sur ordinateur, 640 × 760 sur téléphone. Le profil est choisi à l’arrivée ; le téléphone ne télécharge pas les deux séries.
 - La photo du produit apparaît immédiatement. L’animation démarre automatiquement, sans attendre toutes les images.
-- Le lecteur prépare les images à venir et ignore les décodages périmés qui feraient reculer la pose. Les dessins sont regroupés sur les images du navigateur.
+- Le lecteur prépare les images à venir et ignore les décodages périmés qui feraient reculer la pose. Un décodage lent reste utilisable s’il fait avancer le geste ; il n’est plus jeté parce que la fenêtre des prochaines poses a bougé. Un redimensionnement restaure immédiatement la dernière image visible.
 - Le cache conserve au maximum 32 images compressées, avec six images décodées sur téléphone et vingt sur ordinateur. La densité de dessin est limitée à 1,5×. Les dessins et le travail en attente sont suspendus hors écran et dans un onglet masqué.
+- Le téléphone utilise deux chargements simultanés. Pendant un geste continu, un transfert utile peut finir même si la pose visée a avancé ; l’autre suit la cible récente. Un changement de sens ou un grand saut abandonne les transferts périmés. Les tests couvrent aussi une connexion partagée à 5 Mbit/s avec un décodage de 80 ms.
 - La fiche du Classique réutilise cette rotation, à la souris, au toucher ou au clavier. Les autres goûts utilisent leurs photos.
+- Sur téléphone, la canette suit directement l’inertie du défilement natif. La chronologie utilise la hauteur stable de la scène, afin que la barre de Safari ne recale pas l’animation en se rétractant. La montée de la canette utilise une transformation sans modifier sa position de mise en page.
+- Les titres hors écran ne sont pas mesurés à chaque geste ; les opacités inchangées ne sont pas réécrites. La carte démarre automatiquement à l’approche de sa section, après 180 ms sans défilement sur mobile.
 
 Le rendu Blender reste net : aucune transition floue entre deux poses n’est utilisée. Les anciens fichiers 3D restent dans le dépôt comme références mais sont exclus de `public-files.json` et du dossier publié.
 
@@ -38,6 +41,7 @@ Sous PowerShell, `npm.cmd` peut être utilisé à la place de `npm`.
 - `rendered-sequence.js` : chargement, caches, dessin et cycle de vie.
 - `sequence-timeline.js` : nombre de tours défini par le manifeste, ouverture et compensation de taille.
 - `assets/rendered-one-turn/` : images et manifeste versionné par empreinte du contenu.
+- `assets/rendered-one-turn-mobile/` : mêmes poses et matériaux, adaptées au téléphone.
 - `home-map.css`, `store-map.js` : carte et liste des commerces ; la carte attend l’approche de sa section.
 - `revendeurs.html`, `revendeurs.css`, `revendeurs.js` : page professionnelle, avec navigation et pied de page communs.
 - `tests/` : tests automatisés, exclus du site publié.
@@ -45,6 +49,6 @@ Sous PowerShell, `npm.cmd` peut être utilisé à la place de `npm`.
 
 Les polices du premier écran et les visuels sont locaux. Les polices complémentaires viennent de Google Fonts ; la carte utilise Mapbox lorsqu’un jeton public est configuré. Les commerces affichés sont des exemples fictifs. Les contacts ouvrent la messagerie du visiteur ; aucun service de paiement ou d’envoi d’e-mails n’est configuré.
 
-La version actuelle construit 316 fichiers publics, environ 18,32 Mo au total. Ce total comprend toutes les poses ; elles ne sont pas toutes nécessaires à l’arrivée. Le poids exact est affiché à chaque construction.
+Le dossier publié comprend les deux profils d’images ; chaque appareil en utilise un seul. Toutes les poses ne sont pas nécessaires à l’arrivée. Le poids exact du dossier est affiché à chaque construction.
 
 Voir [DEPLOIEMENT.md](DEPLOIEMENT.md) pour les paramètres Vercel. Modifier les sources et reconstruire ; ne pas modifier `dist` directement.

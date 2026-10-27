@@ -5,10 +5,12 @@ const flush=async()=>{for(let i=0;i<5;i++)await new Promise(resolve=>setImmediat
 const timeline={rotationFrames:180,turns:2,rotationEnd:.68,openingStart:.70,openingEnd:.96,openingFrameStep:1/360,openingScale:.86,shrinkStart:.62,shrinkEnd:.70};
 const manifestFor=(count=100,extra={})=>({width:800,height:950,frames:Array.from({length:count},(_,i)=>`frame-${i}.webp`),...extra});
 
-function fixture({manifest=manifestFor(),compact=true,deferDecode=false,fixedScale=false}={}){
+function fixture({manifest=manifestFor(),compact=true,deferDecode=false,decodeMs=0,fixedScale=false,nativeDecoder,bandwidthMbps=0,transferBytes=42000,cacheResponses=false}={}){
   const records=[],pending=new Map(),draws=[],images=[],errors=[],rafs=new Map(),decodes=new Map();
+  const compressedCache=new Set();let cacheReads=0;
   let nextRAF=0,maxRAF=0,hidden=false,visibleChanged,documentChanged,resizeChanged,size={width:400,height:500},readyCalls=0,clock=0;
-  const canvas={width:0,height:0,getContext:()=>({clearRect(){},drawImage:(image,...args)=>draws.push({index:image.index,args})})};
+  const canvas={width:0,height:0,getContext:()=>({clearRect(){},drawImage:(image,...args)=>draws.push({index:image.index,args,time:clock})})};
+  if(nativeDecoder)canvas.ownerDocument={defaultView:{createImageBitmap:nativeDecoder}};
   const env={baseURL:'https://site.test/',compact,pixelRatio:3,measure:()=>size,isHidden:()=>hidden,
     observeResize:callback=>{resizeChanged=callback;return()=>resizeChanged=null;},
     observeVisibility:callback=>{visibleChanged=callback;return()=>visibleChanged=null;},
@@ -17,17 +19,23 @@ function fixture({manifest=manifestFor(),compact=true,deferDecode=false,fixedSca
     fetch:async(url,options={})=>{
       if(url.endsWith('manifest.json'))return {ok:true,json:async()=>manifest};
       const index=Number(/frame-(\d+)\.webp/.exec(url)[1]);
-      const record={index,url,options,aborted:false,finished:false,started:clock};records.push(record);
+      if(cacheResponses&&compressedCache.has(index)){
+        if(++cacheReads>256)throw new Error('Compressed cache is being refetched without settling');
+        return {ok:true,index,blob:async()=>({index,size:transferBytes})};
+      }
+      const record={index,url,options,aborted:false,finished:false,started:clock,remaining:transferBytes,received:0};records.push(record);
       return new Promise((resolve,reject)=>{
-        record.resolve=()=>{record.finished=true;if(pending.get(index)===record)pending.delete(index);resolve({ok:true,index,blob:async()=>({index,size:32000})});};
+        record.resolve=()=>{record.finished=true;compressedCache.add(index);if(pending.get(index)===record)pending.delete(index);resolve({ok:true,index,blob:async()=>({index,size:transferBytes})});};
         record.reject=error=>{record.finished=true;if(pending.get(index)===record)pending.delete(index);reject(error);};
         pending.set(index,record);
-        options.signal?.addEventListener('abort',()=>{record.aborted=true;record.reject(new DOMException('Aborted','AbortError'));},{once:true});
+        options.signal?.addEventListener('abort',()=>{if(!record.finished){record.aborted=true;record.reject(new DOMException('Aborted','AbortError'));}},{once:true});
       });
     },
-    decode:async blob=>{
-      const image={index:blob.index,closed:false,close(){this.closed=true;}};images.push(image);
-      if(deferDecode)return new Promise(resolve=>decodes.set(blob.index,()=>resolve(image)));
+    decode:nativeDecoder?undefined:async (blob,options)=>{
+      const image={index:blob.index,decodeOptions:options,closed:false,close(){this.closed=true;}};images.push(image);
+      if(deferDecode||decodeMs)return new Promise(resolve=>{
+        const complete=()=>{complete.done=true;resolve(image);};complete.due=clock+decodeMs;decodes.set(blob.index,complete);
+      });
       return image;
     }
   };
@@ -35,12 +43,27 @@ function fixture({manifest=manifestFor(),compact=true,deferDecode=false,fixedSca
   player.ready.catch(()=>{});
   const result={player,canvas,records,pending,draws,images,errors,rafs,decodes,
     get maxRAF(){return maxRAF;},get readyCalls(){return readyCalls;},
+    get cacheReads(){return cacheReads;},
     async frame(){const callbacks=[...rafs.values()];rafs.clear();for(const callback of callbacks)callback();await flush();},
     async settle(){await flush();await result.frame();},
     async resolve(index){assert.ok(pending.has(index),`Frame ${index} pending`);pending.get(index).resolve();await result.settle();},
     async fail(index){assert.ok(pending.has(index),`Frame ${index} pending`);pending.get(index).reject(new Error('network'));await result.settle();},
     async drain(){for(let i=0;i<100&&pending.size;i++)await result.resolve([...pending.keys()][0]);assert.equal(pending.size,0);},
-    async time(value,latency=40){clock=value;for(const record of [...pending.values()])if(record.started+latency<=clock)record.resolve();await result.settle();},
+    async time(value,latency=40){
+      if(bandwidthMbps){
+        while(clock<value-1e-6){
+          const next=Math.min(value,clock+1),active=[...pending.values()].filter(record=>record.started+latency<=clock);
+          const share=active.length?bandwidthMbps*1e6/8/1000*(next-clock)/active.length:0;let changed=false;clock=next;
+          for(const record of active){const bytes=Math.min(share,record.remaining);record.remaining-=bytes;record.received+=bytes;if(record.remaining<=1e-6){record.resolve();changed=true;}}
+          if(decodeMs)for(const complete of decodes.values())if(!complete.done&&complete.due<=clock){complete();changed=true;}
+          if(changed)await flush();
+        }
+      }else{
+        clock=value;for(const record of [...pending.values()])if(record.started+latency<=clock)record.resolve();await flush();
+        if(decodeMs)for(const complete of decodes.values())if(!complete.done&&complete.due<=clock)complete();
+      }
+      await result.settle();
+    },
     setVisible(value){visibleChanged?.(value);},setHidden(value){hidden=value;documentChanged?.();},
     resize(value){size=value;resizeChanged?.();}
   };
@@ -202,4 +225,92 @@ test('one turn reduces visible angular steps at 60 Hz with 40 ms transfers',asyn
   assert.ok(one.maximumStep<two.maximumStep,'Fewer turns reduce angular jumps under the same input and latency');
   assert.ok(one.count>=75,'One-turn playback sustains at least 30 changes per second');
   testContext.diagnostic('one turn: '+one.count+' changes/2.5s, max '+one.maximumStep*2+' degrees; two turns: max '+two.maximumStep*2+' degrees; no backwards steps');
+});
+
+test('40–80 ms decoders keep forward progress after their six-frame window moves on',async context=>{
+  for(const decodeMs of [40,80]){
+    const f=fixture({manifest:manifestFor(275,{timeline:{...timeline,turns:1}}),decodeMs});
+    f.player.render(.2);await flush();for(let tick=0;tick<=48;tick++)await f.time(tick*1000/60,0);
+    await f.player.ready;const start=f.draws.length;
+    for(let tick=1;tick<=150;tick++){
+      f.player.render(.2+.25*tick/150);await f.time(800+tick*1000/60,0);
+    }
+    const changes=f.draws.slice(start).filter((draw,index,array)=>!index||draw.index!==array[index-1].index);
+    assert.ok(changes.length>=20,'A slow decoder must produce visible progress during the gesture');
+    assert.ok(changes.every((draw,index)=>!index||draw.index>=changes[index-1].index),'Late images stay monotonic');
+    const inFlight=[...f.decodes.values()].filter(complete=>!complete.done).length;
+    assert.ok(inFlight<=1);assert.ok(f.images.filter(image=>!image.closed).length<=6+inFlight,'Useful late frames keep six cached images plus the one decoding job');
+    context.diagnostic(decodeMs+' ms decoder: '+changes.length+' changes during the 2.5 s gesture');f.player.dispose();
+  }
+});
+
+test('a completed old-direction decode cannot overwrite a reversed gesture',async()=>{
+  const f=fixture({manifest:manifestFor(275,{timeline:{...timeline,turns:1}}),deferDecode:true});
+  f.player.render(invert(30/180));await flush();await f.resolve(30);f.decodes.get(30)();await f.settle();
+  await f.resolve(31);assert.ok(f.decodes.has(31));
+  f.player.render(invert(29/180));await flush();await f.resolve(29);
+  f.decodes.get(31)();await f.settle();assert.notEqual(f.draws.at(-1).index,31);
+  assert.equal(f.images.find(image=>image.index===31).closed,true);
+  f.decodes.get(29)();await f.settle();assert.equal(f.draws.at(-1).index,29);f.player.dispose();
+});
+
+test('resize immediately restores the displayed frame while an ambiguous new target is pending',async()=>{
+  const f=fixture({manifest:manifestFor(275,{timeline:{...timeline,turns:1}})});await flush();await f.resolve(0);
+  const before=f.draws.length;f.player.render(.34);f.resize({width:390,height:480});
+  assert.equal(f.draws.length,before+1,'The resized buffer is restored before the next RAF or decode');
+  assert.equal(f.draws.at(-1).index,0,'The visible product stays present while its new pose downloads');f.player.dispose();
+});
+
+test('compact decoding requests the actual display density instead of full HD pixels',async()=>{
+  const f=fixture();f.resize({width:390,height:500});await flush();await f.resolve(0);
+  assert.deepEqual(f.images[0].decodeOptions,{resizeWidth:585,resizeHeight:695,resizeQuality:'high'});
+  assert.equal(f.canvas.width,585);f.player.dispose();
+  const desktop=fixture({compact:false});await flush();await desktop.resolve(0);
+  assert.equal(desktop.images[0].decodeOptions,undefined,'Desktop rendering retains its original source resolution');desktop.player.dispose();
+});
+
+test('Safari rejecting ImageBitmap resize options retries the same image without them',async()=>{
+  const calls=[];
+  const f=fixture({nativeDecoder:async (blob,options)=>{
+    calls.push(options);if(options)throw new TypeError('Resize options unsupported');return {index:blob.index,close(){}};
+  }});
+  f.resize({width:390,height:500});await flush();await f.resolve(0);await f.player.ready;
+  assert.deepEqual(calls,[{resizeWidth:585,resizeHeight:695,resizeQuality:'high'},undefined]);
+  assert.equal(f.draws.at(-1).index,0);assert.equal(f.errors.length,0);
+  await f.resolve(1);assert.deepEqual(calls,[{resizeWidth:585,resizeHeight:695,resizeQuality:'high'},undefined,undefined],'Following frames skip already-rejected resize options');f.player.dispose();
+});
+
+test('a browser ignoring ImageBitmap resize options still draws the complete visible image',async()=>{
+  let calls=0;
+  const f=fixture({nativeDecoder:async blob=>{calls++;return {index:blob.index,width:800,height:950,close(){}};}});
+  f.resize({width:390,height:500});await flush();await f.resolve(0);await f.player.ready;
+  assert.equal(calls,1);assert.equal(f.readyCalls,1);assert.equal(f.errors.length,0);
+  const draw=f.draws.at(-1);assert.equal(draw.index,0);assert.equal(draw.args[2],585);
+  assert.ok(Math.abs(draw.args[3]-585*950/800)<1e-9,'Unresized Safari output keeps the full source proportions');f.player.dispose();
+});
+
+test('shared 5 Mbps transfers cannot starve cold, forward or reverse mobile gestures',async context=>{
+  for(const mode of ['cold','forward','reverse']){
+    const f=fixture({manifest:manifestFor(275,{timeline:{...timeline,turns:1},revision:'shared-pipe'}),decodeMs:80,bandwidthMbps:5,cacheResponses:true});
+    f.player.render(.2);await flush();const origin=mode==='cold'?0:800;
+    if(origin)for(let tick=0;tick<=48;tick++)await f.time(tick*1000/60,80);
+    const start=f.draws.length;
+    for(let tick=1;tick<=150;tick++){
+      const p=mode==='reverse'?(tick<=75?.2+.25*tick/75:.45-.25*(tick-75)/75):.2+.25*tick/150;
+      f.player.render(p);await f.time(origin+tick*1000/60,80);
+    }
+    const gesture=f.draws.slice(start).filter((draw,index,array)=>!index||draw.index!==array[index-1].index);
+    // Clocked ImageBitmap jobs and shared body bytes both compete while input
+    // keeps moving; cancelled bytes never return to the connection budget.
+    assert.ok(gesture.length>=5,mode+' must keep displaying useful completed transfers');
+    const stamps=[origin,...gesture.map(draw=>draw.time),origin+2500];
+    const maximumGap=Math.max(...stamps.slice(1).map((time,index)=>time-stamps[index]));
+    assert.ok(maximumGap<750,mode+' must not freeze for seconds while targets keep changing');
+    if(mode==='cold')assert.ok(f.readyCalls>0&&f.draws[0].time<=600,'A moving cold target must not block first readiness');
+    const beforeSettleReads=f.cacheReads,finalProgress=mode==='reverse'?.2:.45;f.player.render(finalProgress);
+    for(let tick=1;tick<=120;tick++)await f.time(origin+2500+tick*1000/60,80);
+    assert.equal(f.draws.at(-1).index,mode==='reverse'?28:141,'The held final target settles exactly');
+    assert.ok(f.cacheReads-beforeSettleReads<=64,'A full warm compressed cache must settle with finite speculative work');
+    assert.equal(f.errors.length,0);context.diagnostic(mode+': '+gesture.length+' visible changes over shared5Mbps');f.player.dispose();
+  }
 });

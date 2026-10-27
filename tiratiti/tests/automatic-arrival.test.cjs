@@ -1,8 +1,9 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
+const path=require('node:path');
 const source=fs.readFileSync(require('node:path').resolve(__dirname,'../loading.js'),'utf8').replace(/^import .*?;\r?\n/,'');
-function arrive(width=390){
+function arrive(width=390,coarse=false){
   const calls=[],events={};
   const classes=new Set(),stage={dataset:{progress:'.3'},classList:{add:v=>classes.add(v),remove:v=>classes.delete(v)},setAttribute(){}};
   const button={hidden:true,addEventListener(name,fn){events.retry=fn;}};
@@ -12,16 +13,43 @@ function arrive(width=390){
   const hint={};
   const document={body:{dataset:{}},createElement:tag=>({tag,style:{},listeners:{},setAttribute(){},addEventListener(name,fn){this.listeners[name]=fn;},setPointerCapture(){}}),querySelector:selector=>({'#product-stage':stage,'#poster':{src:'poster.webp'},'#pot':canvas,'#retry-3d':button,'#scene-status':status,'#dialog-visual':host,'.drag-hint':hint})[selector]};
   const createRenderedSequence=options=>{const record={...options,poses:[]};calls.push(record);return {ready:Promise.resolve(),render:p=>record.poses.push(p),dispose(){record.disposed=true;}};};
-  new Function('document','window','addEventListener','matchMedia','innerWidth','createRenderedSequence',source)(document,{},(n,f)=>events[n]=f,()=>({matches:false}),width,createRenderedSequence);
+  new Function('document','window','addEventListener','matchMedia','innerWidth','createRenderedSequence',source)(document,{},(n,f)=>events[n]=f,()=>({matches:coarse}),width,createRenderedSequence);
   return {calls,events,canvas,stage,classes,button,status,host,hint};
 }
 test('phone arrival automatically uses the sharp rendered animation, without importing real-time 3D',()=>{
-  const f=arrive();assert.equal(f.calls.length,1);assert.match(f.calls[0].manifestUrl,/rendered-one-turn/);
+  const f=arrive();assert.equal(f.calls.length,1);assert.equal(f.calls[0].manifestUrl,'assets/rendered-one-turn-mobile/manifest.json');
   assert.deepEqual(f.calls[0].poses,[.3]);assert.doesNotMatch(source,/import\(.*scene\.js/);
   f.calls[0].onReady();assert.ok(f.classes.has('loaded'));assert.equal(f.button.hidden,true);
 });
+
+test('a touch phone in landscape still uses only the compact animation profile',()=>{
+  const phone=arrive(844,true),desktop=arrive(844,false);
+  assert.equal(phone.calls[0].manifestUrl,'assets/rendered-one-turn-mobile/manifest.json');
+  assert.equal(desktop.calls[0].manifestUrl,'assets/rendered-one-turn/manifest.json');
+  phone.events['tiratiti-flavor']({detail:{flavor:'classique'}});
+  assert.equal(phone.calls[1].manifestUrl,phone.calls[0].manifestUrl,'Product detail reuses the same compact files');
+});
+
+test('the compact published sequence preserves every authored pose and transparent product edge',()=>{
+  const root=path.resolve(__dirname,'..'),folder='assets/rendered-one-turn-mobile/';
+  const hd=JSON.parse(fs.readFileSync(path.join(root,'assets/rendered-one-turn/manifest.json')));
+  const mobile=JSON.parse(fs.readFileSync(path.join(root,folder,'manifest.json')));
+  const published=JSON.parse(fs.readFileSync(path.join(root,'public-files.json')));
+  assert.equal(mobile.width,640);assert.equal(mobile.height,760);
+  assert.deepEqual(mobile.frames,hd.frames);assert.deepEqual(mobile.timeline,hd.timeline);
+  assert.equal(mobile.closureRotationDegrees,180);assert.notEqual(mobile.revision,hd.revision);
+  let mobileBytes=0,hdBytes=0;
+  for(const frame of mobile.frames){
+    assert.ok(published.includes(folder+frame),'Every mobile pose is included in the deployment');
+    const bytes=fs.readFileSync(path.join(root,folder,frame));mobileBytes+=bytes.length;
+    hdBytes+=fs.statSync(path.join(root,'assets/rendered-one-turn',frame)).size;
+    assert.equal(bytes.toString('ascii',12,16),'VP8X');assert.ok(bytes[20]&16,'Alpha stays present');
+    assert.equal(bytes.readUIntLE(24,3)+1,640);assert.equal(bytes.readUIntLE(27,3)+1,760);
+  }
+  assert.ok(mobileBytes<hdBytes*.8,'The mobile profile must reduce actual transfer bytes by at least 20%');
+});
 test('scroll seeks both ways and reduced motion holds the closed pose',()=>{
-  const f=arrive(1500);assert.match(f.calls[0].manifestUrl,/rendered-one-turn/);
+  const f=arrive(1500);assert.equal(f.calls[0].manifestUrl,'assets/rendered-one-turn/manifest.json');
   f.events['tiratiti-scroll']({detail:{progress:.95,reduced:false}});
   f.events['tiratiti-scroll']({detail:{progress:.1,reduced:false}});
   f.events['tiratiti-scroll']({detail:{progress:.7,reduced:true}});
