@@ -7,7 +7,7 @@ Site de présentation du tiramisu artisanal Tiratiti : histoire, trois goûts, c
 La canette affiche des rendus transparents calculés dans Blender avec les matériaux, la caméra et les éclairages d’origine. Le navigateur affiche ces images dans un canevas 2D ; aucun modèle GLB, Three.js ou décodeur Draco n’est chargé par la version active.
 
 - Une rotation complète échantillonnée tous les 2° parcourt un seul tour avant l’ouverture.
-- L’ouverture utilise 95 poses et reste réversible au défilement.
+- L’ouverture utilise 95 poses et reste réversible au défilement. Après le décollement, le couvercle monte verticalement et sort par le haut de l’image.
 - La languette et tout le couvercle sont orientés à 180° par rapport à la scène Blender d’origine ; le corps et les étiquettes conservent leur orientation.
 - Les 275 images WebP conservent leur transparence : 800 × 950 pixels sur ordinateur, 640 × 760 sur téléphone. Le profil est choisi à l’arrivée ; le téléphone ne télécharge pas les deux séries.
 - La photo du produit apparaît immédiatement. L’animation démarre automatiquement, sans attendre toutes les images.
