@@ -2,7 +2,7 @@ const clamp=value=>Math.min(1,Math.max(0,Number.isFinite(value)?value:0));
 const wrap=(value,length)=>((value%length)+length)%length;
 const smooth=value=>{const t=clamp(value);return t*t*(3-2*t);};
 
-// A uniform closed turn can be reused twice; opening frames keep their own time.
+// The manifest sets the number of closed turns; opening frames keep their own time.
 export function createSequenceTimeline(manifest){
   const count=manifest.frames.length,meta=manifest.timeline;
   const loop=meta?Math.floor(meta.rotationFrames):0;

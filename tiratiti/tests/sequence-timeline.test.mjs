@@ -21,6 +21,28 @@ test('a uniform closed loop produces two turns while opening stays a separate se
   assert.equal(t.pose(.96).index,227);assert.equal(t.pose(1).index,227);
 });
 
+test('one-turn metadata makes exactly one revolution and reaches the back at halfway',()=>{
+  const one=make({...metadata,turns:1,openingFrameStep:1/360},275);
+  assert.equal(one.pose(0).coordinate,0);assert.equal(one.pose(0).index,0);
+  assert.equal(one.pose(.34).coordinate,90);assert.equal(one.pose(.34).index,90);
+  assert.equal(one.pose(.68).coordinate,180);assert.equal(one.pose(.68).index,0);
+  assert.equal(one.pose(.70).coordinate,180,'Opening continues from the end of that single turn');
+  let previous=0;
+  for(let step=0;step<=68;step++){
+    const coordinate=one.pose(step/100).coordinate;
+    assert.ok(coordinate>=previous&&coordinate<=180);previous=coordinate;
+  }
+});
+
+test('one turn halves angular velocity for the same scroll gesture',()=>{
+  const one=make({...metadata,turns:1}),two=make();
+  for(const progress of [.1,.2,.3,.34,.4,.5,.6]){
+    const singleStep=one.pose(progress+.001).coordinate-one.pose(progress).coordinate;
+    const doubleStep=two.pose(progress+.001).coordinate-two.pose(progress).coordinate;
+    assert.ok(singleStep>0&&Math.abs(singleStep*2-doubleStep)<1e-10);
+  }
+});
+
 test('opening density and frame count come from metadata instead of a fixed length',()=>{
   const t=make({...metadata,openingFrameStep:1/360},275);
   assert.equal(t.pose(.70+10/360).index,190);assert.equal(t.pose(.96).index,274);

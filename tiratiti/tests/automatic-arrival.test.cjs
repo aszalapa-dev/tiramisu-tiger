@@ -16,12 +16,12 @@ function arrive(width=390){
   return {calls,events,canvas,stage,classes,button,status,host,hint};
 }
 test('phone arrival automatically uses the sharp rendered animation, without importing real-time 3D',()=>{
-  const f=arrive();assert.equal(f.calls.length,1);assert.match(f.calls[0].manifestUrl,/rendered-smooth/);
+  const f=arrive();assert.equal(f.calls.length,1);assert.match(f.calls[0].manifestUrl,/rendered-one-turn/);
   assert.deepEqual(f.calls[0].poses,[.3]);assert.doesNotMatch(source,/import\(.*scene\.js/);
   f.calls[0].onReady();assert.ok(f.classes.has('loaded'));assert.equal(f.button.hidden,true);
 });
 test('scroll seeks both ways and reduced motion holds the closed pose',()=>{
-  const f=arrive(1500);assert.match(f.calls[0].manifestUrl,/rendered-smooth/);
+  const f=arrive(1500);assert.match(f.calls[0].manifestUrl,/rendered-one-turn/);
   f.events['tiratiti-scroll']({detail:{progress:.95,reduced:false}});
   f.events['tiratiti-scroll']({detail:{progress:.1,reduced:false}});
   f.events['tiratiti-scroll']({detail:{progress:.7,reduced:true}});
@@ -42,4 +42,14 @@ test('the detail rotates immediately in both directions and wraps while staying 
   for(let i=0;i<44;i++)detail.listeners.keydown({key:'ArrowRight',preventDefault(){}});
   assert.ok(poses.every(p=>p>=0&&p<=.68),'Opening is never selected');
   assert.ok(poses.at(-1)<.68,'Multiple turns do not stick at the end');
+});
+
+test('a 150 pixel drag covers a quarter of the one-turn detail loop',()=>{
+  const f=arrive();f.events['tiratiti-flavor']({detail:{flavor:'classique'}});
+  const detail=f.host.children[1],poses=f.calls[1].poses;
+  detail.listeners.pointerdown({clientX:0,pointerId:1});
+  detail.listeners.pointermove({clientX:150});
+  const t=poses.at(-1)/.68,turn=t*t*t*(10+t*(-15+6*t));
+  assert.ok(Math.abs(turn-.25)<1e-6,'The one-turn detail uses 600 pixels per full turn');
+  detail.listeners.pointerup();
 });

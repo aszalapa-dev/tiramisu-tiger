@@ -179,3 +179,27 @@ test('40 ms transfers sustain forward movement without backwards visual steps',a
   assert.ok(changes.length>=75,'The slow-network gesture keeps at least 30 visible changes per second ('+changes.length+')');
   testContext.diagnostic(changes.length+' monotonic changes / 2.5 s, '+changes.length/2.5+' per second, max '+maximumStep*2+' degrees');f.player.dispose();
 });
+
+test('one turn reduces visible angular steps at 60 Hz with 40 ms transfers',async testContext=>{
+  async function gesture(turns){
+    const f=fixture({manifest:manifestFor(275,{timeline:{...timeline,turns}})});
+    f.player.render(.2);await flush();
+    for(let time=0;time<=400;time+=10)await f.time(time);
+    await f.player.ready;const start=f.draws.length;let previous=f.draws.at(-1).index,maximumStep=0;
+    for(let tick=1;tick<=150;tick++){
+      f.player.render(.2+.25*tick/150);await f.time(400+tick*1000/60);
+    }
+    const changes=f.draws.slice(start).filter((draw,index,array)=>!index||draw.index!==array[index-1].index);
+    for(const draw of changes){
+      let coordinate=draw.index;while(coordinate<previous-90)coordinate+=180;
+      assert.ok(coordinate>=previous,'Late transfers cannot reverse the '+turns+' turn gesture');
+      maximumStep=Math.max(maximumStep,coordinate-previous);previous=coordinate;
+    }
+    assert.equal(f.errors.length,0);f.player.dispose();return {count:changes.length,maximumStep};
+  }
+  const two=await gesture(2),one=await gesture(1);
+  assert.ok(one.maximumStep<=1,'One-turn playback advances at most one 2-degree image per visible change');
+  assert.ok(one.maximumStep<two.maximumStep,'Fewer turns reduce angular jumps under the same input and latency');
+  assert.ok(one.count>=75,'One-turn playback sustains at least 30 changes per second');
+  testContext.diagnostic('one turn: '+one.count+' changes/2.5s, max '+one.maximumStep*2+' degrees; two turns: max '+two.maximumStep*2+' degrees; no backwards steps');
+});

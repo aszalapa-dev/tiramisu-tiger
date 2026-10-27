@@ -1,11 +1,11 @@
-import { createRenderedSequence } from './rendered-sequence.js?v=smooth-final-27';
+import { createRenderedSequence } from './rendered-sequence.js?v=one-turn-27';
 
 const stage=document.querySelector('#product-stage');
 const poster=document.querySelector('#poster');
 const canvas=document.querySelector('#pot');
 const button=document.querySelector('#retry-3d');
 const status=document.querySelector('#scene-status');
-const manifestUrl='assets/rendered-smooth/manifest.json';
+const manifestUrl='assets/rendered-one-turn/manifest.json';
 let hero,attempt=0,dialogPlayer,dialogToken=0;
 document.body.dataset.loadingState='ready';
 window.TiratitiLoading={stage(){},finish(){}};
@@ -71,7 +71,7 @@ addEventListener('tiratiti-flavor',event=>{
     dialogPlayer?.render(progress);
   };
   detailCanvas.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;detailCanvas.setPointerCapture(e.pointerId);});
-  detailCanvas.addEventListener('pointermove',e=>{if(dragging){move((e.clientX-lastX)/1200);lastX=e.clientX;}});
+  detailCanvas.addEventListener('pointermove',e=>{if(dragging){move((e.clientX-lastX)/600);lastX=e.clientX;}});
   detailCanvas.addEventListener('pointerup',()=>{dragging=false;});
   detailCanvas.addEventListener('pointercancel',()=>{dragging=false;});
   detailCanvas.addEventListener('keydown',e=>{

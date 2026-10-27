@@ -33,7 +33,7 @@ Sans jeton public, le site conserve le lien de carte OpenStreetMap. L’accueil 
 
 ## Fichiers publiés
 
-La version du 27 octobre 2026 contient 316 fichiers publics, environ 17,78 Mo. L’animation utilise 180 angles de rotation et 95 poses d’ouverture transparents, chargés progressivement. Aucun GLB ni moteur 3D n’est requis par cette version.
+La version du 27 octobre 2026 contient 316 fichiers publics, environ 18,32 Mo. L’animation utilise 180 angles de rotation et 95 poses d’ouverture transparents, chargés progressivement. Aucun GLB ni moteur 3D n’est requis par cette version.
 
 Après l’ajout d’un fichier utilisé par le site, ajouter son chemin à `public-files.json`, puis reconstruire. Le manifeste de l’animation contient une empreinte de révision pour éviter de réutiliser des images périmées dans le cache du navigateur.
 
