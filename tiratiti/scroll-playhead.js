@@ -6,9 +6,11 @@ export function createScrollPlayhead({onProgress,initialProgress=0},environment=
   const cancel=environment.cancel||(id=>globalThis.cancelAnimationFrame(id));
   const now=environment.now||(()=>globalThis.performance?.now?.()??Date.now());
   const isHidden=environment.isHidden||(()=>Boolean(globalThis.document?.hidden));
-  const lookbackMilliseconds=60,maxLag=.025,maxAnchors=16;
+  const maxLookbackMilliseconds=60,maxLag=.025,maxAnchors=16;
+  let lookbackMilliseconds=maxLookbackMilliseconds;
   let current=clamp(initialProgress),target=current,direction=0;
-  let anchors=[{time:now(),value:current}];
+  let lastInput={time:now(),value:current};
+  let anchors=[{...lastInput}];
   let frame=null,suspended=false,disposed=false;
 
   function canRun(){return !disposed&&!suspended&&!isHidden();}
@@ -43,6 +45,8 @@ export function createScrollPlayhead({onProgress,initialProgress=0},environment=
     if(disposed)return;
     const next=clamp(value),inputDirection=Math.sign(next-target),time=now();
     const reversing=inputDirection&&direction&&inputDirection!==direction;
+    const input=lastInput;
+    if(inputDirection)lastInput={time,value:next};
     target=next;if(inputDirection)direction=inputDirection;
     if(!canRun()){stop();return;}
     if(immediate){direction=0;finish(time);return;}
@@ -50,10 +54,16 @@ export function createScrollPlayhead({onProgress,initialProgress=0},environment=
     // When input reverses inside the old lag, align instead of continuing the
     // old-direction chase. Subsequent inputs can reverse without overshooting.
     if(reversing&&inputDirection*(target-current)<0){finish(time);return;}
+    const previous=anchors.at(-1);
+    // Shorten the known-sample buffer at high input speeds, before its delay
+    // reaches the lag limit and repeatedly clips/restarts the motion curve.
+    if(!reversing&&time>input.time){
+      const speed=Math.abs(target-input.value)/(time-input.time);
+      lookbackMilliseconds=Math.min(maxLookbackMilliseconds,(maxLag-1e-6)/speed);
+    }
     const distance=target-current;
     const capped=Math.abs(distance)>maxLag;
     if(capped)publish(target-Math.sign(distance)*maxLag);
-    const previous=anchors.at(-1);
     if(capped||reversing||time-previous.time>=lookbackMilliseconds||time<=previous.time)bridge(time);
     else anchors.push({time,value:target});
     while(anchors.length>maxAnchors)anchors.shift();

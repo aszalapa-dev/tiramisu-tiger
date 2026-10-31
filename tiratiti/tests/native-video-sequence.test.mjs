@@ -9,7 +9,7 @@ function fixture({manifest=metadata(),deferDecode=false,supported=true,rendererF
   const requests=[],draws=[],frames=[],decoders=[],errors=[],presents=[],raf=new Map(),readers=[];
   let nextRAF=0,resizeHook,visibilityHook,hiddenHook,hidden=false,readyCount=0,contextLost;
   let size=initialSize||{width:390,height:500};
-  const all=new Uint8Array(manifest.video.bytes);for(let i=0;i<manifest.frames.length;i++)all.fill(i,i*10,i*10+10);
+  const all=new Uint8Array(manifest.video.bytes);manifest.video.packets.forEach((packet,index)=>all.fill(index,packet.offset,packet.offset+packet.size));
   const uniforms={},gpu={NO_ERROR:0,getError:()=>0,isContextLost:()=>false,getShaderParameter:()=>true,getProgramParameter:()=>true,getAttribLocation:()=>0,getUniformLocation:(_program,name)=>name};
   for(const name of ['createShader','createProgram','createBuffer','createTexture'])gpu[name]=()=>({});
   for(const name of ['shaderSource','compileShader','deleteShader','attachShader','linkProgram','deleteProgram','bindBuffer','bufferData','useProgram','enableVertexAttribArray','vertexAttribPointer','activeTexture','bindTexture','texParameteri','uniform1i','disable','enable','blendFunc','clearColor','viewport','pixelStorei','clear','deleteTexture','deleteBuffer'])gpu[name]=()=>{};
@@ -50,6 +50,13 @@ function fixture({manifest=metadata(),deferDecode=false,supported=true,rendererF
     async flush(){await tick();const callbacks=[...raf.values()];raf.clear();for(const callback of callbacks)callback();await tick();},
     async feed(start,end){await tick();const request=requests.find(r=>r.reader&&!r.aborted);assert.ok(request,'Stream started');const item={value:all.slice(start,end),done:false};if(request.waiter){request.waiter.resolve(item);request.waiter=null;}else request.reader.queue.push(item);await f.flush();},
     async range(request,{status=206,start,end}={}){assert.ok(request?.resolve,'Priority range pending');const rangeStart=start??Number(/bytes=(\d+)/.exec(request.options.headers.Range)[1]);const rangeEnd=end??Number(/-(\d+)$/.exec(request.options.headers.Range)[1])+1;const data=status===200?all:all.slice(rangeStart,rangeEnd);request.resolve({ok:true,status,headers:{get:name=>name.toLowerCase()==='content-range'?`bytes ${rangeStart}-${rangeStart+data.length-1}/${all.length}`:null},arrayBuffer:async()=>data.buffer});await f.flush();},
+    async partialRange(request){
+      const [,start,end]=/bytes=(\d+)-(\d+)/.exec(request.options.headers.Range),reader={queue:[],done:false,waiter:null};
+      reader.read=()=>reader.queue.length?Promise.resolve(reader.queue.shift()):new Promise((resolve,reject)=>{reader.waiter={resolve,reject};});
+      reader.cancel=()=>{reader.done=true;reader.waiter?.resolve({done:true});reader.waiter=null;return Promise.resolve();};
+      request.resolve({ok:true,status:206,headers:{get:()=>`bytes ${start}-${end}/${all.length}`},body:{getReader:()=>reader}});await tick();
+      return async(start,end)=>{const item={done:false,value:all.slice(start,end)};if(reader.waiter){reader.waiter.resolve(item);reader.waiter=null;}else reader.queue.push(item);await f.flush();};
+    },
     async complete(){const batch=decoders[0]?.batches.find(b=>!b.finished);assert.ok(batch);batch.finished=true;batch.finish();await f.flush();},
     resize(value){size=value;resizeHook?.();},visible(value){visibilityHook?.(value);},hide(value){hidden=value;hiddenHook?.();},lose(){contextLost?.(new Error('lost'));}
   };return f;
@@ -60,6 +67,11 @@ test('first complete packet paints before the stream completes; no idle RAF or b
   assert.equal(f.draws.at(-1)?.index,0);assert.equal(f.readyCount,1);assert.equal(f.requests.length,1);
   assert.equal(f.canvas.width,585);assert.equal(f.canvas.height,750);assert.equal(f.raf.size,0);
   assert.equal(f.frames.length,1);f.player.dispose();assert.ok(f.frames.every(frame=>frame.closed));
+});
+
+test('a partly received opening keyframe continues on the original stream without another round trip',async()=>{
+  const f=fixture();await f.feed(0,5);assert.equal(f.requests.length,1,'Already arriving prefix bytes must not trigger a duplicate priority fetch');
+  await f.feed(5,10);await f.player.ready;assert.equal(f.draws.at(-1)?.index,0);assert.equal(f.requests.length,1);f.player.dispose();
 });
 
 test('random GOP seek decodes preceding key through target and closes intermediate frames',async()=>{
@@ -80,9 +92,65 @@ test('slow batches coalesce newer targets, preserve useful advance, and never pa
 
 test('one priority range loads an unreceived target GOP without waiting for sequential prefix',async()=>{
   const f=fixture();await f.feed(0,10);f.player.render(10/17);await tick();
-  const request=f.requests.find(r=>r.options.headers?.Range);assert.equal(request.options.headers.Range,'bytes=60-119');
-  await f.range(request);assert.equal(f.draws.at(-1)?.index,10);assert.equal(f.requests.filter(r=>r.options.headers?.Range).length,1);
+  const request=f.requests.find(r=>r.options.headers?.Range);assert.equal(request.options.headers.Range,'bytes=60-179');
+  await f.range(request);assert.equal(f.draws.at(-1)?.index,10);
+  assert.equal(f.requests.length,3,'One urgent window is followed by one resumed prefix stream');assert.equal(f.requests.at(-1).options.headers.Range,'bytes=10-179');
   f.player.dispose();assert.ok(f.requests.every(r=>r.aborted));
+});
+
+test('forward lookahead remains within its byte budget and keeps a partly loaded covered range',async()=>{
+  const manifest=metadata(100);let offset=0;
+  manifest.video.packets.forEach(packet=>{packet.offset=offset;packet.size=packet.key?90000:12000;offset+=packet.size;});manifest.video.bytes=offset;
+  const f=fixture({manifest});await f.feed(0,90000);f.player.render(10/99);await tick();const request=f.requests.at(-1);
+  const [,start,end]=/bytes=(\d+)-(\d+)/.exec(request.options.headers.Range).map(Number);
+  assert.ok(end-start+1<=512*1024,'The lookahead has a fixed byte ceiling');
+  assert.ok(end>=manifest.video.packets[22].offset+manifest.video.packets[22].size-1,'Future covered GOPs should not need another RTT');
+  const feed=await f.partialRange(request);f.player.render(16/99);await tick();
+  await feed(start,manifest.video.packets[17].offset+manifest.video.packets[17].size);assert.equal(f.draws.at(-1)?.index,16);
+  f.player.render(22/99);await tick();assert.equal(f.requests.length,2,'A useful partly loaded window is not restarted');assert.equal(request.aborted,false);
+  f.visible(false);assert.ok(f.requests.every(r=>r.aborted),'Both background and priority suspend outside the viewport');f.player.dispose();
+});
+
+test('tiny packets cannot expand a priority window past six GOPs',async()=>{
+  const f=fixture({manifest:metadata(100)});await f.feed(0,10);f.player.render(10/99);await tick();
+  assert.equal(f.requests.at(-1).options.headers.Range,'bytes=60-419');f.player.dispose();
+});
+
+test('an urgent window gets the bandwidth and idle completion resumes the saved prefix without another render',async()=>{
+  const f=fixture({manifest:metadata(100)});await f.feed(0,10);f.player.render(10/99);await tick();const urgent=f.requests.at(-1);
+  assert.ok(f.requests[0].aborted,'The background prefix must not compete with the urgent seek');
+  await f.range(urgent);assert.equal(f.draws.at(-1)?.index,10);
+  const resumed=f.requests.at(-1);assert.notEqual(resumed,urgent);assert.equal(resumed.options.headers.Range,'bytes=10-999','Completion resumes the exact received prefix even when store->pump cleared the priority first');
+  f.player.dispose();assert.ok(f.requests.every(r=>r.aborted));
+});
+
+test('a detached seek prefetches before its cached tail runs out without decoding future poses',async()=>{
+  const f=fixture({manifest:metadata(100)});await f.feed(0,10);f.player.render(10/99);await tick();await f.range(f.requests.at(-1));
+  const resumed=f.requests.at(-1);f.player.render(32/99);await f.flush();assert.equal(f.draws.at(-1)?.index,32,'The requested pose was already cached');
+  const ahead=f.requests.at(-1);assert.notEqual(ahead,resumed);assert.ok(resumed.aborted);assert.equal(ahead.options.headers.Range,'bytes=420-779');
+  const decoded=f.frames.length;await f.range(ahead);assert.equal(f.frames.length,decoded,'Compressed lookahead never adds decoded surfaces');
+  assert.equal(f.draws.at(-1)?.index,32);f.player.dispose();
+});
+
+test('reversing inside cached poses cancels a now-useless forward prefetch and resumes the prefix',async()=>{
+  const f=fixture({manifest:metadata(100)});await f.feed(0,10);f.player.render(10/99);await tick();await f.range(f.requests.at(-1));
+  f.player.render(32/99);await f.flush();const ahead=f.requests.at(-1);assert.equal(ahead.options.headers.Range,'bytes=420-779');
+  f.player.render(31/99);await f.flush();assert.ok(ahead.aborted,'A range wholly ahead of a reverse gesture is obsolete');
+  assert.equal(f.draws.at(-1)?.index,31);assert.equal(f.requests.at(-1).options.headers.Range,'bytes=10-999');f.player.dispose();
+});
+
+test('refilling an interrupted lookahead requests missing deltas even when its keyframe is cached',async()=>{
+  const f=fixture({manifest:metadata(100)});await f.feed(0,10);f.player.render(10/99);await tick();await f.range(f.requests.at(-1));
+  f.player.render(32/99);await f.flush();const ahead=f.requests.at(-1),feed=await f.partialRange(ahead);await feed(420,430);
+  f.player.render(31/99);await f.flush();assert.ok(ahead.aborted);const prefix=f.requests.at(-1);
+  f.player.render(32/99);await f.flush();assert.equal(f.draws.at(-1)?.index,32);assert.ok(prefix.aborted,'The restored detached window must get priority again');
+  assert.equal(f.requests.at(-1).options.headers.Range,'bytes=420-779','A cached key does not mean the whole future GOP is available');f.player.dispose();
+});
+
+test('a cold reverse seek keeps its target first instead of waiting behind backward lookahead',async()=>{
+  const f=fixture({manifest:metadata(100)});await f.feed(0,10);f.player.render(.5);await tick();const forward=f.requests.at(-1);
+  f.player.render(.4);await tick();assert.ok(forward.aborted,'A stale forward range is cancelled on reversal');
+  assert.equal(f.requests.at(-1).options.headers.Range,'bytes=360-419');f.player.dispose();
 });
 
 test('a server ignoring Range is interpreted from byte zero and never corrupts cached packets',async()=>{
@@ -126,14 +194,15 @@ test('context loss preserves no stale decoder or frame resources and reports fal
   const f=fixture();await f.feed(0,10);f.lose();f.lose();assert.equal(f.errors.length,1);assert.ok(f.frames.every(frame=>frame.closed));assert.ok(f.decoders[0].closed);assert.ok(f.requests.every(r=>r.aborted));f.player.dispose();
 });
 
-test('a cold forward gesture keeps one useful full GOP transfer and paints its late completion',async()=>{
-  const f=fixture();await f.feed(0,10);f.player.render(8/17);await tick();const request=f.requests.at(-1);
-  assert.equal(request.options.headers.Range,'bytes=60-119');
-  for(const index of [9,10,11,12,13]){f.player.render(index/17);await tick();}
+test('a cold forward gesture keeps its useful window and paints a late completion before the exact target arrives',async()=>{
+  const f=fixture({manifest:metadata(60)});await f.feed(0,10);f.player.render(8/59);await tick();const request=f.requests.at(-1);
+  assert.equal(request.options.headers.Range,'bytes=60-419');
+  for(let index=9;index<=43;index++){f.player.render(index/59);await tick();}
   assert.equal(request.aborted,false,'Same-direction movement cannot starve the useful transfer');
   assert.equal(f.requests.filter(r=>r.options.headers?.Range&&!r.aborted).length,1);
-  await f.range(request);assert.equal(f.draws.at(-1)?.index,11,'Late complete GOP still moves forward while exact target is absent');
-  await f.range(f.requests.at(-1));assert.equal(f.draws.at(-1)?.index,13);f.player.dispose();
+  await f.range(request);assert.equal(f.draws.at(-1)?.index,41,'Late useful completion still advances while the exact target is absent');
+  assert.equal(f.requests.at(-1).options.headers.Range,'bytes=420-599');
+  await f.range(f.requests.at(-1));assert.equal(f.draws.at(-1)?.index,43);f.player.dispose();
 });
 
 test('all-IDR assets decode exactly one packet for each arbitrary target',async()=>{

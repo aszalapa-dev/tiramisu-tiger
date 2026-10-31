@@ -60,6 +60,37 @@ test('large seeks immediately stay within 0.025 progress without overshooting or
   f.settle();assert.equal(f.value,.9);f.player.dispose();
 });
 
+for(const [inputHz,displayHz]of [[30,60],[30,120],[60,60],[60,120]])test(`${inputHz} Hz fast linear input does not pulse against the lag cap at ${displayHz} Hz`,context=>{
+  const f=fixture({initialProgress:.1,hz:displayHz}),values=[],interval=displayHz/inputHz;
+  for(let tick=0;tick<displayHz*1.5;tick++){
+    const target=.1+.5*Math.floor(tick/interval)*interval/displayHz;
+    if(tick%interval===0)f.player.set(target);
+    f.advance();values.push(f.value);
+    assert.ok(target-f.value<=.025+1e-12,'Adaptive timing must preserve the existing maximum lag');
+    assert.ok(f.value<=target+1e-12,'The fast input must never be extrapolated');
+  }
+  const interior=values.slice(Math.ceil(displayHz*.3),displayHz*1.3),steps=interior.slice(1).map((v,i)=>v-interior[i]);
+  assert.ok(steps.every(step=>step>0),'Fast linear input must not hold refreshes');
+  const ratio=Math.max(...steps)/Math.min(...steps);
+  assert.ok(ratio<=1.2,`The lag cap must not periodically accelerate the model (${ratio.toFixed(3)}×)`);
+  context.diagnostic(`fast-input velocity ratio: ${ratio.toFixed(3)}×`);
+  f.settle();assert.equal(f.value,.1+.5*(1.5-1/inputHz));f.player.dispose();
+});
+
+for(const accelerating of [true,false])test(`a smoothly ${accelerating?'accelerating':'decelerating'} touch gesture stays monotonic and reaches its exact final input`,()=>{
+  const f=fixture({initialProgress:.1}),values=[];let target=.1;
+  const position=time=>accelerating?.1+.1*time+.4*time*time/3:.1+.5*time-.4*time*time/3;
+  for(let tick=0;tick<90;tick++){
+    if(tick%2===0){target=position(tick/60);f.player.set(target);}
+    f.advance();values.push(f.value);
+    assert.ok(target-f.value<=.025+1e-12,'Changing speed cannot violate the lag budget');
+    assert.ok(f.value<=target+1e-12,'Changing speed cannot extrapolate');
+  }
+  const interior=values.slice(20,80);
+  assert.ok(interior.slice(1).every((v,i)=>v>interior[i]),'Gradual speed changes must not freeze display frames');
+  f.settle();assert.equal(f.value,target);f.player.dispose();
+});
+
 test('a reversed target behind the visual reverses on the next display frame without inertia overshoot',()=>{
   const f=fixture();f.player.set(.02);f.advance();const before=f.value;
   assert.ok(before>.004);f.player.set(.004);f.advance();
@@ -104,4 +135,33 @@ test('immediate updates clamp to the timeline and disposal cancels future callba
   f.player.set(.02);const late=[...f.frames.values()][0];f.player.dispose();
   const calls=f.values.length;late(100);f.player.set(.9,{immediate:true});f.player.resume();
   assert.equal(f.values.length,calls);assert.equal(f.frames.size,0);
+});
+
+for(const inputHz of [30,60])test(`${inputHz} Hz exponential touch momentum restores an even cadence after a fast startup`,()=>{
+  const f=fixture({initialProgress:.1}),values=[];let target=.1;
+  for(let tick=0;tick<120;tick++){
+    if(tick%(60/inputHz)===0){target=.1+.5*(1-Math.exp(-3*tick/60));f.player.set(target);}
+    f.advance();values.push(f.value);
+    assert.ok(f.value<=target+1e-12,'Momentum may not be extrapolated');
+    assert.ok(target-f.value<=.025+1e-12,'Momentum remains within the lag budget');
+  }
+  const steps=values.slice(40,90).map((value,i)=>value-values[39+i]);
+  assert.ok(steps.every(step=>step>0),'The still-moving momentum cannot freeze');
+  const adjacent=steps.slice(1).map((step,i)=>Math.max(step,steps[i])/Math.min(step,steps[i]));
+  assert.ok(Math.max(...adjacent)<1.25,`A decaying gesture must not pulse every other refresh (${Math.max(...adjacent).toFixed(3)}×)`);
+  f.settle();assert.equal(f.value,target);f.player.dispose();
+});
+
+test('a fast gesture followed by idle does not poison the next slow gesture',()=>{
+  const f=fixture({initialProgress:.1});
+  for(let tick=0;tick<30;tick++){if(tick%2===0)f.player.set(.1+.8*tick/60);f.advance();}
+  f.settle();f.advance(1000);const start=f.value,values=[];let target=start;
+  for(let tick=0;tick<90;tick++){
+    if(tick%2===0){target=start+.08*tick/60;f.player.set(target);}f.advance();values.push(f.value);
+    assert.ok(f.value<=target+1e-12);assert.ok(target-f.value<=.025+1e-12);
+  }
+  const steps=values.slice(20,80).map((value,i)=>value-values[19+i]);
+  assert.ok(steps.every(step=>step>0));
+  assert.ok(Math.max(...steps)/Math.min(...steps)<1.2,'Old short-delay interpolation state cannot pulse the new gesture');
+  f.settle();assert.equal(f.value,target);f.player.dispose();
 });

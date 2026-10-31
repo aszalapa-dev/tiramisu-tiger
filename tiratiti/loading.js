@@ -1,5 +1,5 @@
-import { createRenderedSequence } from './sequence-playback.js?v=lid-overscan-31';
-import { createScrollPlayhead } from './scroll-playhead.js?v=fluid-31';
+import { createRenderedSequence } from './sequence-playback.js?v=dense-cadence-31';
+import { createScrollPlayhead } from './scroll-playhead.js?v=dense-cadence-31';
 
 const stage=document.querySelector('#product-stage');
 const poster=document.querySelector('#poster');

@@ -102,6 +102,17 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
     const start=video.packets[first].offset,end=video.packets[index].offset+video.packets[index].size;
     return {first,index,start,end,last,rangeEnd:video.packets[last].offset+video.packets[last].size};
   }
+  function downloadWindow(wanted){
+    let last=wanted.last,end=wanted.rangeEnd,groups=1;
+    // HTTP bytes arrive in ascending order. A backward window would postpone
+    // the current missing pose behind the lookahead, so reverse stays one GOP.
+    if(direction>0)while(groups<6&&last+1<video.packets.length){
+      const next=group(last+1);
+      if(next.rangeEnd-wanted.start>512*1024)break;
+      last=next.last;end=next.rangeEnd;groups++;
+    }
+    return {start:wanted.start,end,first:wanted.first,last};
+  }
   async function readResponse(response,job,requestedStart,expectedEnd){
     if(!response.ok)throw new Error('Vidéo indisponible ('+response.status+').');
     let start=0,limit=video.bytes;
@@ -125,7 +136,7 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
     if(!job.cancelled&&cursor!==limit)throw new Error('Flux vidéo incomplet.');
   }
   function startStream(){
-    if(!canWork()||!video||streamJob||streamCompleted)return;
+    if(!canWork()||!video||streamJob||streamCompleted||priorityJob)return;
     const start=received[0]?.[0]===0?received[0][1]:0;
     if(start>=video.bytes)return;
     const job={controller:new AbortController(),cancelled:false};streamJob=job;
@@ -137,27 +148,51 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
   function requestRange(wanted){
     if(priorityJob&&contains(priorityJob.start,priorityJob.end)){priorityJob.cancelled=true;priorityJob.controller.abort();priorityJob=null;}
     if(contains(wanted.start,wanted.end))return;
-    // Let the opening packet of the already-running stream arrive without a duplicate request.
-    if(wanted.start===0&&received.length===0&&streamJob)return;
+    // The sequential stream is already delivering this GOP. Preserve its
+    // partially received opening keyframe instead of paying another round trip.
+    const prefix=received[0]?.[0]===0?received[0][1]:0;
+    if(streamJob&&wanted.start<=prefix)return;
     if(priorityJob?.start===wanted.start&&priorityJob?.end===wanted.rangeEnd)return;
     if(priorityJob&&priorityJob.epoch===epoch){
+      // Keep useful bytes already in flight when the gesture enters the next
+      // covered GOP instead of restarting its network round trip.
+      if(wanted.first>=priorityJob.first&&wanted.last<=priorityJob.last)return;
       const near=direction>0?priorityJob.last:priorityJob.first;
       const coordinate=timeline.frameCoordinate(near,pose),target=timeline.frameCoordinate(pose.index,pose);
       if(direction>0?coordinate<=target+6&&(lastCoordinate===null||coordinate>=lastCoordinate):
         coordinate>=target-6&&(lastCoordinate===null||coordinate<=lastCoordinate))return;
     }
     if(priorityJob){priorityJob.cancelled=true;priorityJob.controller.abort();priorityJob.reader?.cancel()?.catch?.(()=>{});}
-    const job={start:wanted.start,end:wanted.rangeEnd,first:wanted.first,last:wanted.last,epoch,controller:new AbortController(),cancelled:false};priorityJob=job;
-    fetchFile(videoURL,{signal:job.controller.signal,...requestOptions(),headers:{Range:`bytes=${wanted.start}-${wanted.rangeEnd-1}`}})
-      .then(response=>readResponse(response,job,wanted.start,wanted.rangeEnd))
+    // Give the visible seek the bandwidth; its compressed bytes share the same
+    // buffer. The prefix resumes from its received offset when no window needs it.
+    if(streamJob){const stream=streamJob;streamJob=null;stream.cancelled=true;stream.controller.abort();stream.reader?.cancel()?.catch?.(()=>{});}
+    const job={...downloadWindow(wanted),epoch,controller:new AbortController(),cancelled:false};priorityJob=job;
+    fetchFile(videoURL,{signal:job.controller.signal,...requestOptions(),headers:{Range:`bytes=${job.start}-${job.end-1}`}})
+      .then(response=>readResponse(response,job,job.start,job.end))
       .catch(error=>{if(!job.cancelled&&!disposed&&!failed&&!isAbort(error))fail(error);})
       .finally(()=>{if(priorityJob===job){priorityJob=null;pump();}});
+  }
+  function prefetch(wanted){
+    if(direction<0||priorityJob||streamCompleted||!contains(wanted.start,wanted.rangeEnd))return;
+    // The prefix already has a stream. Only refill a detached seek window, up
+    // to four cached GOPs before its tail, so the next RTT overlaps movement.
+    const prefix=received[0]?.[0]===0?received[0][1]:0;
+    if(wanted.start<prefix)return;
+    let index=wanted.last+1;
+    for(let groups=0;groups<4&&index<video.packets.length;groups++){
+      const next=group(index);
+      if(!contains(next.start,next.rangeEnd)){requestRange({...next,end:next.rangeEnd});return;}
+      index=next.last+1;
+    }
   }
   function pump(){
     if(!canWork()||!video)return;
     const wanted=group(pose.index);
     if(priorityJob&&contains(priorityJob.start,priorityJob.end)){priorityJob.cancelled=true;priorityJob.controller.abort();priorityJob.reader?.cancel()?.catch?.(()=>{});priorityJob=null;}
-    if(!contains(wanted.start,wanted.end))requestRange(wanted);
+    if(!contains(wanted.start,wanted.end))requestRange(wanted);else prefetch(wanted);
+    // store() may clear a complete priority before its promise finally runs.
+    // Decide the next priority first, then resume even when the pose is idle.
+    if(!priorityJob)startStream();
     if(batch||pending?.index===pose.index&&pending.epoch===epoch||displayed?.index===pose.index)return;
     let candidate=contains(wanted.start,wanted.end)?wanted:null,distance=Infinity;
     if(!candidate)for(let index=0;index<video.packets.length;index++){
@@ -190,15 +225,19 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
       let delta=pose.index-oldPose.index;if(Math.abs(delta)>timeline.loopFrames/2)delta-=Math.sign(delta)*timeline.loopFrames;direction=Math.sign(delta);
     }
     if(direction!==oldDirection||Math.abs(next-previous)>.10){epoch++;lastCoordinate=null;close(pending?.frame);pending=null;}
+    if(direction!==oldDirection&&priorityJob){
+      const wanted=group(pose.index),obsolete=direction<0?priorityJob.first>wanted.last:priorityJob.last<wanted.first;
+      if(obsolete){const job=priorityJob;priorityJob=null;job.cancelled=true;job.controller.abort();job.reader?.cancel()?.catch?.(()=>{});}
+    }
     if(displayed?.index===pose.index&&canWork()){
       const scale=(fixedScale?1:pose.scale)/timeline.frameScale(displayed.index);
       if(scale!==lastScale){try{draw(displayed);}catch(error){fail(error);}}
     }
-    startStream();pump();wantPaint();
+    pump();wantPaint();
   }
   function visibilityChanged(){
     if(!canWork()){cancelPaint();stopNetwork();return;}
-    resize();startStream();pump();wantPaint();
+    resize();pump();wantPaint();
   }
   function validate(input){
     const v=input.video,frames=input.frames;
