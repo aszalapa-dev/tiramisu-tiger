@@ -21,7 +21,7 @@ function page({reduced=false}={}){
     };
   }
   const headings=[
-    {id:'near',top:628,text:'LE BON TIRAMISU'},
+    {id:'near',top:500,text:'LE BON TIRAMISU'},
     {id:'far',top:3000,text:'AUTRE\nTITRE'},
     {id:'above',top:-1000,text:'DÉJÀ PASSÉ'},
     {id:'hero',top:0,text:'HÉROS',excluded:true}
@@ -72,7 +72,7 @@ test('offscreen headings do not read geometry, rewrite opacity or queue scroll f
 
 test('only nearby headings are measured and every geometry read precedes opacity writes',()=>{
   const p=page();p.intersect({near:true,far:true,above:false});p.frame();
-  p.headings[0].top=700;p.headings[1].top=650;p.clear();p.fire('scroll');p.frame();
+  p.headings[0].top=620;p.headings[1].top=500;p.clear();p.fire('scroll');p.frame();
   assert.deepEqual(p.operations.filter(op=>op.type==='read').map(op=>op.id),['near','far']);
   const firstWrite=p.operations.findIndex(op=>op.type==='write');
   assert.ok(firstWrite>=2);assert.ok(p.operations.slice(firstWrite).every(op=>op.type==='write'));
@@ -81,7 +81,9 @@ test('only nearby headings are measured and every geometry read precedes opacity
 });
 
 test('word reveals stay reversible and preserve the heading text and accessible name',()=>{
-  const p=page();p.intersect({near:true});p.frame();
+  const p=page();p.headings[0].top=700;p.intersect({near:true});p.frame();
+  assert.deepEqual(p.opacity('near'),[.2,.2,.2],'Words wait until the heading reaches 80% of the viewport');
+  p.headings[0].top=500;p.fire('scroll');p.frame();
   const halfway=p.opacity('near');assert.equal(halfway[0],1);assert.ok(Math.abs(halfway[1]-.6)<1e-10);assert.equal(halfway[2],.2);
   p.headings[0].top=0;p.fire('scroll');p.frame();assert.deepEqual(p.opacity('near'),[1,1,1]);
   p.headings[0].top=800;p.fire('scroll');p.frame();assert.deepEqual(p.opacity('near'),[.2,.2,.2]);

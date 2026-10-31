@@ -72,7 +72,7 @@ function paintHero(){
   styleValue(stage,'--stage-offset-y',((initialY-50)*(1-ease(clamp(progress/.18)))*heroHeight/100).toFixed(2)+'px',true);
   stage.dataset.progress=String(progress);
   for(const block of heroBlocks){
-    const reveal=clamp((heroHeight*.96-(block.offset-y))/(heroHeight*.35));
+    const reveal=clamp((heroHeight*.80-(block.offset-y))/(heroHeight*.35));
     block.words.forEach((word,i)=>{
       const f=reduce.matches?1:clamp(reveal*block.words.length-i);
       styleValue(word,'opacity',String(.2+.8*f));

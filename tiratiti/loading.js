@@ -1,13 +1,17 @@
-import { createRenderedSequence } from './rendered-sequence.js?v=mobile-safari-27';
+import { createRenderedSequence } from './sequence-playback.js?v=fluid-31';
+import { createScrollPlayhead } from './scroll-playhead.js?v=fluid-31';
 
 const stage=document.querySelector('#product-stage');
 const poster=document.querySelector('#poster');
-const canvas=document.querySelector('#pot');
+let canvas=document.querySelector('#pot');
 const button=document.querySelector('#retry-3d');
 const status=document.querySelector('#scene-status');
 const compact=innerWidth<=760||(innerWidth<=1024&&matchMedia('(pointer: coarse)').matches);
 const manifestUrl=compact?'assets/rendered-one-turn-mobile/manifest.json':'assets/rendered-one-turn/manifest.json';
+const videoManifestUrl=compact?'assets/rendered-video-mobile/manifest.json':'assets/rendered-video-desktop/manifest.json';
 let hero,attempt=0,dialogPlayer,dialogToken=0;
+const playhead=createScrollPlayhead({initialProgress:Number(stage.dataset.progress||0),onProgress:progress=>hero?.render(progress)});
+document.addEventListener?.('visibilitychange',()=>{if(document.hidden)playhead.suspend();else playhead.resume();});
 document.body.dataset.loadingState='ready';
 window.TiratitiLoading={stage(){},finish(){}};
 
@@ -16,7 +20,9 @@ function startHero(){
   hero?.dispose();button.hidden=true;canvas.hidden=false;
   stage.setAttribute('aria-busy','true');
   status.textContent='Préparation de l’animation de la canette.';
-  hero=createRenderedSequence({canvas,manifestUrl,
+  hero=createRenderedSequence({canvas,manifestUrl,videoManifestUrl,
+    onCanvas:next=>{canvas=next;},
+    onFallback(){if(token===attempt)stage.classList.remove('loaded');},
     onReady(){
       if(token!==attempt)return;
       stage.classList.add('loaded');stage.setAttribute('aria-busy','false');
@@ -34,7 +40,7 @@ function startHero(){
   hero.render(Number(stage.dataset.progress||0));
 }
 button.addEventListener('click',startHero);
-addEventListener('tiratiti-scroll',event=>hero?.render(event.detail.reduced?0:event.detail.progress));
+addEventListener('tiratiti-scroll',event=>playhead.set(event.detail.reduced?0:event.detail.progress,{immediate:Boolean(event.detail.reduced)}));
 addEventListener('online',()=>{if(!button.hidden)startHero();});
 
 // The product detail reuses the same native Blender materials and rotation.

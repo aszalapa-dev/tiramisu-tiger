@@ -33,7 +33,7 @@ Sans jeton public, le site conserve le lien de carte OpenStreetMap. L’accueil 
 
 ## Fichiers publiés
 
-L’animation utilise 180 angles de rotation et 95 poses d’ouverture transparents, chargés progressivement. Deux profils sont publiés : 800 × 950 pixels pour l’ordinateur et 640 × 760 pour le téléphone. Le navigateur choisit un seul profil à l’arrivée. Aucun GLB ni moteur 3D n’est requis par cette version.
+L’animation utilise 180 angles de rotation et 95 poses d’ouverture transparents, chargés progressivement. Deux profils sont publiés : 800 × 950 pixels pour l’ordinateur et 640 × 760 pour le téléphone. Le navigateur choisit un seul profil à l’arrivée. Il utilise d’abord le flux H.264 indexé avec WebCodecs lorsque le décodage et le rendu GPU sont disponibles, sinon les images WebP. Le flux mobile pèse 4,22 Mo et celui pour ordinateur 6,22 Mo. Les fichiers statiques doivent accepter les requêtes HTTP Range ; le serveur local les prend également en charge. Aucun GLB ni moteur 3D n’est requis par cette version.
 
 Après l’ajout d’un fichier utilisé par le site, ajouter son chemin à `public-files.json`, puis reconstruire. Le manifeste de l’animation contient une empreinte de révision pour éviter de réutiliser des images périmées dans le cache du navigateur.
 

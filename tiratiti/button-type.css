@@ -1,9 +1,9 @@
 /* Readable action labels shared by the home and reseller pages. */
 .pill,.dealer-header>.pill,.professional .pill,.hero-bottom .pill,.header nav a,.header nav button,.header-actions>a,.nav-cta,.menu-button,.contact-sheet .contact-submit{font:700 16px/1.35 Arial,sans-serif;letter-spacing:.035em;white-space:normal;text-align:center;min-height:48px}
-.header nav a,.header nav button,.header-actions>a,.header .nav-cta,.header .menu-button{font-size:15px;padding:15px 18px}
+.header nav a,.header nav button,.header-actions>a,.header .nav-cta,.header .menu-button{font-size:14px;padding:12px 16px;min-height:44px}
 .header nav,.header-actions{gap:8px}
 .text-link,.card-actions .text-link,.dialog-copy .text-link,.back-home,.external-map,#loading-skip,.scene-retry,.shop-drawer .shop-continue,.shop-drawer .shop-remove,.shop-drawer .shop-checkout{font-family:Arial,sans-serif;font-size:16px;line-height:1.45;letter-spacing:.025em;min-height:44px}
 .mobile-menu nav a{font-family:Arial,sans-serif;letter-spacing:.015em;line-height:1.15}
 .footer-main nav,.dealer-footer nav{font-family:Arial,sans-serif;font-size:15px;line-height:1.5;letter-spacing:.025em}
-@media(min-width:901px) and (max-width:1100px){.header nav a,.header nav button,.header-actions>a{font-size:14px;padding:14px 12px}.header nav{gap:6px}}
-@media(max-width:760px){.header .menu-button,.header .nav-cta{font-size:14px;padding:12px}.pill,.dealer-header>.pill,.professional .pill,.hero-bottom .pill{font-size:15px;max-width:100%;padding:15px 20px}.dealer-header{grid-template-columns:1fr auto;gap:18px}.dealer-header .dealer-logo{grid-column:2;grid-row:1}.dealer-header>.pill{grid-column:1/-1;grid-row:2;justify-self:stretch}.dealer-header .back-home{text-align:left}}
+@media(min-width:901px) and (max-width:1100px){.header nav a,.header nav button,.header-actions>a{font-size:13px;padding:12px 11px}.header nav{gap:6px}}
+@media(max-width:760px){.header .menu-button,.header .nav-cta{font-size:13px;padding:11px 10px}.pill,.dealer-header>.pill,.professional .pill,.hero-bottom .pill{font-size:15px;max-width:100%;padding:15px 20px}.dealer-header{grid-template-columns:1fr auto;gap:18px}.dealer-header .dealer-logo{grid-column:2;grid-row:1}.dealer-header>.pill{grid-column:1/-1;grid-row:2;justify-self:stretch}.dealer-header .back-home{text-align:left}}

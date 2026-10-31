@@ -590,5 +590,12 @@
   "assets/rendered-one-turn-mobile/open-0091.webp",
   "assets/rendered-one-turn-mobile/open-0092.webp",
   "assets/rendered-one-turn-mobile/open-0093.webp",
-  "assets/rendered-one-turn-mobile/open-0094.webp"
+  "assets/rendered-one-turn-mobile/open-0094.webp",
+  "native-video-sequence.js",
+  "sequence-playback.js",
+  "scroll-playhead.js",
+  "assets/rendered-video-mobile/manifest.json",
+  "assets/rendered-video-mobile/sequence.h264",
+  "assets/rendered-video-desktop/manifest.json",
+  "assets/rendered-video-desktop/sequence.h264"
 ]

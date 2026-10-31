@@ -47,7 +47,7 @@
     // Read only nearby headings, and finish every read before changing opacity.
     const positions = [...active].map(block => ({ block, top: block.el.getBoundingClientRect().top }));
     for (const { block, top } of positions) {
-      const progress = clamp((height * .96 - top) / (height * .35));
+      const progress = clamp((height * .80 - top) / (height * .35));
       paintWords(block, progress);
     }
   }

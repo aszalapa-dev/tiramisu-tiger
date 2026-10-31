@@ -8,6 +8,6 @@
     "start": "node server.cjs",
     "build": "node build.cjs",
     "preview": "node server.cjs --dist",
-    "test": "node --test tests/automatic-arrival.test.cjs tests/rendered-sequence.test.mjs tests/sequence-regressions.test.mjs tests/sequence-timeline.test.mjs tests/heading-scroll.test.cjs tests/mobile-scroll.test.cjs tests/store-map-scroll.test.cjs"
+    "test": "node --test tests/automatic-arrival.test.cjs tests/rendered-sequence.test.mjs tests/sequence-regressions.test.mjs tests/sequence-timeline.test.mjs tests/heading-scroll.test.cjs tests/mobile-scroll.test.cjs tests/store-map-scroll.test.cjs tests/native-video-sequence.test.mjs tests/sequence-playback.test.mjs tests/scroll-playhead.test.mjs tests/native-video-network.test.mjs"
   }
 }

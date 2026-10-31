@@ -2,7 +2,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const source=fs.readFileSync(require('node:path').resolve(__dirname,'../loading.js'),'utf8').replace(/^import .*?;\r?\n/,'');
+const source=fs.readFileSync(require('node:path').resolve(__dirname,'../loading.js'),'utf8').replace(/^import .*?;\r?\n/gm,'');
 function arrive(width=390,coarse=false){
   const calls=[],events={};
   const classes=new Set(),stage={dataset:{progress:'.3'},classList:{add:v=>classes.add(v),remove:v=>classes.delete(v)},setAttribute(){}};
@@ -13,7 +13,8 @@ function arrive(width=390,coarse=false){
   const hint={};
   const document={body:{dataset:{}},createElement:tag=>({tag,style:{},listeners:{},setAttribute(){},addEventListener(name,fn){this.listeners[name]=fn;},setPointerCapture(){}}),querySelector:selector=>({'#product-stage':stage,'#poster':{src:'poster.webp'},'#pot':canvas,'#retry-3d':button,'#scene-status':status,'#dialog-visual':host,'.drag-hint':hint})[selector]};
   const createRenderedSequence=options=>{const record={...options,poses:[]};calls.push(record);return {ready:Promise.resolve(),render:p=>record.poses.push(p),dispose(){record.disposed=true;}};};
-  new Function('document','window','addEventListener','matchMedia','innerWidth','createRenderedSequence',source)(document,{},(n,f)=>events[n]=f,()=>({matches:coarse}),width,createRenderedSequence);
+  const createScrollPlayhead=({onProgress})=>({set:onProgress,suspend(){},resume(){}});
+  new Function('document','window','addEventListener','matchMedia','innerWidth','createRenderedSequence','createScrollPlayhead',source)(document,{},(n,f)=>events[n]=f,()=>({matches:coarse}),width,createRenderedSequence,createScrollPlayhead);
   return {calls,events,canvas,stage,classes,button,status,host,hint};
 }
 test('phone arrival automatically uses the sharp rendered animation, without importing real-time 3D',()=>{

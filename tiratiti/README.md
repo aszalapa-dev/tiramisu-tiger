@@ -2,23 +2,21 @@
 
 Site de présentation du tiramisu artisanal Tiratiti : histoire, trois goûts, carte des commerces et page professionnelle.
 
-## Animation Blender — 27 octobre 2026
+## Animation Blender — 31 octobre 2026
 
-La canette affiche des rendus transparents calculés dans Blender avec les matériaux, la caméra et les éclairages d’origine. Le navigateur affiche ces images dans un canevas 2D ; aucun modèle GLB, Three.js ou décodeur Draco n’est chargé par la version active.
+La canette utilise les matériaux, la caméra et les éclairages Blender d’origine. L’accueil privilégie désormais un flux H.264 indexé : WebCodecs décode de petits groupes de six poses maximum, puis un shader WebGL restitue la transparence à partir du masque placé à côté des couleurs prémultipliées. Aucun modèle GLB, Three.js ou décodeur Draco n’est chargé.
 
-- Une rotation complète échantillonnée tous les 2° parcourt un seul tour avant l’ouverture.
-- L’ouverture utilise 95 poses et reste réversible au défilement. Après le décollement, le couvercle monte verticalement et sort par le haut de l’image.
-- La languette et tout le couvercle sont orientés à 180° par rapport à la scène Blender d’origine ; le corps et les étiquettes conservent leur orientation.
-- Les 275 images WebP conservent leur transparence : 800 × 950 pixels sur ordinateur, 640 × 760 sur téléphone. Le profil est choisi à l’arrivée ; le téléphone ne télécharge pas les deux séries.
-- La photo du produit apparaît immédiatement. L’animation démarre automatiquement, sans attendre toutes les images.
-- Le lecteur prépare les images à venir et ignore les décodages périmés qui feraient reculer la pose. Un décodage lent reste utilisable s’il fait avancer le geste ; il n’est plus jeté parce que la fenêtre des prochaines poses a bougé. Un redimensionnement restaure immédiatement la dernière image visible.
-- Le cache conserve au maximum 32 images compressées, avec six images décodées sur téléphone et vingt sur ordinateur. La densité de dessin est limitée à 1,5×. Les dessins et le travail en attente sont suspendus hors écran et dans un onglet masqué.
-- Le téléphone utilise deux chargements simultanés. Pendant un geste continu, un transfert utile peut finir même si la pose visée a avancé ; l’autre suit la cible récente. Un changement de sens ou un grand saut abandonne les transferts périmés. Les tests couvrent aussi une connexion partagée à 5 Mbit/s avec un décodage de 80 ms.
-- La fiche du Classique réutilise cette rotation, à la souris, au toucher ou au clavier. Les autres goûts utilisent leurs photos.
-- Sur téléphone, la canette suit directement l’inertie du défilement natif. La chronologie utilise la hauteur stable de la scène, afin que la barre de Safari ne recale pas l’animation en se rétractant. La montée de la canette utilise une transformation sans modifier sa position de mise en page.
-- Les titres hors écran ne sont pas mesurés à chaque geste ; les opacités inchangées ne sont pas réécrites. La carte démarre automatiquement à l’approche de sa section, après 180 ms sans défilement sur mobile.
+- Les 275 poses gardent un seul tour, l’ouverture réversible et le départ vertical du couvercle. La languette conserve son orientation à 180°.
+- Deux profils vidéo sont disponibles : 640 × 760 sur téléphone (4,22 Mo) et 800 × 950 sur ordinateur (6,22 Mo). L’appareil ne charge que son profil.
+- La photo apparaît immédiatement et la lecture démarre automatiquement dès les premiers paquets disponibles. Le téléchargement continue en arrière-plan ; une plage prioritaire peut charger le groupe visé par un geste rapide.
+- Un tampon de 60 ms interpole les positions horodatées du défilement natif, sans prédire ni dépasser le geste. Son retard est plafonné à 0,025 de la progression ; les grands sauts ne créent pas plusieurs secondes de rattrapage. Il s’arrête exactement à la pose demandée, puis ne consomme aucun RAF au repos.
+- Le lecteur vidéo garde un seul tampon compressé et au maximum deux images de présentation. Les sorties intermédiaires des groupes sont fermées sans dessin. Les dessins et téléchargements sont suspendus hors écran et dans les onglets masqués.
+- Si le codec ou le rendu GPU ne fonctionne pas, le site remplace automatiquement le canevas et utilise le lecteur WebP existant. La photo reste visible pendant ce remplacement, sans bouton d’activation.
+- Le repli WebP garde 32 images compressées et six images décodées sur téléphone, vingt sur ordinateur. La fiche du Classique réutilise ce lecteur au toucher, à la souris et au clavier.
+- La densité de dessin reste limitée à 1,5×. La chronologie repose sur la hauteur stable de la scène afin que la barre Safari ne recale pas l’animation.
+- Les titres hors écran ne sont pas mesurés à chaque geste ; la carte attend 180 ms sans défilement près de sa section sur mobile.
 
-Le rendu Blender reste net : aucune transition floue entre deux poses n’est utilisée. Les anciens fichiers 3D restent dans le dépôt comme références mais sont exclus de `public-files.json` et du dossier publié.
+Les poses ne sont pas mélangées : aucun fondu entre deux angles ne brouille l’étiquette. Le masque vidéo est légèrement compressé ; les photos et les WebP d’origine restent disponibles en repli. Les sources 3D sont exclues du dossier publié.
 
 ## Commandes
 
@@ -38,9 +36,11 @@ Sous PowerShell, `npm.cmd` peut être utilisé à la place de `npm`.
 - `index.html`, `redesign.css`, `loading.css` : page principale et adaptation mobile.
 - `interface.js`, `smooth-scroll.js`, `heading-scroll.js` : défilement et textes.
 - `loading.js` : démarrage automatique, secours photo et fiches produit.
-- `rendered-sequence.js` : chargement, caches, dessin et cycle de vie.
+- `sequence-playback.js`, `native-video-sequence.js`, `scroll-playhead.js` : sélection du lecteur, décodage vidéo/GPU et suivi visuel.
+- `rendered-sequence.js` : lecteur WebP de compatibilité et fiches produit.
 - `sequence-timeline.js` : nombre de tours défini par le manifeste, ouverture et compensation de taille.
-- `assets/rendered-one-turn/` : images et manifeste versionné par empreinte du contenu.
+- `assets/rendered-video-mobile/`, `assets/rendered-video-desktop/` : flux vidéo et index versionnés.
+- `assets/rendered-one-turn/` : images et manifeste du repli ordinateur.
 - `assets/rendered-one-turn-mobile/` : mêmes poses et matériaux, adaptées au téléphone.
 - `home-map.css`, `store-map.js` : carte et liste des commerces ; la carte attend l’approche de sa section.
 - `revendeurs.html`, `revendeurs.css`, `revendeurs.js` : page professionnelle, avec navigation et pied de page communs.
