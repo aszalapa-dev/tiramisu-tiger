@@ -1,5 +1,5 @@
 import {createRenderedSequence as createImageSequence} from './rendered-sequence.js?v=mobile-safari-27';
-import {createNativeVideoSequence} from './native-video-sequence.js?v=fluid-31';
+import {createNativeVideoSequence} from './native-video-sequence.js?v=lid-overscan-31';
 
 // Keep the native Blender images as an automatic compatibility fallback.
 // A fresh canvas is essential: a WebGL canvas cannot become a 2D canvas.

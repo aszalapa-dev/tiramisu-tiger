@@ -7,7 +7,11 @@ function arrive(width=390,coarse=false){
   const calls=[],events={};
   const classes=new Set(),stage={dataset:{progress:'.3'},classList:{add:v=>classes.add(v),remove:v=>classes.delete(v)},setAttribute(){}};
   const button={hidden:true,addEventListener(name,fn){events.retry=fn;}};
-  const canvas={dataset:{},hidden:false};
+  const canvasClasses=new Set();
+  const canvas={dataset:{},hidden:false,classList:{
+    toggle(name,enabled){if(enabled)canvasClasses.add(name);else canvasClasses.delete(name);},
+    remove(name){canvasClasses.delete(name);},contains:name=>canvasClasses.has(name)
+  }};
   const status={textContent:''};
   const host={children:[],classList:{toggle(){}},replaceChildren(){this.children=[];},append(node){this.children.push(node);}};
   const hint={};
@@ -21,6 +25,17 @@ test('phone arrival automatically uses the sharp rendered animation, without imp
   const f=arrive();assert.equal(f.calls.length,1);assert.equal(f.calls[0].manifestUrl,'assets/rendered-one-turn-mobile/manifest.json');
   assert.deepEqual(f.calls[0].poses,[.3]);assert.doesNotMatch(source,/import\(.*scene\.js/);
   f.calls[0].onReady();assert.ok(f.classes.has('loaded'));assert.equal(f.button.hidden,true);
+});
+
+test('overscan follows the poster and a compatibility canvas returns to normal framing',()=>{
+  const f=arrive(),options=f.calls[0];
+  assert.equal(options.referenceElement.src,'poster.webp');
+  options.onLayout({width:640,height:760,top:760});assert.ok(f.canvas.classList.contains('video-overscan'));
+  options.onReady();assert.ok(f.classes.has('loaded'));
+  options.onFallback();assert.equal(f.classes.has('loaded'),false,'The photo is shown while a fallback loads');
+  let removed=false;const replacement={dataset:{},classList:{remove(name){removed=name==='video-overscan';}}};
+  options.onCanvas(replacement);assert.ok(removed,'A fallback cannot inherit the enlarged video geometry');
+  options.onReady();assert.equal(replacement.dataset.renderMode,'blender');assert.ok(f.classes.has('loaded'));
 });
 
 test('a touch phone in landscape still uses only the compact animation profile',()=>{

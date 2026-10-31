@@ -1,4 +1,4 @@
-import { createRenderedSequence } from './sequence-playback.js?v=fluid-31';
+import { createRenderedSequence } from './sequence-playback.js?v=lid-overscan-31';
 import { createScrollPlayhead } from './scroll-playhead.js?v=fluid-31';
 
 const stage=document.querySelector('#product-stage');
@@ -20,8 +20,9 @@ function startHero(){
   hero?.dispose();button.hidden=true;canvas.hidden=false;
   stage.setAttribute('aria-busy','true');
   status.textContent='Préparation de l’animation de la canette.';
-  hero=createRenderedSequence({canvas,manifestUrl,videoManifestUrl,
-    onCanvas:next=>{canvas=next;},
+  hero=createRenderedSequence({canvas,manifestUrl,videoManifestUrl,referenceElement:poster,
+    onLayout:layout=>{if(token===attempt)canvas.classList.toggle('video-overscan',Boolean(layout));},
+    onCanvas:next=>{canvas=next;canvas.classList.remove('video-overscan');},
     onFallback(){if(token===attempt)stage.classList.remove('loaded');},
     onReady(){
       if(token!==attempt)return;

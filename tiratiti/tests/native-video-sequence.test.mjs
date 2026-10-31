@@ -5,19 +5,24 @@ import {createNativeVideoSequence} from '../native-video-sequence.js';
 const tick=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 function metadata(count=18,gop=6){return {width:640,height:760,revision:'test1',frames:Array.from({length:count},(_,i)=>i+'.webp'),video:{url:'packed.h264',bytes:count*10,codec:'avc1.42c020',codedWidth:1280,codedHeight:760,packets:Array.from({length:count},(_,i)=>({offset:i*10,size:10,key:i%gop===0,timestamp:i*33333}))}};}
 
-function fixture({manifest=metadata(),deferDecode=false,supported=true,rendererFailure=false,fixedScale=false}={}){
+function fixture({manifest=metadata(),deferDecode=false,supported=true,rendererFailure=false,fixedScale=false,referenceElement,referenceSize,realRenderer=false,size:initialSize,onLayout}={}){
   const requests=[],draws=[],frames=[],decoders=[],errors=[],presents=[],raf=new Map(),readers=[];
   let nextRAF=0,resizeHook,visibilityHook,hiddenHook,hidden=false,readyCount=0,contextLost;
-  let size={width:390,height:500};
+  let size=initialSize||{width:390,height:500};
   const all=new Uint8Array(manifest.video.bytes);for(let i=0;i<manifest.frames.length;i++)all.fill(i,i*10,i*10+10);
-  const canvas={width:0,height:0,dataset:{}};
+  const uniforms={},gpu={NO_ERROR:0,getError:()=>0,isContextLost:()=>false,getShaderParameter:()=>true,getProgramParameter:()=>true,getAttribLocation:()=>0,getUniformLocation:(_program,name)=>name};
+  for(const name of ['createShader','createProgram','createBuffer','createTexture'])gpu[name]=()=>({});
+  for(const name of ['shaderSource','compileShader','deleteShader','attachShader','linkProgram','deleteProgram','bindBuffer','bufferData','useProgram','enableVertexAttribArray','vertexAttribPointer','activeTexture','bindTexture','texParameteri','uniform1i','disable','enable','blendFunc','clearColor','viewport','pixelStorei','clear','deleteTexture','deleteBuffer'])gpu[name]=()=>{};
+  let uploaded;
+  gpu.uniform2f=(name,x,y)=>{uniforms[name]=[x,y];};gpu.texImage2D=(...args)=>{uploaded=args.at(-1);};gpu.drawArrays=()=>draws.push({index:uploaded.index,uniforms:{...uniforms}});
+  const canvas={width:0,height:0,dataset:{},getContext:()=>gpu,addEventListener(){},removeEventListener(){},parentElement:{clientWidth:12,clientHeight:12}};
   const view={
     baseURL:'https://site.test/',pixelRatio:3,measure:()=>size,isHidden:()=>hidden,
     observeResize:hook=>{resizeHook=hook;return()=>resizeHook=null;},
     observeVisibility:hook=>{visibilityHook=hook;return()=>visibilityHook=null;},
     onDocumentVisibility:hook=>{hiddenHook=hook;return()=>hiddenHook=null;},
     schedule:callback=>{raf.set(++nextRAF,callback);return nextRAF;},cancel:id=>raf.delete(id),onPresent:i=>presents.push(i),
-    isConfigSupported:async()=>({supported}),createChunk:init=>init,
+    isConfigSupported:async config=>({supported:typeof supported==='function'?supported(config):supported}),createChunk:init=>init,
     createRenderer(_canvas,hooks){
       if(rendererFailure)throw new Error('No GPU');contextLost=hooks.onContextLost;
       return {draw(frame,pose){assert.equal(frame.closed,false);draws.push({index:frame.index,pose});},resize(){},dispose(){this.disposed=true;}};
@@ -37,7 +42,9 @@ function fixture({manifest=metadata(),deferDecode=false,supported=true,rendererF
       return {ok:true,status:200,body:{getReader(){const reader={queue:[],done:false,read(){if(this.queue.length)return Promise.resolve(this.queue.shift());if(this.done)return Promise.resolve({done:true});return new Promise((resolve,reject)=>{request.waiter={resolve,reject};});},cancel(){this.done=true;}};request.reader=reader;readers.push(reader);return reader;}}};
     }
   };
-  const player=createNativeVideoSequence({canvas,manifestUrl:'/manifest.json',fixedScale,onReady(){readyCount++;},onError:error=>errors.push(error)},view);player.ready.catch(()=>{});
+  if(realRenderer)delete view.createRenderer;
+  if(referenceSize)view.measureReference=()=>referenceSize;
+  const player=createNativeVideoSequence({canvas,manifestUrl:'/manifest.json',fixedScale,referenceElement,onLayout,onReady(){readyCount++;},onError:error=>errors.push(error)},view);player.ready.catch(()=>{});
   const f={player,canvas,requests,draws,frames,decoders,errors,presents,raf,all,
     get readyCount(){return readyCount;},
     async flush(){await tick();const callbacks=[...raf.values()];raf.clear();for(const callback of callbacks)callback();await tick();},
@@ -165,4 +172,58 @@ test('resuming after a hidden resize redraws the retained frame even at exactly 
   f.visible(false);f.resize({width:400,height:430});await f.flush();assert.equal(f.draws.length,before);
   f.visible(true);await f.flush();assert.equal(f.draws.length,before+1);assert.equal(f.draws.at(-1)?.index,0);
   assert.equal(f.frames.length,1,'Restoring the backing buffer does not decode another frame');f.player.dispose();
+});
+
+const overscanMetadata=()=>{const m=metadata();m.layout={width:640,height:760,top:760};m.height=1520;m.video.codedHeight=1520;return m;};
+const projectedY=(f,v)=>{const uniforms=f.draws.at(-1).uniforms;return -((1-2*v)*uniforms.fit[1]+(uniforms.offset?.[1]||0))*f.canvas.height/2;};
+
+test('extended raster preserves original body size and center while revealing space above it',async()=>{
+  const old=fixture({realRenderer:true});await old.feed(0,10);
+  const referenceElement={getBoundingClientRect:()=>({width:390,height:500})};
+  const f=fixture({manifest:overscanMetadata(),realRenderer:true,referenceElement,size:{width:390,height:844}});await f.feed(0,10);
+  assert.equal(f.canvas.height,1266,'Backing buffer follows the larger presentation canvas');
+  for(const originalY of [0,.5,1])assert.ok(Math.abs(projectedY(f,.5+originalY*.5)-projectedY(old,originalY))<1e-9,'Original lower-half image keeps its exact body projection');
+  assert.ok(projectedY(f,.35)<projectedY(f,.5),'Additional top raster can display the detached lid above the old image edge');
+  assert.ok(projectedY(f,.35)>-f.canvas.height/2,'Its extra upper space lies inside the expanded canvas');
+  assert.equal(f.decoders[0].config.codedHeight,1520);old.player.dispose();f.player.dispose();
+});
+
+test('reference-only size changes redraw the retained overscan frame without another decode',async()=>{
+  const rect={width:390,height:500},referenceElement={getBoundingClientRect:()=>rect},f=fixture({manifest:overscanMetadata(),realRenderer:true,referenceElement,size:{width:390,height:844}});
+  await f.feed(0,10);const before=f.draws.length,oldFit=f.draws.at(-1).uniforms.fit[0];
+  rect.width=300;f.resize({width:390,height:844});
+  assert.equal(f.draws.length,before+1);assert.ok(f.draws.at(-1).uniforms.fit[0]<oldFit);assert.equal(f.frames.length,1);f.player.dispose();
+});
+
+test('standalone legacy canvases ignore their parent size and keep the original centered fit',async()=>{
+  const f=fixture({realRenderer:true});await f.feed(0,10);const uniforms=f.draws.at(-1).uniforms;
+  assert.equal(uniforms.fit[0],1);assert.ok(Math.abs(uniforms.fit[1]-760*(585/640)/750)<1e-9);assert.ok(Math.abs(projectedY(f,.5))<1e-9);f.player.dispose();
+});
+
+test('layout validation and unsupported tall decode dimensions reject before video transfer',async()=>{
+  for(const mutate of [m=>m.layout.width=639,m=>m.layout.top=-1,m=>m.layout.height=761,m=>m.layout.top=NaN]){
+    const manifest=overscanMetadata();mutate(manifest);const f=fixture({manifest});await tick();assert.equal(f.requests.length,0,'Invalid layout must stop before transferring the video');await assert.rejects(f.player.ready);f.player.dispose();
+  }
+  const f=fixture({manifest:overscanMetadata(),supported:config=>config.codedHeight<=1000});await assert.rejects(f.player.ready,/Format vidéo natif/);assert.equal(f.requests.length,0);f.player.dispose();
+});
+
+test('transformed poster bounds determine physical can scale and shifted center inside the large canvas',async()=>{
+  const canvasRect={width:351,height:759.6,left:10,top:20};
+  const referenceSize={width:287.82,height:369,left:41.59,top:235.1};
+  const f=fixture({manifest:overscanMetadata(),realRenderer:true,referenceSize,size:canvasRect});await f.feed(0,10);
+  const xRatio=f.canvas.width/canvasRect.width,yRatio=f.canvas.height/canvasRect.height;
+  const expectedWidth=referenceSize.width*xRatio,expectedScale=Math.min(expectedWidth/640,referenceSize.height*yRatio/760);
+  const uniforms=f.draws.at(-1).uniforms;
+  assert.ok(Math.abs(uniforms.fit[0]*f.canvas.width-640*expectedScale)<1e-9);
+  const centerDeltaY=(referenceSize.top+referenceSize.height/2-canvasRect.top-canvasRect.height/2)*yRatio;
+  assert.ok(Math.abs(projectedY(f,.75)-centerDeltaY)<1e-9,'Original body center follows the translated poster');
+  const centerDeltaX=(referenceSize.left+referenceSize.width/2-canvasRect.left-canvasRect.width/2)*xRatio;
+  assert.ok(Math.abs(uniforms.offset[0]*f.canvas.width/2-centerDeltaX)<1e-9);f.player.dispose();
+});
+
+test('layout callback expands the canvas before final reference measurement and first draw',async()=>{
+  const size={width:390,height:500},seen=[];
+  const f=fixture({manifest:overscanMetadata(),realRenderer:true,referenceSize:{width:390,height:500},size,onLayout(layout){seen.push(layout);size.height=844;}});
+  await f.feed(0,10);assert.equal(seen.length,1);assert.equal(seen[0].top,760);assert.equal(f.canvas.height,1266);
+  assert.ok(Math.abs(projectedY(f,.75))<1e-9);f.player.dispose();
 });

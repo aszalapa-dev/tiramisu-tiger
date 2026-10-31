@@ -1,3 +1,6 @@
+/* The lid can leave the product box without being cropped by that box. Its
+   logical scale and centre still follow the poster, including short phones. */
+.product-stage canvas.video-overscan{inset:auto;left:calc(50% - 50vw);top:calc(50% - 50svh);width:100vw;height:100svh;max-width:none;transform:none!important}
 @media(max-width:760px) and (max-height:700px){.poster,.product-stage canvas{transform:translateY(22px) scale(.82)}}
 .dialog-visual [hidden]{display:none!important}
 :root{--classique-color-finish:contrast(1.12) saturate(1.18)}

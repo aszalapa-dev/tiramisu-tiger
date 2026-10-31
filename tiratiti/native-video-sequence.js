@@ -1,17 +1,19 @@
 import {createSequenceTimeline} from './sequence-timeline.js?v=smooth-27';
 
 // Indexed Annex B AVC. The left half contains premultiplied RGB, the right alpha.
-export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onError=()=>{},fixedScale=false},environment={}){
+export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onError=()=>{},onLayout=()=>{},fixedScale=false,referenceElement},environment={}){
   const view=canvas.ownerDocument?.defaultView||globalThis,doc=canvas.ownerDocument;
   const fetchFile=environment.fetch||view.fetch.bind(view);
   const manifestURL=new URL(manifestUrl,environment.baseURL||doc?.baseURI||view.location?.href);
   const measure=environment.measure||(()=>canvas.getBoundingClientRect());
+  const measureReference=environment.measureReference||(referenceElement?()=>referenceElement.getBoundingClientRect():null);
   const hidden=environment.isHidden||(()=>Boolean(doc?.hidden));
   const schedule=environment.schedule||view.requestAnimationFrame?.bind(view)||((callback)=>setTimeout(callback,0));
   const cancel=environment.cancel||view.cancelAnimationFrame?.bind(view)||clearTimeout;
   const pixelRatio=Math.min(environment.pixelRatio??view.devicePixelRatio??1,1.5);
   const manifestController=new AbortController();
-  let manifest,video,timeline,pose,buffer,videoURL,decoder,renderer,streamJob,priorityJob;
+  let manifest,video,layout,timeline,pose,buffer,videoURL,decoder,renderer,streamJob,priorityJob;
+  let referenceWidth=1,referenceHeight=1,referenceX=0,referenceY=0;
   let progress=0,direction=1,epoch=0,sequence=0,raf=null,visible=true,disposed=false,failed=false,settled=false;
   let batch=null,pending=null,displayed=null,lastCoordinate=null,lastScale=1,resolveReady,rejectReady;
   let received=[],streamCompleted=false,versioned=false,needsRestore=false;
@@ -42,9 +44,10 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
       coordinate>=target&&(lastCoordinate===null||coordinate<=lastCoordinate);
   }
   function wantPaint(){if(canWork()&&pending&&raf===null)raf=schedule(()=>{raf=null;paint();});}
+  function drawProperties(index,relativeScale){return {index,relativeScale,width:manifest.width,height:manifest.height,layout,referenceWidth,referenceHeight,referenceX,referenceY,codedWidth:video.codedWidth,codedHeight:video.codedHeight};}
   function draw(item){
     const relativeScale=(fixedScale?1:pose.scale)/timeline.frameScale(item.index);
-    renderer.draw(item.frame,{index:item.index,relativeScale,width:manifest.width,height:manifest.height,codedWidth:video.codedWidth,codedHeight:video.codedHeight});
+    renderer.draw(item.frame,drawProperties(item.index,relativeScale));
     lastScale=relativeScale;
   }
   function paint(){
@@ -70,10 +73,17 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
   function resize(){
     if(disposed)return;const rect=measure(),width=Math.max(1,Math.round(rect.width*pixelRatio)),height=Math.max(1,Math.round(rect.height*pixelRatio));
     if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;renderer?.resize(width,height);needsRestore=true;}
+    const reference=measureReference?.();
+    const xRatio=rect.width>0?width/rect.width:1,yRatio=rect.height>0?height/rect.height:1;
+    const refWidth=reference?Math.max(1,reference.width*xRatio):width,refHeight=reference?Math.max(1,reference.height*yRatio):height;
+    const refX=reference&&Number.isFinite(reference.left)?(reference.left+reference.width/2-(rect.left||0)-rect.width/2)*xRatio:0;
+    const refY=reference&&Number.isFinite(reference.top)?(reference.top+reference.height/2-(rect.top||0)-rect.height/2)*yRatio:0;
+    if(refWidth!==referenceWidth||refHeight!==referenceHeight||refX!==referenceX||refY!==referenceY)needsRestore=true;
+    referenceWidth=refWidth;referenceHeight=refHeight;referenceX=refX;referenceY=refY;
     // A hidden resize clears the backing buffer too; restore on the next show,
     // even if its dimensions and requested pose are now unchanged.
     if(needsRestore&&displayed&&canWork()){
-      try{renderer.draw(displayed.frame,{index:displayed.index,relativeScale:lastScale,width:manifest.width,height:manifest.height,codedWidth:video.codedWidth,codedHeight:video.codedHeight});needsRestore=false;}catch(error){fail(error);}
+      try{renderer.draw(displayed.frame,drawProperties(displayed.index,lastScale));needsRestore=false;}catch(error){fail(error);}
     }
     wantPaint();
   }
@@ -196,6 +206,9 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
       typeof v.url!=='string'||!v.url||typeof v.codec!=='string'||!v.codec.startsWith('avc1.')||!Number.isSafeInteger(v.bytes)||v.bytes<=0||v.bytes>64*1024*1024||
       v.codedWidth!==input.width*2||v.codedHeight!==input.height||!Array.isArray(v.packets)||v.packets.length!==frames.length)
       throw new Error('Manifeste vidéo invalide.');
+    const logical=input.layout;
+    if(logical!==undefined&&(!logical||!Number.isSafeInteger(logical.width)||!Number.isSafeInteger(logical.height)||!Number.isSafeInteger(logical.top)||
+      logical.width!==input.width||logical.height<=0||logical.top<0||logical.top+logical.height!==input.height))throw new Error('Cadrage vidéo invalide.');
     let previousEnd=0,key=-1;
     v.packets.forEach((packet,index)=>{
       if(!Number.isSafeInteger(packet.offset)||!Number.isSafeInteger(packet.size)||packet.offset<previousEnd||packet.size<=0||packet.offset+packet.size>v.bytes||
@@ -210,7 +223,8 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
   fetchFile(manifestURL.href,{signal:manifestController.signal})
     .then(response=>{if(!response.ok)throw new Error('Manifeste vidéo indisponible.');return response.json();})
     .then(async input=>{
-      if(disposed)return;manifest=validate(input);video=manifest.video;timeline=createSequenceTimeline(manifest);pose=timeline.pose(progress);
+      if(disposed)return;manifest=validate(input);video=manifest.video;layout=manifest.layout||{width:manifest.width,height:manifest.height,top:0};timeline=createSequenceTimeline(manifest);pose=timeline.pose(progress);
+      onLayout(manifest.layout);if(disposed)return;resize();
       const support=environment.isConfigSupported||(view.VideoDecoder?.isConfigSupported?.bind(view.VideoDecoder));
       if(!support)throw new Error('Décodage vidéo natif indisponible.');
       const config={codec:video.codec,codedWidth:video.codedWidth,codedHeight:video.codedHeight,optimizeForLatency:true,hardwareAcceleration:'prefer-hardware'};
@@ -226,7 +240,7 @@ export function createNativeVideoSequence({canvas,manifestUrl,onReady=()=>{},onE
     if(disposed)return;disposed=true;cleanup();unresize?.();unvisible?.();undocument?.();buffer=null;received=[];
     if(!settled){settled=true;rejectReady(new DOMException('Animation fermée.','AbortError'));}
   }
-  function observeResize(){if(view.ResizeObserver){const observer=new view.ResizeObserver(resize);observer.observe(canvas);return()=>observer.disconnect();}view.addEventListener?.('resize',resize);return()=>view.removeEventListener?.('resize',resize);}
+  function observeResize(){if(view.ResizeObserver){const observer=new view.ResizeObserver(resize);observer.observe(canvas);if(referenceElement&&referenceElement!==canvas)observer.observe(referenceElement);return()=>observer.disconnect();}view.addEventListener?.('resize',resize);return()=>view.removeEventListener?.('resize',resize);}
   function observeVisibility(){if(!view.IntersectionObserver)return()=>{};const observer=new view.IntersectionObserver(entries=>{visible=entries.some(entry=>entry.isIntersecting);visibilityChanged();},{rootMargin:'80px'});observer.observe(canvas);return()=>observer.disconnect();}
   function listenDocument(){doc?.addEventListener('visibilitychange',visibilityChanged);return()=>doc?.removeEventListener('visibilitychange',visibilityChanged);}
   return {ready,render,dispose};
@@ -237,7 +251,7 @@ function createPackedRenderer(canvas,onContextLost){
   if(!gl)throw new Error('Affichage vidéo GPU indisponible.');
   let disposed=false;
   function shader(type,source){const value=gl.createShader(type);gl.shaderSource(value,source);gl.compileShader(value);if(!gl.getShaderParameter(value,gl.COMPILE_STATUS)){const message=gl.getShaderInfoLog(value);gl.deleteShader(value);throw new Error(message||'Shader vidéo invalide.');}return value;}
-  const vertex=shader(gl.VERTEX_SHADER,'attribute vec2 a;uniform vec2 fit;varying vec2 uv;void main(){uv=vec2((a.x+1.0)*0.5,(1.0-a.y)*0.5);gl_Position=vec4(a*fit,0.0,1.0);}');
+  const vertex=shader(gl.VERTEX_SHADER,'attribute vec2 a;uniform vec2 fit;uniform vec2 offset;varying vec2 uv;void main(){uv=vec2((a.x+1.0)*0.5,(1.0-a.y)*0.5);gl_Position=vec4(a*fit+offset,0.0,1.0);}');
   const fragment=shader(gl.FRAGMENT_SHADER,'precision mediump float;varying vec2 uv;uniform sampler2D image;uniform vec2 texel;void main(){vec2 p=clamp(uv,texel,vec2(1.0)-texel);vec3 rgb=texture2D(image,vec2(p.x*0.5,p.y)).rgb;float alpha=texture2D(image,vec2(0.5+p.x*0.5,p.y)).r;alpha=alpha<0.008?0.0:alpha;gl_FragColor=vec4(min(rgb,vec3(alpha)),alpha);}');
   const program=gl.createProgram();gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);gl.deleteShader(vertex);gl.deleteShader(fragment);
   if(!gl.getProgramParameter(program,gl.LINK_STATUS)){gl.deleteProgram(program);throw new Error('Programme vidéo GPU invalide.');}
@@ -245,17 +259,18 @@ function createPackedRenderer(canvas,onContextLost){
   gl.useProgram(program);const attribute=gl.getAttribLocation(program,'a');gl.enableVertexAttribArray(attribute);gl.vertexAttribPointer(attribute,2,gl.FLOAT,false,0,0);
   gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-  const fit=gl.getUniformLocation(program,'fit'),texel=gl.getUniformLocation(program,'texel');gl.uniform1i(gl.getUniformLocation(program,'image'),0);
+  const fit=gl.getUniformLocation(program,'fit'),offset=gl.getUniformLocation(program,'offset'),texel=gl.getUniformLocation(program,'texel');gl.uniform1i(gl.getUniformLocation(program,'image'),0);
   gl.disable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.clearColor(0,0,0,0);
   function lost(event){event.preventDefault();onContextLost(new Error('Affichage vidéo interrompu.'));}canvas.addEventListener('webglcontextlost',lost);
   return {
     resize(width,height){gl.viewport(0,0,width,height);},
-    draw(frame,{width,height,relativeScale,codedWidth,codedHeight}){
+    draw(frame,{width,height,layout,referenceWidth,referenceHeight,referenceX,referenceY,relativeScale,codedWidth,codedHeight}){
       if(disposed||gl.isContextLost())throw new Error('Affichage vidéo interrompu.');
       gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
       gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,frame);
-      const scale=Math.min(canvas.width/width,canvas.height/height)*relativeScale;
-      gl.uniform2f(fit,width*scale/canvas.width,height*scale/canvas.height);gl.uniform2f(texel,1/codedWidth,.5/codedHeight);
+      const scale=Math.min(referenceWidth/layout.width,referenceHeight/layout.height)*relativeScale;
+      gl.uniform2f(fit,width*scale/canvas.width,height*scale/canvas.height);
+      gl.uniform2f(offset,2*referenceX/canvas.width,(layout.top*scale-2*referenceY)/canvas.height);gl.uniform2f(texel,1/codedWidth,.5/codedHeight);
       gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
       const error=gl.getError();if(error!==gl.NO_ERROR)throw new Error('Image vidéo GPU illisible ('+error+').');
     },
