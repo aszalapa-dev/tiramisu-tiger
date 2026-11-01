@@ -5,8 +5,8 @@
   "durationSeconds": 36.666667,
   "width": 800,
   "height": 1900,
-  "bytes": 15738911,
-  "sha256": "fabcbad3ec9060ff69a38acd635e4bdab17f132897caa3a09b140c71abe67a98",
+  "bytes": 21752078,
+  "sha256": "c8ae0397fda10d4866631160c54792c6ca405373848a33036d703e50a2dd1515",
   "rotationFrames": 2880,
   "openingFrames": 1520,
   "newNativeFrames": 3285,
@@ -14,8 +14,15 @@
   "clampedTailReferences": 15,
   "codec": "H.264 High 5.1",
   "gop": 24,
+  "crf": 18,
   "alpha": false,
   "background": "#2b1611",
+  "cocoaOpacityCorrection": {
+    "method": "Opaque matte for the cocoa enclosed by the metal rim; native RGB and exterior alpha preserved.",
+    "pixels": 16872,
+    "maskSha256": "ea555fe971cc53feafbdbde5fff349faa6d34441c7e67b926a4b9977e9d765b5",
+    "decodedQualityVerified": true
+  },
   "nativePlanSha256": "53f90035f31b8c426d900900bda65396e812599fb50594b9ca4b4983c862aa42",
   "purpose": "Standalone Blender master; homepage scroll playback retains its existing optimized sequence."
 }

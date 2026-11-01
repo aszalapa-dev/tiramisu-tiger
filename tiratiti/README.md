@@ -21,7 +21,7 @@ Les poses ne sont pas mélangées : aucun fondu entre deux angles ne brouille l�
 
 ## Rendu Blender à 120 images/s — 1er novembre 2026
 
-Le [master MP4 à 120 images/s](assets/rendered-120fps/Tiratiti_Classique_120fps.mp4) est disponible séparément, avec ses [données de vérification](assets/rendered-120fps/render-info.json). Il contient 4 400 images natives : 2 880 pour la rotation et 1 520 pour l’ouverture, soit 36,667 secondes et 15,74 Mo. Le fond brun et le cadrage constant servent au visionnage ; la marge haute conserve le couvercle pendant son départ vertical.
+Le [master MP4 à 120 images/s](assets/rendered-120fps/Tiratiti_Classique_120fps.mp4?v=c8ae0397fda10d48) est disponible séparément, avec ses [données de vérification](assets/rendered-120fps/render-info.json?v=c8ae0397fda10d48). Il contient 4 400 images natives : 2 880 pour la rotation et 1 520 pour l’ouverture, soit 36,667 secondes et 21,75 Mo. Le fond brun et le cadrage constant servent au visionnage ; la marge haute conserve le couvercle pendant son départ vertical. Le compositing restaure l’opacité du cacao pour garder son grain RGB Blender, avec une compression CRF18 ; le verre et le contour restent intacts.
 
 L’accueil conserve son flux indexé de 1 100 poses. Les nouveaux candidats web de 4 400 poses améliorent certains défilements lents, mais la simulation à froid sur mobile à 20 Mbit/s montre une régression lors d’un geste rapide : 144 à 100 changements affichés, avec un intervalle P95 de 16,7 à 83,3 ms. Le master est donc archivé sans être ajouté au préchargement de la page. Ces mesures concernent le banc réseau, pas les FPS d’un iPhone physique.
 
