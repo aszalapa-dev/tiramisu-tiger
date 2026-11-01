@@ -597,5 +597,7 @@
   "assets/rendered-video-mobile/manifest.json",
   "assets/rendered-video-mobile/sequence.h264",
   "assets/rendered-video-desktop/manifest.json",
-  "assets/rendered-video-desktop/sequence.h264"
+  "assets/rendered-video-desktop/sequence.h264",
+  "assets/rendered-120fps/Tiratiti_Classique_120fps.mp4",
+  "assets/rendered-120fps/render-info.json"
 ]
