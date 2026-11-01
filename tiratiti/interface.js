@@ -17,7 +17,7 @@ function styleValue(el,name,value,custom=false){
 }
 document.documentElement.classList.add('js');
 
-// One timeline drives the product, its backdrop and the text behind it.
+// The same scroll target coordinates the product, backdrop and text.
 const blocks=[...stream.querySelectorAll('[data-reveal]')].map(el=>{
   el.setAttribute('aria-label',el.innerText.replace(/\n/g,' '));
   const nodes=[],walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
@@ -71,6 +71,7 @@ function paintHero(){
   const initialY=innerWidth<761||(innerWidth<951&&heroHeight<501)?71:85;
   styleValue(stage,'--stage-offset-y',((initialY-50)*(1-ease(clamp(progress/.18)))*heroHeight/100).toFixed(2)+'px',true);
   stage.dataset.progress=String(progress);
+  stage.dataset.inputProgress=String(target);
   for(const block of heroBlocks){
     const reveal=clamp((heroHeight*.80-(block.offset-y))/(heroHeight*.35));
     block.words.forEach((word,i)=>{
@@ -78,7 +79,7 @@ function paintHero(){
       styleValue(word,'opacity',String(.2+.8*f));
     });
   }
-  dispatchEvent(new CustomEvent('tiratiti-scroll',{detail:{progress,paused:userPaused||reduce.matches,reduced:reduce.matches}}));
+  dispatchEvent(new CustomEvent('tiratiti-scroll',{detail:{progress,inputProgress:target,paused:userPaused||reduce.matches,reduced:reduce.matches}}));
   heroDirty=false;
 }
 function readSections(){
@@ -131,8 +132,8 @@ function tick(time){
   target=reduce.matches?0:clamp((scrollY-start)/span);
   if(reduce.matches){progress=0;heroDirty=true;}
   else if(!userPaused&&(innerWidth<=760||(coarse.matches&&innerWidth<=1024)||document.documentElement.classList.contains('smooth-scrolling'))){
-    // Native touch scrolling already has inertia. Follow it without adding a
-    // second catch-up animation that continues after the finger has stopped.
+    // Keep text and page layout attached to native touch scrolling. The can
+    // receives the raw target separately and owns its short visual coast.
     if(progress!==target){progress=target;heroDirty=true;}
   }
   else if(!userPaused&&Math.abs(target-progress)>.000015){

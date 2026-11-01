@@ -1,5 +1,5 @@
 import { createRenderedSequence } from './sequence-playback.js?v=dense-cadence-31';
-import { createScrollPlayhead } from './scroll-playhead.js?v=dense-cadence-31';
+import { createScrollPlayhead } from './scroll-playhead.js?v=coast-scroll-01';
 
 const stage=document.querySelector('#product-stage');
 const poster=document.querySelector('#poster');
@@ -10,8 +10,36 @@ const compact=innerWidth<=760||(innerWidth<=1024&&matchMedia('(pointer: coarse)'
 const manifestUrl=compact?'assets/rendered-one-turn-mobile/manifest.json':'assets/rendered-one-turn/manifest.json';
 const videoManifestUrl=compact?'assets/rendered-video-mobile/manifest.json':'assets/rendered-video-desktop/manifest.json';
 let hero,attempt=0,dialogPlayer,dialogToken=0;
-const playhead=createScrollPlayhead({initialProgress:Number(stage.dataset.progress||0),onProgress:progress=>hero?.render(progress)});
-document.addEventListener?.('visibilitychange',()=>{if(document.hidden)playhead.suspend();else playhead.resume();});
+let renderedProgress=Number(stage.dataset.inputProgress??stage.dataset.progress??0);
+let sceneVisible=true,eventPaused=false,resumeFrame=null;
+const playhead=createScrollPlayhead({initialProgress:renderedProgress,onProgress:progress=>{
+  renderedProgress=progress;hero?.render(progress);
+}});
+const canAnimate=()=>!document.hidden&&sceneVisible&&!eventPaused;
+function cancelResume(){
+  if(resumeFrame!==null)window.cancelAnimationFrame(resumeFrame);
+  resumeFrame=null;
+}
+document.addEventListener?.('visibilitychange',()=>{
+  cancelResume();
+  if(!canAnimate()){playhead.suspend();return;}
+  // The page measures its restored scroll position first. Resume at that fresh
+  // target instead of playing a hidden interval or showing the old pose.
+  if(window.requestAnimationFrame)resumeFrame=window.requestAnimationFrame(()=>{
+    resumeFrame=null;if(canAnimate())playhead.resume();
+  });
+  else playhead.resume();
+});
+if(window.IntersectionObserver){
+  new window.IntersectionObserver(entries=>{
+    const entry=entries.find(item=>item.target===stage);
+    if(!entry||entry.isIntersecting===sceneVisible)return;
+    sceneVisible=entry.isIntersecting;
+    if(!canAnimate()){cancelResume();playhead.suspend();}
+    else if(resumeFrame===null)playhead.resume();
+  },{rootMargin:'80px'}).observe(stage);
+}
+if(!canAnimate())playhead.suspend();
 document.body.dataset.loadingState='ready';
 window.TiratitiLoading={stage(){},finish(){}};
 
@@ -38,10 +66,16 @@ function startHero(){
     }
   });
   hero.ready.catch(()=>{});
-  hero.render(Number(stage.dataset.progress||0));
+  hero.render(renderedProgress);
 }
 button.addEventListener('click',startHero);
-addEventListener('tiratiti-scroll',event=>playhead.set(event.detail.reduced?0:event.detail.progress,{immediate:Boolean(event.detail.reduced)}));
+addEventListener('tiratiti-scroll',event=>{
+  const detail=event.detail,wasPaused=eventPaused;
+  eventPaused=Boolean(detail.paused&&!detail.reduced);
+  if(!canAnimate()){cancelResume();playhead.suspend();}
+  playhead.set(detail.reduced?0:(detail.inputProgress??detail.progress),{immediate:Boolean(detail.reduced)});
+  if(wasPaused&&!eventPaused&&canAnimate()&&resumeFrame===null)playhead.resume();
+});
 addEventListener('online',()=>{if(!button.hidden)startHero();});
 
 // The product detail reuses the same native Blender materials and rotation.

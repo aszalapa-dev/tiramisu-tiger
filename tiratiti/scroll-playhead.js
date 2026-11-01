@@ -1,79 +1,79 @@
 const clamp=value=>Math.min(1,Math.max(0,Number.isFinite(value)?value:0));
 
-// Interpolate known scroll samples with a short lookback, never extrapolate.
+// Follow the latest scroll pose on the display clock, including between sparse
+// input events. A critically damped response coasts into that pose, not past it.
 export function createScrollPlayhead({onProgress,initialProgress=0},environment={}){
   const schedule=environment.schedule||(callback=>globalThis.requestAnimationFrame(callback));
   const cancel=environment.cancel||(id=>globalThis.cancelAnimationFrame(id));
   const now=environment.now||(()=>globalThis.performance?.now?.()??Date.now());
   const isHidden=environment.isHidden||(()=>Boolean(globalThis.document?.hidden));
-  const maxLookbackMilliseconds=60,maxLag=.025,maxAnchors=16;
-  let lookbackMilliseconds=maxLookbackMilliseconds;
-  let current=clamp(initialProgress),target=current,direction=0;
-  let lastInput={time:now(),value:current};
-  let anchors=[{...lastInput}];
-  let frame=null,suspended=false,disposed=false;
+  const baseOmega=14,maxOmega=32,speedResponse=60;
+  const positionTolerance=.0001,velocityTolerance=.001;
+  let current=clamp(initialProgress),target=current,velocity=0,omega=baseOmega;
+  let direction=0,lastInputTime=now(),lastFrameTime=lastInputTime;
+  let frame=null,generation=0,suspended=false,disposed=false;
 
   function canRun(){return !disposed&&!suspended&&!isHidden();}
-  function stop(){if(frame!==null){cancel(frame);frame=null;}}
-  function publish(value){if(value!==current){current=value;onProgress(current);}}
-  function finish(time=now()){stop();anchors=[{time,value:target}];publish(target);}
-  function bridge(time){anchors=[{time:time-lookbackMilliseconds,value:current},{time,value:target}];}
-  function queue(){
-    if(frame!==null||!canRun()||current===target)return;
-    frame=schedule(tick);
+  function stop(){
+    generation++;
+    if(frame!==null){cancel(frame);frame=null;}
   }
-  function tick(timestamp){
+  function publish(value){if(value!==current){current=value;onProgress(current);}}
+  function align(){
+    stop();velocity=0;omega=baseOmega;direction=0;
+    lastInputTime=lastFrameTime=now();publish(target);
+  }
+  function queue(){
+    if(frame!==null||!canRun()||current===target&&velocity===0)return;
+    const scheduledGeneration=generation;
+    frame=schedule(timestamp=>tick(timestamp,scheduledGeneration));
+  }
+  function tick(timestamp,scheduledGeneration){
+    // cancelAnimationFrame cannot retract an already dispatched callback.
+    // Check its generation before touching the newer frame's ownership.
+    if(scheduledGeneration!==generation||disposed)return;
     frame=null;
-    if(!canRun())return;
+    if(!canRun()){stop();return;}
     const time=Number.isFinite(timestamp)?timestamp:now();
-    const sampleTime=time-lookbackMilliseconds;
-    while(anchors.length>2&&anchors[1].time<=sampleTime)anchors.shift();
-    const first=anchors[0],last=anchors.at(-1);
-    if(sampleTime>=last.time){finish(time);return;}
-    let next=first.value;
-    if(sampleTime>first.time){
-      const after=anchors.findIndex(anchor=>anchor.time>sampleTime);
-      const a=anchors[after-1],b=anchors[after];
-      next=a.value+(b.value-a.value)*(sampleTime-a.time)/(b.time-a.time);
-    }
-    // A reversal/lag-cap reset must not replay an older part of the curve.
-    next=Math.max(Math.min(current,target),Math.min(Math.max(current,target),next));
+    const seconds=Math.max(0,(time-lastFrameTime)/1000);
+    lastFrameTime=time;
+    const displacement=current-target;
+    const coefficient=velocity+omega*displacement;
+    const decay=Math.exp(-omega*seconds);
+    let next=target+(displacement+coefficient*seconds)*decay;
+    velocity=(velocity-omega*coefficient*seconds)*decay;
+    // Retargets may put a close target in the path of existing momentum.
+    // Reach that target without extrapolating to an invented scroll pose.
+    if((target-current)*(target-next)<=0){next=target;velocity=0;}
+    if(Math.abs(target-next)<=positionTolerance&&Math.abs(velocity)<=velocityTolerance){next=target;velocity=0;}
     publish(next);
-    if(current===target)finish(time);else queue();
+    queue();
   }
   function set(value,{immediate=false}={}){
     if(disposed)return;
     const next=clamp(value),inputDirection=Math.sign(next-target),time=now();
-    const reversing=inputDirection&&direction&&inputDirection!==direction;
-    const input=lastInput;
-    if(inputDirection)lastInput={time,value:next};
-    target=next;if(inputDirection)direction=inputDirection;
-    if(!canRun()){stop();return;}
-    if(immediate){direction=0;finish(time);return;}
-    if(!inputDirection){queue();return;}
-    // When input reverses inside the old lag, align instead of continuing the
-    // old-direction chase. Subsequent inputs can reverse without overshooting.
-    if(reversing&&inputDirection*(target-current)<0){finish(time);return;}
-    const previous=anchors.at(-1);
-    // Shorten the known-sample buffer at high input speeds, before its delay
-    // reaches the lag limit and repeatedly clips/restarts the motion curve.
-    if(!reversing&&time>input.time){
-      const speed=Math.abs(target-input.value)/(time-input.time);
-      lookbackMilliseconds=Math.min(maxLookbackMilliseconds,(maxLag-1e-6)/speed);
+    if(inputDirection){
+      const inputSeconds=(time-lastInputTime)/1000;
+      const rawSpeed=inputSeconds>0?Math.abs(next-target)/inputSeconds:0;
+      omega=Math.max(baseOmega,Math.min(maxOmega,speedResponse*rawSpeed));
+      if(direction&&inputDirection!==direction)velocity=0;
+      direction=inputDirection;lastInputTime=time;
     }
-    const distance=target-current;
-    const capped=Math.abs(distance)>maxLag;
-    if(capped)publish(target-Math.sign(distance)*maxLag);
-    if(capped||reversing||time-previous.time>=lookbackMilliseconds||time<=previous.time)bridge(time);
-    else anchors.push({time,value:target});
-    while(anchors.length>maxAnchors)anchors.shift();
+    target=next;
+    // A target can cross the displayed pose during a single raw-input
+    // direction. Brake old momentum that would move away from the new target.
+    if(velocity*(target-current)<0)velocity=0;
+    if(!canRun()){stop();return;}
+    if(immediate){align();return;}
+    // Ordinary input changes the target only. Never publish from this path.
+    if(frame===null)lastFrameTime=time;
     queue();
   }
   function suspend(){if(!disposed){suspended=true;stop();}}
   function resume(){
     if(disposed)return;
-    suspended=false;direction=0;
-    if(!isHidden())finish();
+    suspended=false;
+    if(!isHidden())align();
   }
   function dispose(){if(!disposed){disposed=true;stop();}}
   return {set,suspend,resume,dispose};

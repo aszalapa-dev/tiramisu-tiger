@@ -3,10 +3,10 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
-const source=fs.readFileSync(path.join(__dirname,'../interface.js'),'utf8').split('const dialog=')[0];
+const source=fs.readFileSync(path.join(process.env.TEST_SOURCE_ROOT||path.resolve(__dirname,'..'),'interface.js'),'utf8').split('const dialog=')[0];
 
 function page({width=390,height=700,reduced=false,coarse=true}={}){
-  const events=new Map(),frames=new Map(),operations=[],observers=[];let frameId=0,time=0;
+  const events=new Map(),frames=new Map(),operations=[],observers=[],scrollEvents=[];let frameId=0,time=0;
   const listen=(name,fn)=>{if(!events.has(name))events.set(name,[]);events.get(name).push(fn);};
   const classes=()=>({values:new Set(),add(name){this.values.add(name);},contains(name){return this.values.has(name);}});
   function element(id){
@@ -28,10 +28,10 @@ function page({width=390,height=700,reduced=false,coarse=true}={}){
   class ResizeObserver{constructor(fn){this.fn=fn;}observe(){}}
   const context={document,innerWidth:width,innerHeight:height,scrollY:0,IntersectionObserver,ResizeObserver,
     matchMedia:query=>query.includes('reduced')?media:{matches:coarse},getComputedStyle:()=>({marginTop:'-700px'}),
-    addEventListener:listen,dispatchEvent:()=>{},CustomEvent:class{constructor(name,options){this.type=name;this.detail=options.detail;}},
+    addEventListener:listen,dispatchEvent:event=>{if(event.type==='tiratiti-scroll')scrollEvents.push(event.detail);},CustomEvent:class{constructor(name,options){this.type=name;this.detail=options.detail;}},
     requestAnimationFrame:fn=>{frames.set(++frameId,fn);return frameId;},cancelAnimationFrame:id=>frames.delete(id)};
   vm.runInNewContext(source,context,{filename:'interface.js'});
-  const p={context,stage,scene,journey,stream,operations,frames,
+  const p={context,stage,scene,scrollEvents,journey,stream,operations,frames,
     fire(name){for(const fn of events.get(name)||[])fn();},
     step(){time+=16.67;const batch=[...frames.values()];frames.clear();for(const fn of batch)fn(time);},
     scroll(y){context.scrollY=y;p.fire('scroll');p.step();},
@@ -76,4 +76,13 @@ test('desktop wheel easing and reduced motion remain supported',()=>{
   assert.ok(Math.abs(desktop.progress()-1000/1890)<.00002);
   const reduced=page({reduced:true});reduced.scroll(1000);
   assert.equal(reduced.progress(),0);assert.equal(reduced.stream.style.transform,'none');assert.equal(reduced.frames.size,0);
+});
+
+
+test('the can receives the raw scroll target without inheriting desktop text easing',()=>{
+  const p=page({width:1440,height:700,coarse:false});p.scroll(1000);
+  const detail=p.scrollEvents.at(-1);
+  assert.equal(detail.inputProgress,1000/1890);
+  assert.equal(Number(p.stage.dataset.inputProgress),detail.inputProgress);
+  assert.ok(detail.progress<detail.inputProgress,'The existing text timing remains independently eased');
 });
