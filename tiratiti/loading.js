@@ -1,4 +1,4 @@
-import { createRenderedSequence } from './sequence-playback.js?v=dense-cadence-31';
+import { createRenderedSequence } from './sequence-playback.js?v=motion-trial-10';
 import { createScrollPlayhead } from './scroll-playhead.js?v=coast-scroll-01';
 
 const stage=document.querySelector('#product-stage');
@@ -8,7 +8,8 @@ const button=document.querySelector('#retry-3d');
 const status=document.querySelector('#scene-status');
 const compact=innerWidth<=760||(innerWidth<=1024&&matchMedia('(pointer: coarse)').matches);
 const manifestUrl=compact?'assets/rendered-one-turn-mobile/manifest.json':'assets/rendered-one-turn/manifest.json';
-const videoManifestUrl=compact?'assets/rendered-video-mobile/manifest.json':'assets/rendered-video-desktop/manifest.json';
+// Trial only changes the hero; the existing 360-degree product detail stays available.
+const heroManifestUrl='assets/motion-trial-20261107/manifest.json';
 let hero,attempt=0,dialogPlayer,dialogToken=0;
 let renderedProgress=Number(stage.dataset.inputProgress??stage.dataset.progress??0);
 let sceneVisible=true,eventPaused=false,resumeFrame=null;
@@ -48,7 +49,7 @@ function startHero(){
   hero?.dispose();button.hidden=true;canvas.hidden=false;
   stage.setAttribute('aria-busy','true');
   status.textContent='Préparation de l’animation de la canette.';
-  hero=createRenderedSequence({canvas,manifestUrl,videoManifestUrl,referenceElement:poster,
+  hero=createRenderedSequence({canvas,manifestUrl:heroManifestUrl,cacheLimit:compact?6:9,referenceElement:poster,
     onLayout:layout=>{if(token===attempt)canvas.classList.toggle('video-overscan',Boolean(layout));},
     onCanvas:next=>{canvas=next;canvas.classList.remove('video-overscan');},
     onFallback(){if(token===attempt)stage.classList.remove('loaded');},
@@ -56,7 +57,7 @@ function startHero(){
       if(token!==attempt)return;
       stage.classList.add('loaded');stage.setAttribute('aria-busy','false');
       canvas.dataset.renderMode='blender';
-      status.textContent='Faites défiler pour faire tourner la canette et l’ouvrir.';
+      status.textContent='Faites défiler pour faire basculer la canette, l’ouvrir et plonger la cuillère.';
     },
     onError(){
       if(token!==attempt)return;
@@ -88,7 +89,7 @@ addEventListener('tiratiti-flavor',event=>{
   const hint=document.querySelector('.drag-hint');
   host.replaceChildren();
   const photo=document.createElement('img');
-  photo.src=flavor==='classique'?poster.src:flavor==='speculoos'?'assets/photos/packshot-speculoos.webp':'assets/photos/packshot-special.webp';
+  photo.src=flavor==='classique'?'assets/classique.webp?v=opposite-tab-27':flavor==='speculoos'?'assets/photos/packshot-speculoos.webp':'assets/photos/packshot-special.webp';
   photo.alt='Pot Tiratiti '+(flavor==='classique'?'Le Classique':flavor==='speculoos'?'Le Spéculos':'Le Spécial');
   host.classList.toggle('has-product-photo',flavor!=='classique');
   hint.hidden=flavor!=='classique';

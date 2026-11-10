@@ -1,4 +1,5 @@
 import {createSequenceTimeline} from './sequence-timeline.js?v=smooth-27';
+import {fitSequenceFrame} from './sequence-framing.js?v=motion-trial-10';
 
 // Keep compressed lookahead separate from the small decoded image window.
 export function createRenderedSequence({canvas,manifestUrl,onReady=()=>{},onError=()=>{},cacheLimit,fixedScale=false},environment={}){
@@ -17,7 +18,7 @@ export function createRenderedSequence({canvas,manifestUrl,onReady=()=>{},onErro
   if(!context)throw new Error('Le navigateur ne peut pas afficher cette animation.');
   const manifestController=new AbortController();
   const blobs=new Map(),bitmaps=new Map(),fetches=new Map(),decodes=new Map(),failedFrames=new Set();
-  let frames=[],timeline,pose,progress=0,direction=1,width=1,height=1,versioned=false,bitmapResizeSupported=true;
+  let frames=[],framing=null,timeline,pose,progress=0,direction=1,width=1,height=1,versioned=false,bitmapResizeSupported=true;
   let fetchWanted=[],decodeWanted=[],visible=true,disposed=false,failed=false,settled=false;
   let frame=null,painted=-1,pendingPaint=-1,blobCandidate=-1,paintedKey='',lastCoordinate=null,lastRelativeScale=1,needsRestore=false,motionEpoch=0,fetchOrder=0,resolveReady,rejectReady;
   const ready=new Promise((resolve,reject)=>{resolveReady=resolve;rejectReady=reject;});ready.catch(()=>{});
@@ -35,8 +36,8 @@ export function createRenderedSequence({canvas,manifestUrl,onReady=()=>{},onErro
   }
   function cancelPaint(){if(frame!==null){cancel(frame);frame=null;}}
   function requestPaint(){if(canShow()&&bitmaps.size&&frame===null)frame=schedule(()=>{frame=null;paint();});}
-  function drawBitmap(bitmap,relativeScale){
-    const scale=Math.min(canvas.width/width,canvas.height/height)*relativeScale;
+  function drawBitmap(bitmap,relativeScale,index){
+    const scale=fitSequenceFrame({width,height,framing},canvas.width,canvas.height,progress,index)*relativeScale;
     const drawWidth=width*scale,drawHeight=height*scale;
     context.clearRect(0,0,canvas.width,canvas.height);
     context.drawImage(bitmap,(canvas.width-drawWidth)/2,(canvas.height-drawHeight)/2,drawWidth,drawHeight);
@@ -45,8 +46,8 @@ export function createRenderedSequence({canvas,manifestUrl,onReady=()=>{},onErro
     if(!needsRestore||!canShow()||!bitmaps.has(painted))return;
     // Resize clears the backing buffer. Restore its visible frame immediately,
     // even when the latest scroll target is still loading or decoding.
-    drawBitmap(bitmaps.get(painted),lastRelativeScale);
-    paintedKey=[painted,lastRelativeScale,canvas.width,canvas.height].join('/');needsRestore=false;
+    drawBitmap(bitmaps.get(painted),lastRelativeScale,painted);
+    paintedKey=[painted,lastRelativeScale,canvas.width,canvas.height,framing?progress:0].join('/');needsRestore=false;
   }
   function usefulCompletedFrame(index){
     const candidate=timeline.frameCoordinate(index,pose),target=timeline.frameCoordinate(pose.index,pose);
@@ -67,9 +68,10 @@ export function createRenderedSequence({canvas,manifestUrl,onReady=()=>{},onErro
     }
     if(nearest<0)return;
     const bitmap=touch(bitmaps,nearest),relativeScale=(fixedScale?1:pose.scale)/timeline.frameScale(nearest);
-    const key=[nearest,relativeScale,canvas.width,canvas.height].join('/');
+    const key=[nearest,relativeScale,canvas.width,canvas.height,framing?progress:0].join('/');
     if(key===paintedKey){lastCoordinate=coordinate;pendingPaint=-1;return;}
-    drawBitmap(bitmap,relativeScale);
+    drawBitmap(bitmap,relativeScale,nearest);
+    if(canvas.dataset)canvas.dataset.frame=String(nearest+1);
     painted=nearest;paintedKey=key;lastCoordinate=coordinate;lastRelativeScale=relativeScale;pendingPaint=-1;needsRestore=false;
     if(!settled){settled=true;resolveReady({frameCount:frames.length,width,height});onReady();}
     pumpDecode();pumpFetch();
@@ -102,7 +104,7 @@ export function createRenderedSequence({canvas,manifestUrl,onReady=()=>{},onErro
       const job={epoch:motionEpoch},blob=touch(blobs,index);decodes.set(index,job);
       if(index===blobCandidate)blobCandidate=-1;
       // Decode no more pixels than this compact display can physically show.
-      const fit=Math.min(1,canvas.width/width,canvas.height/height);
+      const fit=Math.min(1,fitSequenceFrame({width,height,framing},canvas.width,canvas.height,progress,index));
       const decodeOptions=compact&&fit<1?{resizeWidth:Math.max(1,Math.ceil(width*fit)),resizeHeight:Math.max(1,Math.ceil(height*fit)),resizeQuality:'high'}:undefined;
       Promise.resolve().then(()=>decode(blob,decodeOptions))
         .then(bitmap=>{
@@ -191,7 +193,7 @@ export function createRenderedSequence({canvas,manifestUrl,onReady=()=>{},onErro
     .then(manifest=>{
       if(disposed)return;
       if(!Number.isFinite(manifest.width)||manifest.width<=0||!Number.isFinite(manifest.height)||manifest.height<=0||!Array.isArray(manifest.frames)||!manifest.frames.length||manifest.frames.some(frame=>typeof frame!=='string'||!frame))throw new Error('Le manifeste de la séquence est invalide.');
-      width=manifest.width;height=manifest.height;timeline=createSequenceTimeline(manifest);
+      width=manifest.width;height=manifest.height;framing=manifest.framing||null;timeline=createSequenceTimeline(manifest);
       versioned=typeof manifest.revision==='string'&&manifest.revision.length>0;
       frames=manifest.frames.map(frame=>{const url=new URL(frame,manifestURL);if(versioned)url.searchParams.set('v',manifest.revision);return url.href;});render(progress);
     }).catch(error=>{if(!disposed&&error.name!=='AbortError')fail(error);});

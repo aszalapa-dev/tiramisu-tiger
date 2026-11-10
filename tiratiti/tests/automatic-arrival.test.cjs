@@ -22,7 +22,7 @@ function arrive(width=390,coarse=false){
   return {calls,events,canvas,stage,classes,button,status,host,hint};
 }
 test('phone arrival automatically uses the sharp rendered animation, without importing real-time 3D',()=>{
-  const f=arrive();assert.equal(f.calls.length,1);assert.equal(f.calls[0].manifestUrl,'assets/rendered-one-turn-mobile/manifest.json');
+  const f=arrive();assert.equal(f.calls.length,1);assert.equal(f.calls[0].manifestUrl,'assets/motion-trial-20261107/manifest.json');
   assert.deepEqual(f.calls[0].poses,[.3]);assert.doesNotMatch(source,/import\(.*scene\.js/);
   f.calls[0].onReady();assert.ok(f.classes.has('loaded'));assert.equal(f.button.hidden,true);
 });
@@ -38,12 +38,14 @@ test('overscan follows the poster and a compatibility canvas returns to normal f
   options.onReady();assert.equal(replacement.dataset.renderMode,'blender');assert.ok(f.classes.has('loaded'));
 });
 
-test('a touch phone in landscape still uses only the compact animation profile',()=>{
+test('the trial shares its source poses and keeps a bounded mobile decode cache',()=>{
   const phone=arrive(844,true),desktop=arrive(844,false);
-  assert.equal(phone.calls[0].manifestUrl,'assets/rendered-one-turn-mobile/manifest.json');
-  assert.equal(desktop.calls[0].manifestUrl,'assets/rendered-one-turn/manifest.json');
+  assert.equal(phone.calls[0].cacheLimit,6);assert.equal(desktop.calls[0].cacheLimit,9);
+  assert.equal(phone.calls[0].videoManifestUrl,undefined,'Old video is not fetched by the trial');
+  assert.equal(phone.calls[0].manifestUrl,'assets/motion-trial-20261107/manifest.json');
+  assert.equal(desktop.calls[0].manifestUrl,phone.calls[0].manifestUrl);
   phone.events['tiratiti-flavor']({detail:{flavor:'classique'}});
-  assert.equal(phone.calls[1].manifestUrl,phone.calls[0].manifestUrl,'Product detail reuses the same compact files');
+  assert.equal(phone.calls[1].manifestUrl,'assets/rendered-one-turn-mobile/manifest.json','The 360-degree detail retains its compact closed-turn sequence');
 });
 
 test('the compact published sequence preserves every authored pose and transparent product edge',()=>{
@@ -65,7 +67,7 @@ test('the compact published sequence preserves every authored pose and transpare
   assert.ok(mobileBytes<hdBytes*.8,'The mobile profile must reduce actual transfer bytes by at least 20%');
 });
 test('scroll seeks both ways and reduced motion holds the closed pose',()=>{
-  const f=arrive(1500);assert.equal(f.calls[0].manifestUrl,'assets/rendered-one-turn/manifest.json');
+  const f=arrive(1500);assert.equal(f.calls[0].manifestUrl,'assets/motion-trial-20261107/manifest.json');
   f.events['tiratiti-scroll']({detail:{progress:.95,reduced:false}});
   f.events['tiratiti-scroll']({detail:{progress:.1,reduced:false}});
   f.events['tiratiti-scroll']({detail:{progress:.7,reduced:true}});

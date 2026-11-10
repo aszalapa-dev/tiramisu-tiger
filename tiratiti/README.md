@@ -59,3 +59,11 @@ Les polices du premier écran et les visuels sont locaux. Les polices complémen
 Le dossier publié comprend les deux profils d’images ; chaque appareil en utilise un seul. Toutes les poses ne sont pas nécessaires à l’arrivée. Le poids exact du dossier est affiché à chaque construction.
 
 Voir [DEPLOIEMENT.md](DEPLOIEMENT.md) pour les paramètres Vercel. Modifier les sources et reconstruire ; ne pas modifier `dist` directement.
+
+## Essai du nouveau motion — 10 novembre 2026
+
+L’accueil reprend les 240 images transparentes de l’aperçu fourni (version 14, source eab2ff6). La canette bascule, s’ouvre puis la cuillère prélève une bouchée. Le défilement, les titres, le décor et la transition vers les ingrédients restent ceux du site. Les images sont chargées à la demande, sans charger les anciens flux H.264 dans l’accueil. La vidéo HD du bouton Lire du visualiseur n’est pas nécessaire au défilement.
+
+Le cadrage suit les limites de chaque pose et de l’image encore affichée pendant un chargement : le couvercle, la cuillère et leur ombre restent dans le cadre. Six images décodées maximum sur mobile, neuf sur ordinateur. La fiche produit conserve sa rotation à 360 degrés.
+
+L’ancienne animation et ses ressources sont conservées. La branche Git backup/hero-before-motion-20261110 conserve le site complet juste avant cet essai ; annuler le commit de cet essai suffit à rétablir l’accueil précédent sans toucher aux autres changements antérieurs.

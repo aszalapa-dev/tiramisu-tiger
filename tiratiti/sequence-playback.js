@@ -1,4 +1,4 @@
-import {createRenderedSequence as createImageSequence} from './rendered-sequence.js?v=mobile-safari-27';
+import {createRenderedSequence as createImageSequence} from './rendered-sequence.js?v=motion-trial-10';
 import {createNativeVideoSequence} from './native-video-sequence.js?v=dense-cadence-31';
 
 // Keep the native Blender images as an automatic compatibility fallback.
