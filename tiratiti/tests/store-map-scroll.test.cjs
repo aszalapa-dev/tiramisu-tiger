@@ -6,9 +6,9 @@ const vm=require('node:vm');
 const source=fs.readFileSync(path.resolve(__dirname,'../store-map.js'),'utf8');
 const flush=async()=>{for(let i=0;i<5;i++)await new Promise(resolve=>setImmediate(resolve));};
 
-function page({width=390,coarse=true,economical=false}={}){
+function page({width=390,coarse=true,economical=false,consent=true,missingPrivacy=false}={}){
   const windowEvents=new Map(),documentEvents=new Map(),timers=new Map(),observers=[];
-  let clock=0,nextTimer=0;
+  let clock=0,nextTimer=0,opened=0,marked=0,checks=0;
   const listen=(map,name,callback)=>{if(!map.has(name))map.set(name,new Set());map.get(name).add(callback);};
   const unlisten=(map,name,callback)=>map.get(name)?.delete(callback);
   const fire=(map,name)=>{for(const callback of [...map.get(name)||[]])callback();};
@@ -35,6 +35,7 @@ function page({width=390,coarse=true,economical=false}={}){
     observe(target){this.targets.add(target);}disconnect(){this.targets.clear();}
   }
   const window={TIRATITI_MAPBOX_TOKEN:'pk.test-browser-token',IntersectionObserver};
+  if(!missingPrivacy)window.TiratitiPrivacy={has:()=>consent,open:()=>{opened++;},markExternalStarted:()=>{marked++;}};
   const context={window,document,IntersectionObserver,innerWidth:width,
     navigator:{connection:{saveData:economical,effectiveType:economical?'2g':'4g'}},
     matchMedia:query=>({matches:query.includes('pointer')?coarse:false}),
@@ -45,6 +46,9 @@ function page({width=390,coarse=true,economical=false}={}){
   };
   vm.runInNewContext(source,context,{filename:'store-map.js'});
   return {map,head,timers,
+    get opened(){return opened;},get marked(){return marked;},get checks(){return checks;},
+    consent(value){consent=value;fire(documentEvents,'tiratiti-privacy-change');},
+    finishSDK(){window.mapboxgl={supported(){checks++;return false;}};head.children.forEach(e=>e.fire('load'));},
     enter(isIntersecting){for(const observer of observers)if(observer.targets.has(map))observer.callback([{target:map,isIntersecting}]);},
     scroll(){fire(windowEvents,'scroll');},
     hidden(value){document.hidden=value;fire(documentEvents,'visibilitychange');},
@@ -89,4 +93,24 @@ test('data saving keeps automatic loading disabled and a failed manual load can 
   p.scripts()[0].fire('error');await flush();assert.equal(p.map.children.find(child=>child.tag==='button').disabled,false);
   p.click();assert.equal(p.scripts().length,1,'A fresh SDK element replaces the failed request immediately');
   assert.equal(p.timers.size,0);
+});
+
+
+test('neither Mapbox CSS nor JS loads without explicit consent, even after scrolling or clicking the map',()=>{
+  for(const settings of [{consent:false},{missingPrivacy:true}]){
+    const p=page(settings);p.enter(true);p.advance(500);p.scroll();p.click();p.advance(1000);assert.equal(p.head.children.length,0);assert.equal(p.marked,0);assert.equal(p.opened,settings.missingPrivacy?0:1);
+  }
+});
+test('consent granted while already near the map retains the quiet scroll delay',()=>{
+  const p=page({consent:false});p.enter(true);p.advance(1000);assert.equal(p.head.children.length,0);
+  p.consent(true);p.advance(179);assert.equal(p.head.children.length,0);p.advance(1);assert.equal(p.scripts().length,1);assert.equal(p.marked,1);
+});
+test('accepting after an explicit map request starts it without requiring an observer',()=>{
+  const p=page({consent:false,economical:true});p.click();assert.equal(p.opened,1);assert.equal(p.head.children.length,0);p.consent(true);assert.equal(p.scripts().length,1);
+});
+test('withdrawal cancels scheduled loading before any external request',()=>{
+  const p=page();p.enter(true);p.advance(100);p.consent(false);p.advance(1000);assert.equal(p.head.children.length,0);
+});
+test('withdrawal during download prevents any SDK initialisation after its load event',async()=>{
+  const p=page();p.click();assert.equal(p.scripts().length,1);p.consent(false);p.finishSDK();await flush();assert.equal(p.checks,0);
 });

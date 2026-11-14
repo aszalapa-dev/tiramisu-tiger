@@ -3,6 +3,9 @@
   const mapElement = document.querySelector('#dealer-map');
   const notice = document.querySelector('#map-notice');
   if (!mapElement) return;
+  const privacy = window.TiratitiPrivacy;
+  const mapAllowed = () => privacy?.has('mapbox') === true;
+  let requestedByVisitor = false;
   // Explicit demo fixtures, never presented as confirmed retailers.
   const dealers = [
     { name: 'La Petite Cuillère', address: '12, rue des Douceurs', city: '4000 Liège', coords: [5.573, 50.642] },
@@ -42,16 +45,19 @@
     button.type = 'button';
     button.className = 'map-load';
     button.textContent = label;
-    button.addEventListener('click', requestMap);
+    button.addEventListener('click', () => {
+      if (!mapAllowed()) { requestedByVisitor = true; privacy?.open(button); return; }
+      requestMap();
+    });
     mapElement.append(button);
     return button;
   }
   mapElement.replaceChildren();
   const placeholder = document.createElement('p');
   placeholder.className = 'map-loading';
-  placeholder.textContent = 'Découvrez les six commerces fictifs sur la carte.';
+  placeholder.textContent = mapAllowed() ? 'Découvrez les six commerces fictifs sur la carte.' : 'La carte Mapbox est désactivée. Vous pouvez l’autoriser dans vos préférences. Le reste du site reste accessible.';
   mapElement.append(placeholder);
-  let loadButton = addLoadButton('Afficher la carte');
+  let loadButton = addLoadButton(mapAllowed() ? 'Afficher la carte' : 'Choisir pour la carte');
   let resources, pending, map, started = false, observer;
   let automaticTimer = null, nearMap = false, removeAutomaticListeners = () => {};
   const assetLoads = new Map();
@@ -82,6 +88,7 @@
     return resources;
   }
   function requestMap() {
+    if (!mapAllowed()) return;
     if (started || pending) return pending;
     cancelAutomatic();
     removeAutomaticListeners();
@@ -90,7 +97,10 @@
     loadButton.disabled = true;
     loadButton.textContent = 'Chargement de la carte…';
     mapElement.setAttribute('aria-busy', 'true');
+    privacy.markExternalStarted('mapbox');
     pending = loadResources().then(library => {
+      // Consent can be withdrawn while the SDK is still downloading.
+      if (!mapAllowed()) return;
       if (!library || !library.supported()) throw new Error('Carte non prise en charge.');
       initializeMap(library);
       started = true;
@@ -111,7 +121,7 @@
   }
   function scheduleAutomatic() {
     cancelAutomatic();
-    if (!nearMap || document.hidden || started || pending) return;
+    if (!mapAllowed() || !nearMap || document.hidden || started || pending) return;
     if (!waitForScroll) { requestMap(); return; }
     // SDK parsing and the first WebGL draw wait until touch momentum settles.
     automaticTimer = setTimeout(() => {
@@ -119,6 +129,17 @@
       if (nearMap && !document.hidden && !started && !pending) requestMap();
     }, 180);
   }
+  document.addEventListener('tiratiti-privacy-change', () => {
+    if (!mapAllowed()) {
+      cancelAutomatic(); requestedByVisitor = false;
+      cards.forEach(card => { card.disabled = true; });
+      if (map) { map.remove(); map = null; started = false; }
+      return;
+    }
+    loadButton.textContent = 'Afficher la carte';
+    if (requestedByVisitor) { requestedByVisitor = false; requestMap(); }
+    else scheduleAutomatic();
+  });
   if ('IntersectionObserver' in window && !economicalConnection) {
     const onScroll = () => { if (nearMap) scheduleAutomatic(); };
     const onVisibility = () => { if (document.hidden) cancelAutomatic(); else scheduleAutomatic(); };
@@ -153,6 +174,8 @@
         dragRotate: false,
         touchPitch: false,
         attributionControl: false,
+        performanceMetricsCollection: false,
+        collectResourceTiming: false,
         locale: {
           'NavigationControl.ZoomIn': 'Zoomer',
           'NavigationControl.ZoomOut': 'Dézoomer',

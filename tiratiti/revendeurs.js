@@ -26,4 +26,6 @@
     try { await navigator.clipboard.writeText(prepared); status.textContent = 'Message copié. Collez-le dans un e-mail à contact@tiratiti.be.'; }
     catch { ready.querySelector('details').open = true; status.textContent = 'La copie automatique est indisponible. Vous pouvez sélectionner et copier le message affiché ci-dessous.'; }
   });
+  // Enable only after the local-mail handlers are installed; no accidental GET with personal fields.
+  document.querySelector('#dealer-fields').disabled = false;
 })();
