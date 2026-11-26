@@ -1,19 +1,25 @@
-# Site vitrine Tiratiti — vérification du 14 novembre 2026
+# Site vitrine Tiratiti — suivi juridique, mis à jour le 26 novembre 2026
 
 ## État
 
-Protections techniques et pages d'information ajoutées. **Les mentions obligatoires et la politique de confidentialité ne sont pas encore entièrement finalisées : les éléments ci-dessous nécessitent une réponse de l'exploitant.** Ne pas présenter cette livraison comme une certification de conformité générale.
+Protections techniques et pages d’information ajoutées. L’identité de l’exploitant, son adresse professionnelle et son contact sont désormais renseignés. La qualité d’assujetti à la TVA est confirmée dans la BCE. Les points opérationnels ci-dessous et la publication de la bonne version restent à vérifier. Ne pas présenter cette livraison comme une certification de conformité générale.
 
-## Informations attendues de l'exploitant
+## Informations confirmées le 26 novembre 2026
 
-- Nom complet de l'entrepreneur ou dénomination sociale, forme juridique le cas échéant, adresse professionnelle, numéro BCE et statut / numéro TVA. Le prénom Timoty et la marque Tiratiti ne suffisent pas à identifier le responsable. Ne pas inventer ces informations.
-- Confirmer l'adresse figurant dans les anciennes étiquettes du projet (Rue de Bruxelles 13, 4130 Esneux). Elle n'est pas publiée comme siège sans confirmation. Confirmer le téléphone de contact et les éventuelles mentions de registre liées à la forme juridique.
-- Confirmer le prestataire de contact@tiratiti.be, les personnes ayant accès aux messages et les conditions de traitement/transfert applicables. La catégorie « prestataire de messagerie » est indiquée en attendant son identification.
-- Appliquer la règle proposée de suppression des demandes sans suite après 12 mois suivant le dernier échange, ou corriger le texte avant de l'adopter. Le site statique ne peut pas supprimer les messages dans la boîte mail. Les durées des dossiers contractuels et comptables doivent correspondre aux obligations réellement applicables.
-- Vérifier dans le compte Vercel le projet effectivement publié, les journaux activés et leur rétention ; vérifier les accords de sous-traitance / garanties de transfert effectivement applicables avec les prestataires. Le connecteur Vercel n'a exposé aucune équipe accessible ; le tableau de bord n'a donc pas été audité. Les textes ne donnent pas de durée fictive pour ces journaux.
-- Si une autorisation d'activité alimentaire est applicable, confirmer les mentions d'autorité de contrôle requises (AFSCA) et les informations exactes avant publication. Aucun numéro d'agrément n'a été inventé.
+- Exploitant : Timoty Lazzari, indépendant en personne physique ; nom commercial TIRATITI. Nom, numéro BCE et forme confirmés par les captures et le message de l’utilisateur.
+- Adresse professionnelle : Rue de Bruxelles 13, 4130 Esneux, Belgique. L’utilisateur confirme qu’il s’agit bien de l’adresse de la pizzeria, en réponse à la demande portant sur cette adresse.
+- BCE : 1035.923.871 ; TVA : BE 1035.923.871. Lecture du registre officiel le 26 novembre 2026 : entité active, personne physique, qualité « Assujettie à la TVA » depuis le 1 avril 2026 ; situation de la base au 25 novembre 2026. Aucun régime TVA particulier ni taux n’est déduit de cette qualité.
+- Source BCE : https://kbopub.economie.fgov.be/kbopub/toonondernemingps.html?ondernemingsnummer=1035923871&lang=fr
+- E-mail confirmé : info@tiratiti.be. Remplacement de l’ancien contact dans les liens, le formulaire revendeur et les pages légales. Cela ne vérifie pas la délivrabilité de la boîte.
+- Le même exploitant est identifié comme responsable du traitement dans confidentialite.html. Le texte public provisoire « en cours de confirmation » et le repère LEGAL-IDENTITY-PENDING ont été retirés.
 
-Les pages d’identification et de confidentialité signalent cette information incomplète visiblement. Le code source de mentions-legales.html comporte un repère LEGAL-IDENTITY-PENDING pour compléter le bloc « Éditeur et contact ». Le même responsable doit être identifié dans confidentialite.html.
+## Points restant à confirmer ou à appliquer
+
+- Les MX publics indiquent Apple iCloud pour la réception du domaine. Confirmer les redirections éventuelles de info@tiratiti.be, les personnes ayant accès aux messages et les conditions de traitement/transfert applicables. La catégorie « prestataire de messagerie » reste indiquée dans la politique.
+- Appliquer la règle proposée de suppression des demandes sans suite après 12 mois suivant le dernier échange, ou corriger le texte avant de l’adopter. Le site statique ne peut pas supprimer les messages dans la boîte mail. Les durées des dossiers contractuels et comptables doivent correspondre aux obligations réellement applicables.
+- Vérifier dans le compte Netlify le dépôt, la branche et le dossier effectivement publiés, les journaux activés et leur rétention, ainsi que les accords de sous-traitance / garanties de transfert applicables. Le tableau de bord n’a pas été audité. Les textes ne donnent pas de durée fictive pour ces journaux.
+- Pour l’activité alimentaire, confirmer les autorisations et les mentions d’autorité de contrôle requises (AFSCA) avant de déclarer les mentions complètes. Aucun numéro d’agrément n’a été inventé.
+- Un téléphone n’a pas été fourni. Le site reste une présentation et une prise de contact, sans conclusion de contrat à distance ni vente en ligne. Réévaluer les mentions si ce périmètre change.
 
 ## Périmètre et observations
 
@@ -64,4 +70,10 @@ Document interne non inclus dans public-files.json et non copié vers dist.
 - Les journaux et conditions réellement appliqués doivent désormais être vérifiés dans le compte Netlify, et non Vercel. Aucun accès au tableau de bord Netlify n’a été obtenu.
 - La version publique porte le titre « Tiratiti | Tiramisu italien fait maison – Site officiel ». Elle ne charge pas privacy.js et la route /mentions-legales.html répond 404. Ne pas assimiler un push de ce dépôt à une mise en ligne vérifiée sur ce domaine. Le dépôt, la branche et le dossier de publication reliés dans Netlify restent à identifier.
 - La configuration des en-têtes Vercel reste sans effet chez Netlify. Transposer ces en-têtes au bon dossier publié une fois le pipeline identifié.
-- Les MX publics du domaine sont mx01.mail.icloud.com et mx02.mail.icloud.com : ils indiquent une réception via Apple iCloud. Cela n’identifie pas à lui seul les redirections éventuelles, les clients utilisés ni la rétention de contact@tiratiti.be ; ces éléments restent à confirmer.
+- Les MX publics du domaine sont mx01.mail.icloud.com et mx02.mail.icloud.com : ils indiquent une réception via Apple iCloud. Cela n’identifie pas à lui seul les redirections éventuelles, les clients utilisés ni la rétention de info@tiratiti.be ; ces éléments restent à confirmer.
+
+## Validation des coordonnées du 26 novembre 2026
+
+- Les 12 contrôles de confidentialité existants passent.
+- Build réussi : 856 fichiers, 110,20 Mo. Les 19 fichiers HTML/JS publiables ne contiennent plus l’ancienne adresse de contact ni le bloc provisoire d’identification.
+- Aucun changement de service facultatif ni de finalité : la version du choix de cookies reste 2026-11-14.1.

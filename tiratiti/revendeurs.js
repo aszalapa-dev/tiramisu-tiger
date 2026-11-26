@@ -16,14 +16,14 @@
       return;
     }
     prepared = `Bonjour Timoty,\n\nJe souhaite proposer Tiratiti dans mon commerce.\n\nCommerce : ${value('commerce')}\nVille : ${value('ville')}\nType : ${value('type')}\nContact : ${value('nom')}\nE-mail : ${value('email')}\nTéléphone : ${value('telephone') || 'Non renseigné'}\n\n${value('message')}\n\nÀ bientôt,\n${value('nom')}`;
-    emailLink.href = `mailto:contact@tiratiti.be?subject=${encodeURIComponent('Devenir revendeur Tiratiti — ' + value('commerce'))}&body=${encodeURIComponent(prepared)}`;
+    emailLink.href = `mailto:info@tiratiti.be?subject=${encodeURIComponent('Devenir revendeur Tiratiti — ' + value('commerce'))}&body=${encodeURIComponent(prepared)}`;
     document.querySelector('#email-preview').textContent = prepared;
     ready.hidden = false;
     status.textContent = 'Votre e-mail est prêt. Ouvrez votre messagerie pour le relire et l’envoyer, ou copiez le message.';
     emailLink.focus();
   });
   document.querySelector('#copy-email').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(prepared); status.textContent = 'Message copié. Collez-le dans un e-mail à contact@tiratiti.be.'; }
+    try { await navigator.clipboard.writeText(prepared); status.textContent = 'Message copié. Collez-le dans un e-mail à info@tiratiti.be.'; }
     catch { ready.querySelector('details').open = true; status.textContent = 'La copie automatique est indisponible. Vous pouvez sélectionner et copier le message affiché ci-dessous.'; }
   });
   // Enable only after the local-mail handlers are installed; no accidental GET with personal fields.
