@@ -55,3 +55,13 @@ Les pages d’identification et de confidentialité signalent cette information 
 - Vercel : https://vercel.com/legal/privacy-notice ; https://vercel.com/legal/dpa
 
 Document interne non inclus dans public-files.json et non copié vers dist.
+
+## Mise à jour du 26 novembre 2026 — hébergement confirmé
+
+- Le propriétaire précise que le domaine a été acheté chez Hostinger et relié à Netlify, avec déploiement depuis GitHub. Aucun changement de fournisseur ni de formule n’a été effectué.
+- Vérification publique : www.tiratiti.be a pour CNAME tiratiti.netlify.app ; la réponse HTTPS porte Server: Netlify et un identifiant de requête Netlify. Netlify remplace donc Vercel dans les pages préparées.
+- Source des coordonnées : https://www.netlify.com/privacy/ (mise à jour du 4 novembre 2026). DPA : https://www.netlify.com/pdf/netlify-dpa.pdf (13 novembre 2026).
+- Les journaux et conditions réellement appliqués doivent désormais être vérifiés dans le compte Netlify, et non Vercel. Aucun accès au tableau de bord Netlify n’a été obtenu.
+- La version publique porte le titre « Tiratiti | Tiramisu italien fait maison – Site officiel ». Elle ne charge pas privacy.js et la route /mentions-legales.html répond 404. Ne pas assimiler un push de ce dépôt à une mise en ligne vérifiée sur ce domaine. Le dépôt, la branche et le dossier de publication reliés dans Netlify restent à identifier.
+- La configuration des en-têtes Vercel reste sans effet chez Netlify. Transposer ces en-têtes au bon dossier publié une fois le pipeline identifié.
+- Les MX publics du domaine sont mx01.mail.icloud.com et mx02.mail.icloud.com : ils indiquent une réception via Apple iCloud. Cela n’identifie pas à lui seul les redirections éventuelles, les clients utilisés ni la rétention de contact@tiratiti.be ; ces éléments restent à confirmer.
